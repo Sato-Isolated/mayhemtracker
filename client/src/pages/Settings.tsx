@@ -87,7 +87,7 @@ export function SettingsPage() {
         </div>
       </div>
 
-      <div className="settings-panel-grid grid gap-4">
+      <div className="grid-cols-2 max-[1100px]:grid-cols-1 grid gap-4">
         <Card>
           <CardHeader>
             <CardTitle>Theme</CardTitle>
@@ -105,7 +105,7 @@ export function SettingsPage() {
                   onClick={() => void updateSetting("theme", option.value)}
                 >
                   <div className="w-full p-4">
-                    <div className="settings-theme-card-top flex items-start justify-between gap-3">
+                    <div className="min-h-[2.75rem] flex items-start justify-between gap-3">
                       <div>
                         <div className="text-sm font-semibold text-foreground">{option.label}</div>
                         <div className="mt-1 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">{option.tone}</div>
@@ -186,10 +186,10 @@ export function SettingsPage() {
                     <span>{settingMap.theme ?? "ember"} / {settingMap.accentMode ?? "warm"}</span>
                   </div>
                 </div>
-                <div className="settings-preview-rail mt-4 flex flex-wrap gap-2">
-                  <span className="status-chip status-chip-strong">Primary</span>
-                  <span className="status-chip">Muted</span>
-                  <span className="status-chip">Surface</span>
+                <div className="items-start mt-4 flex flex-wrap gap-2">
+                  <span className="status-chip inline-flex items-center gap-[0.55rem] rounded-full px-[0.72rem] py-[0.42rem] text-[0.76rem] status-chip-strong">Primary</span>
+                  <span className="status-chip inline-flex items-center gap-[0.55rem] rounded-full px-[0.72rem] py-[0.42rem] text-[0.76rem]">Muted</span>
+                  <span className="status-chip inline-flex items-center gap-[0.55rem] rounded-full px-[0.72rem] py-[0.42rem] text-[0.76rem]">Surface</span>
                 </div>
               </div>
 

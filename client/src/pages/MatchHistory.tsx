@@ -63,7 +63,7 @@ export function MatchHistoryPage() {
         description="Historique en file compacte avec expansion inline, inspiré de la référence mais adapté à votre stack web locale."
       />
 
-      <section className="match-history-summary-grid grid gap-4 md:grid-cols-3" data-testid="match-history-summary-grid">
+      <section className="items-stretch grid gap-4 md:grid-cols-3" data-testid="match-history-summary-grid">
         <div className="metric-tile p-5">
           <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Stored locally</div>
           <div className="mt-3 text-3xl font-semibold tracking-tight text-foreground">{totalMatches}</div>
@@ -95,7 +95,7 @@ export function MatchHistoryPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="match-history-toolbar mb-4 flex items-center justify-between gap-3">
+          <div className="mb-4 flex items-center justify-between gap-3 max-sm:flex-col max-sm:items-stretch">
             <div className="text-sm text-muted-foreground">Cliquez une ligne pour afficher le détail inline, ou ouvrez l’analyse complète.</div>
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => void setMatchPage(matchPage - 1)} disabled={matchPage <= 1}>Previous</Button>
@@ -130,9 +130,9 @@ export function MatchHistoryPage() {
                       onClick={() => void toggleMatch(match.matchId)}
                       className={`match-history-row w-full rounded-[1.35rem] border px-4 py-4 text-left transition ${isExpanded ? "border-primary/45 bg-accent/20" : "surface-soft hover:border-primary/35 hover:bg-accent/18"}`}
                     >
-                      <div className="match-history-row-layout flex flex-wrap items-center gap-3 xl:gap-4">
+                      <div className="relative z-[1] flex flex-wrap items-center gap-3 xl:gap-4 max-[1100px]:items-start">
                         <div className="flex min-w-[4.4rem] shrink-0 flex-col gap-1 rounded-xl border border-border/60 bg-card/85 px-2.5 py-2 text-center">
-                          <div className={`text-[11px] font-semibold uppercase tracking-[0.16em] ${trackedParticipant?.win ? "result-win" : "result-loss"}`}>
+                          <div className={`text-[11px] font-semibold uppercase tracking-[0.16em] ${trackedParticipant?.win ? "text-success-foreground" : "text-error-foreground"}`}>
                             {trackedParticipant?.win ? "WIN" : "LOSS"}
                           </div>
                           <div className="text-[11px] text-muted-foreground">{formatDuration(match.gameDuration)}</div>
@@ -151,7 +151,7 @@ export function MatchHistoryPage() {
                           <div className="text-xs text-muted-foreground">{match.gameMode ?? "League"}</div>
                         </div>
 
-                        <div className="match-history-row-chips flex flex-wrap gap-2">
+                        <div className="items-center flex flex-wrap gap-2 max-sm:w-full">
                           <Badge variant="outline">{match.participants.length} players</Badge>
                           <Badge variant="outline">{match.gameVersion ?? "Unknown patch"}</Badge>
                         </div>
@@ -190,7 +190,7 @@ export function MatchHistoryPage() {
                                   </Button>
                                 </div>
 
-                                <div className="match-history-inline-summary grid gap-3 md:grid-cols-3">
+                                <div className="items-stretch grid gap-3 md:grid-cols-3">
                                   <div className="surface-soft rounded-[1rem] p-4">
                                     <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Tracked line</div>
                                     <div className="mt-2 text-lg font-semibold text-foreground">{trackedParticipant?.kills ?? 0}/{trackedParticipant?.deaths ?? 0}/{trackedParticipant?.assists ?? 0}</div>
@@ -240,7 +240,7 @@ export function MatchHistoryPage() {
                                                 key={`${participant.puuid ?? index}-${participant.championId ?? index}`}
                                                 className={`match-scoreboard-row px-4 py-2 ${isTracked ? "match-scoreboard-row--tracked" : ""}`}
                                               >
-                                                <div className="match-scoreboard-player min-w-0">
+                                                <div className="flex items-center gap-3 min-w-0">
                                                   {participantVisual.icon ? <img src={participantVisual.icon} alt={participantVisual.name} className="h-10 w-10 rounded-xl object-cover" /> : null}
                                                   <div className="min-w-0">
                                                     <div className="truncate text-sm font-semibold text-foreground">{participant.summonerName ?? participant.riotIdGameName ?? "Unknown"}</div>
@@ -255,7 +255,7 @@ export function MatchHistoryPage() {
                                                   </div>
                                                 </div>
 
-                                                <div className="match-scoreboard-kda">
+                                                <div className="min-w-0 max-sm:text-left">
                                                   <div className="text-sm font-semibold text-foreground">{participant.kills ?? 0} / {participant.deaths ?? 0} / {participant.assists ?? 0}</div>
                                                   <div className="text-xs text-muted-foreground">{formatKdaRatio(participant.kills, participant.deaths, participant.assists).toFixed(2)}</div>
                                                 </div>
@@ -274,8 +274,8 @@ export function MatchHistoryPage() {
                                                   <div className="text-xs font-semibold text-foreground">{formatCompactStat(participant.totalDamageTaken)}</div>
                                                 </div>
 
-                                                <div className="match-scoreboard-metric text-sm font-semibold text-foreground">{formatCompactStat(participant.goldEarned)}</div>
-                                                <div className="match-scoreboard-metric text-sm font-semibold text-emerald-400">{formatCompactStat(participant.totalHeal)}</div>
+                                                <div className="text-right max-sm:text-left text-sm font-semibold text-foreground">{formatCompactStat(participant.goldEarned)}</div>
+                                                <div className="text-right max-sm:text-left text-sm font-semibold text-emerald-400">{formatCompactStat(participant.totalHeal)}</div>
                                               </div>
                                             );
                                           })}

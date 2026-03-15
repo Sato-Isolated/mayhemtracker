@@ -141,36 +141,36 @@ export function ActivityHeatmap({ items, variant = "card" }: ActivityHeatmapProp
   const content = (
     <>
       <div className={layoutClassName}>
-        <div className="activity-heatmap-meta">
-          <div className="activity-heatmap-heading">
+        <div className="activity-heatmap-meta grid gap-3 content-start p-[0.85rem] rounded-[1rem]">
+          <div className="flex items-start justify-between gap-3">
             <div>
-              <div className="activity-heatmap-kicker">12 derniers mois</div>
-              <div className="activity-heatmap-title">Activity rhythm</div>
-              <div className="activity-heatmap-description">Vue annuelle continue, alignée par semaines comme une contribution graph.</div>
+              <div className="text-[0.64rem] font-bold tracking-[0.14em] uppercase text-muted-foreground">12 derniers mois</div>
+              <div className="mt-[0.16rem] text-[1.02rem] font-semibold leading-[1.1] text-foreground max-sm:text-[0.95rem]">Activity rhythm</div>
+              <div className="mt-[0.28rem] text-[0.84rem] text-muted-foreground max-sm:text-[0.78rem]">Vue annuelle continue, alignée par semaines comme une contribution graph.</div>
             </div>
           </div>
-          <div className="activity-summary-row" data-testid="activity-summary">
-            <div className="activity-summary-period">12 derniers mois</div>
-            <div className="activity-stat-card">
-              <span className="activity-stat-label">Matches</span>
-              <strong className="activity-stat-value">{calendar.totalMatches}</strong>
+          <div className="grid grid-cols-2 gap-[0.55rem]" data-testid="activity-summary">
+            <div className="col-span-full text-[0.72rem] font-semibold tracking-[0.08em] uppercase text-muted-foreground">12 derniers mois</div>
+            <div className="activity-stat-card grid gap-[0.18rem] px-[0.72rem] py-[0.65rem] rounded-[0.9rem]">
+              <span className="text-[0.64rem] font-semibold tracking-[0.08em] uppercase text-muted-foreground">Matches</span>
+              <strong className="text-[0.96rem] font-semibold leading-[1.1] text-foreground">{calendar.totalMatches}</strong>
             </div>
-            <div className="activity-stat-card">
-              <span className="activity-stat-label">Active days</span>
-              <strong className="activity-stat-value">{calendar.activeDays}</strong>
+            <div className="activity-stat-card grid gap-[0.18rem] px-[0.72rem] py-[0.65rem] rounded-[0.9rem]">
+              <span className="text-[0.64rem] font-semibold tracking-[0.08em] uppercase text-muted-foreground">Active days</span>
+              <strong className="text-[0.96rem] font-semibold leading-[1.1] text-foreground">{calendar.activeDays}</strong>
             </div>
-            <div className="activity-stat-card">
-              <span className="activity-stat-label">Peak day</span>
-              <strong className="activity-stat-value">{calendar.hottestDay.label}</strong>
+            <div className="activity-stat-card grid gap-[0.18rem] px-[0.72rem] py-[0.65rem] rounded-[0.9rem]">
+              <span className="text-[0.64rem] font-semibold tracking-[0.08em] uppercase text-muted-foreground">Peak day</span>
+              <strong className="text-[0.96rem] font-semibold leading-[1.1] text-foreground">{calendar.hottestDay.label}</strong>
             </div>
-            <div className="activity-stat-card">
-              <span className="activity-stat-label">Peak volume</span>
-              <strong className="activity-stat-value">{calendar.hottestDay.matches}</strong>
+            <div className="activity-stat-card grid gap-[0.18rem] px-[0.72rem] py-[0.65rem] rounded-[0.9rem]">
+              <span className="text-[0.64rem] font-semibold tracking-[0.08em] uppercase text-muted-foreground">Peak volume</span>
+              <strong className="text-[0.96rem] font-semibold leading-[1.1] text-foreground">{calendar.hottestDay.matches}</strong>
             </div>
           </div>
 
           {debugMode ? (
-            <div className="activity-debug-panel" data-testid="activity-debug-panel">
+            <div className="flex flex-wrap gap-[0.45rem] text-[0.72rem] text-muted-foreground" data-testid="activity-debug-panel">
               <span>{calendar.weekCount} weeks</span>
               <span>{calendar.visibleDays.length} visible days</span>
               <span>{activityCellSize}px min cells</span>
@@ -178,7 +178,7 @@ export function ActivityHeatmap({ items, variant = "card" }: ActivityHeatmapProp
             </div>
           ) : null}
         </div>
-        <div className="activity-heatmap-graph">
+        <div className="activity-heatmap-graph px-[0.8rem] py-[0.72rem] rounded-[1rem]">
           <div className="activity-calendar-shell" data-testid="activity-calendar-shell">
             <div
               className={`activity-calendar-track ${debugMode ? "activity-calendar-track-debug" : ""}`}
@@ -239,8 +239,8 @@ export function ActivityHeatmap({ items, variant = "card" }: ActivityHeatmapProp
 
   if (variant === "embedded") {
     return (
-      <div className="activity-heatmap-panel activity-heatmap-panel-embedded" data-testid="activity-heatmap-card">
-        <div className="activity-heatmap-body">{content}</div>
+      <div className="activity-heatmap-panel activity-heatmap-panel-embedded rounded-[1.25rem]" data-testid="activity-heatmap-card">
+        <div className="grid gap-4 p-4">{content}</div>
       </div>
     );
   }

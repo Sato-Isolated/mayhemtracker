@@ -64,8 +64,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, [settingMap]);
 
   return (
-    <div className="app-shell-frame">
-      <aside className="app-sidebar">
+    <div className="grid min-h-screen grid-cols-[290px_minmax(0,1fr)] gap-5 p-5 max-[1100px]:grid-cols-1 max-sm:p-[0.85rem]">
+      <aside className="app-sidebar flex min-h-[calc(100vh-2.5rem)] flex-col justify-between gap-4 sticky top-5 rounded-[2rem] p-4 overflow-hidden max-[1100px]:min-h-auto max-[1100px]:static">
         <div className="space-y-4">
           <div className="panel-surface app-brand-panel rounded-[1.6rem] p-4">
             <div className="flex items-start justify-between gap-3">
@@ -88,7 +88,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
           </div>
 
-          <nav className="app-sidebar-nav space-y-1.5" aria-label="Primary navigation">
+          <nav className="app-sidebar-nav space-y-1.5 max-[1100px]:grid max-[1100px]:grid-cols-2 max-[1100px]:gap-[0.65rem] max-sm:grid-cols-1" aria-label="Primary navigation">
             {navigation.map((item) => {
               const Icon = item.icon;
               return (
@@ -97,7 +97,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   to={item.to}
                   className={({ isActive }) =>
                     cn(
-                      "app-nav-link group",
+                      "app-nav-link flex items-center gap-[0.8rem] relative rounded-[1.2rem] px-[0.95rem] py-[0.85rem] no-underline overflow-hidden group",
                       isActive && "app-nav-link-active",
                     )
                   }
@@ -133,8 +133,8 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </aside>
 
-      <div className="app-main-column">
-        <header className="app-topbar">
+      <div className="min-w-0 flex flex-col gap-[0.8rem]">
+        <header className="app-topbar flex flex-wrap items-center justify-between gap-[0.8rem] sticky top-5 z-10 rounded-[1.3rem] px-4 py-[0.9rem] max-[1100px]:static">
           <div className="min-w-0">
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">Product surface</p>
             <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
@@ -142,7 +142,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <p className="text-sm text-muted-foreground">{currentRoute.description}</p>
             </div>
           </div>
-          <div className="app-topbar-actions flex flex-wrap items-center gap-2">
+          <div className="justify-end flex flex-wrap items-center gap-2 max-[1100px]:w-full max-[1100px]:justify-start">
             {shellBadges.map((entry) => (
               <Badge key={entry.label} variant="outline">{entry.label}</Badge>
             ))}
@@ -151,17 +151,17 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        <div className="app-status-strip">
-          <div className="status-chip">
+        <div className="flex flex-wrap gap-[0.45rem]">
+          <div className="status-chip inline-flex items-center gap-[0.55rem] rounded-full px-[0.72rem] py-[0.42rem] text-[0.76rem]">
             <span className="status-dot" />
             Backend {status.data?.ok ? "reachable" : "idle"}
           </div>
           {statusChips.map((chip) => (
-            <div key={chip} className="status-chip">{chip}</div>
+            <div key={chip} className="status-chip inline-flex items-center gap-[0.55rem] rounded-full px-[0.72rem] py-[0.42rem] text-[0.76rem]">{chip}</div>
           ))}
         </div>
 
-        <main className="app-content-area">{children}</main>
+        <main className="min-w-0 flex-1">{children}</main>
       </div>
     </div>
   );

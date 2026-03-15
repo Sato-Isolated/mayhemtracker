@@ -16,13 +16,13 @@ const SettingsPage = lazy(async () => ({ default: (await import("@/pages/Setting
 function RouteFallback() {
   return (
     <div className="space-y-6">
-      <section className="panel-surface route-fallback-shell rounded-[1.6rem] p-6">
+      <section className="panel-surface relative overflow-hidden route-fallback-shell rounded-[1.6rem] p-6">
         <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">Loading route</p>
         <h1 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">Preparing the next view</h1>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
           Route-level code splitting keeps the initial bundle lighter while the shell stays responsive.
         </p>
-        <div className="route-fallback-grid mt-6">
+        <div className="grid grid-cols-2 gap-[0.9rem] mt-6">
           <div className="route-fallback-card" />
           <div className="route-fallback-card" />
           <div className="route-fallback-card route-fallback-card-wide" />
