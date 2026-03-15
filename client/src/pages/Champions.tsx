@@ -1,5 +1,6 @@
 import { ArrowDownUp, Search } from "lucide-react";
 import { useMemo, useState } from "react";
+import { MetricTile } from "@/components/features/metric-tile";
 import { PageIntro } from "@/components/features/page-intro";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -52,11 +53,7 @@ export function ChampionsPage() {
     <div className="space-y-6">
       <PageIntro eyebrow="Champion analytics" title="Champion pool" description="Premier tableau métier dédié, pensé pour la lecture rapide plutôt qu’une simple dump de debug." />
       <div className="grid gap-4 lg:grid-cols-[0.8fr_1.2fr]">
-        <div className="metric-tile p-5">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Most impactful pick</div>
-          <div className="mt-3 text-2xl font-semibold text-foreground">{topEntry?.championName ?? "-"}</div>
-          <div className="mt-2 text-sm text-muted-foreground">{topEntry ? `${topEntry.matches} games · ${topEntry.winRate}% WR · ${topEntry.averageKda} KDA` : "No champion data"}</div>
-        </div>
+        <MetricTile label="Most impactful pick" value={topEntry?.championName ?? "-"} hint={topEntry ? `${topEntry.matches} games · ${topEntry.winRate}% WR · ${topEntry.averageKda} KDA` : "No champion data"} />
         <div className="panel-surface flex flex-wrap items-center gap-3 p-4">
           <div className="relative min-w-[260px] flex-1">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -106,22 +103,10 @@ export function ChampionsPage() {
                       <DialogDescription>Lecture compacte des signaux principaux pour décider si le pick mérite une analyse plus poussée.</DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 md:grid-cols-2">
-                      <div className="metric-tile p-4">
-                        <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Match volume</div>
-                        <div className="mt-2 text-3xl font-semibold">{entry.matches}</div>
-                      </div>
-                      <div className="metric-tile p-4">
-                        <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Win rate</div>
-                        <div className="mt-2 text-3xl font-semibold">{entry.winRate}%</div>
-                      </div>
-                      <div className="metric-tile p-4">
-                        <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Average KDA</div>
-                        <div className="mt-2 text-3xl font-semibold">{entry.averageKda}</div>
-                      </div>
-                      <div className="metric-tile p-4">
-                        <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Damage / Gold</div>
-                        <div className="mt-2 text-2xl font-semibold">{Math.round(entry.averageDamage / 100) / 10}k / {Math.round(entry.averageGold / 100) / 10}k</div>
-                      </div>
+                      <MetricTile label="Match volume" value={entry.matches} className="p-4" />
+                      <MetricTile label="Win rate" value={`${entry.winRate}%`} className="p-4" />
+                      <MetricTile label="Average KDA" value={entry.averageKda} className="p-4" />
+                      <MetricTile label="Damage / Gold" value={`${Math.round(entry.averageDamage / 100) / 10}k / ${Math.round(entry.averageGold / 100) / 10}k`} className="p-4" />
                     </div>
                   </DialogContent>
                 </Dialog>

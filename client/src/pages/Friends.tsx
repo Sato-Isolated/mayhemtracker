@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { MetricTile } from "@/components/features/metric-tile";
 import { PageIntro } from "@/components/features/page-intro";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,19 +15,9 @@ export function FriendsPage() {
     <div className="space-y-6">
       <PageIntro eyebrow="Teammates" title="Friends board" description="Première implémentation des coéquipiers fréquents avec rating local persistant, déjà exploitable." />
       <div className="grid gap-4 md:grid-cols-3">
-        <div className="metric-tile p-5">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Tracked teammates</div>
-          <div className="mt-3 text-3xl font-semibold">{sorted.length}</div>
-        </div>
-        <div className="metric-tile p-5">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Rated players</div>
-          <div className="mt-3 text-3xl font-semibold">{sorted.filter((entry) => typeof entry.rating === "number").length}</div>
-        </div>
-        <div className="metric-tile p-5">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Most played ally</div>
-          <div className="mt-3 text-xl font-semibold">{sorted[0]?.summonerName ?? "-"}</div>
-          <div className="mt-1 text-sm text-muted-foreground">{sorted[0]?.matches ?? 0} games</div>
-        </div>
+        <MetricTile label="Tracked teammates" value={sorted.length} />
+        <MetricTile label="Rated players" value={sorted.filter((entry) => typeof entry.rating === "number").length} />
+        <MetricTile label="Most played ally" value={sorted[0]?.summonerName ?? "-"} hint={`${sorted[0]?.matches ?? 0} games`} />
       </div>
       <div className="grid gap-4 xl:grid-cols-2">
         {sorted.map((entry) => (

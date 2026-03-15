@@ -1,5 +1,6 @@
 import { MonitorCog, Palette, PanelsTopLeft, SlidersHorizontal } from "lucide-react";
 import { useMemo } from "react";
+import { MetricTile } from "@/components/features/metric-tile";
 import { PageIntro } from "@/components/features/page-intro";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -64,27 +65,11 @@ export function SettingsPage() {
       />
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-        <div className="metric-tile p-5">
-          <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground"><Palette className="h-4 w-4" /> Theme</div>
-          <div className="mt-3 text-2xl font-semibold capitalize">{settingMap.theme ?? "ember"}</div>
-        </div>
-        <div className="metric-tile p-5">
-          <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground"><Palette className="h-4 w-4" /> Accent</div>
-          <div className="mt-3 text-2xl font-semibold capitalize">{settingMap.accentMode ?? "warm"}</div>
-        </div>
-        <div className="metric-tile p-5">
-          <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground"><SlidersHorizontal className="h-4 w-4" /> Density</div>
-          <div className="mt-3 text-2xl font-semibold capitalize">{settingMap.density ?? "comfortable"}</div>
-        </div>
-        <div className="metric-tile p-5">
-          <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground"><PanelsTopLeft className="h-4 w-4" /> Sidebar</div>
-          <div className="mt-3 text-2xl font-semibold">{settingMap.compactSidebar === "true" ? "Compact" : "Expanded"}</div>
-        </div>
-        <div className="metric-tile p-5">
-          <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground"><MonitorCog className="h-4 w-4" /> Scope</div>
-          <div className="mt-3 text-lg font-semibold">Stored locally</div>
-          <div className="mt-2 text-sm text-muted-foreground">Ces préférences vivent dans SQLite.</div>
-        </div>
+        <MetricTile label="Theme" value={<span className="capitalize">{settingMap.theme ?? "ember"}</span>} icon={<Palette className="h-4 w-4" />} />
+        <MetricTile label="Accent" value={<span className="capitalize">{settingMap.accentMode ?? "warm"}</span>} icon={<Palette className="h-4 w-4" />} />
+        <MetricTile label="Density" value={<span className="capitalize">{settingMap.density ?? "comfortable"}</span>} icon={<SlidersHorizontal className="h-4 w-4" />} />
+        <MetricTile label="Sidebar" value={settingMap.compactSidebar === "true" ? "Compact" : "Expanded"} icon={<PanelsTopLeft className="h-4 w-4" />} />
+        <MetricTile label="Scope" value="Stored locally" hint="Ces préférences vivent dans SQLite." icon={<MonitorCog className="h-4 w-4" />} />
       </div>
 
       <div className="grid-cols-2 max-[1100px]:grid-cols-1 grid gap-4">

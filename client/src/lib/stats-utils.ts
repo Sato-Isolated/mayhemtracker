@@ -294,6 +294,23 @@ export function buildDashboardOverview(matches: MatchListItem[]): DashboardOverv
   };
 }
 
+export function formatCompactStat(value?: number): string {
+  if (!value) {
+    return "0";
+  }
+
+  if (value >= 1000) {
+    return `${(Math.round((value / 1000) * 10) / 10).toLocaleString("fr-FR")}k`;
+  }
+
+  return value.toLocaleString("fr-FR");
+}
+
+export function formatKdaRatio(kills?: number, deaths?: number, assists?: number): number {
+  const safeDeaths = deaths && deaths > 0 ? deaths : 1;
+  return ((kills ?? 0) + (assists ?? 0)) / safeDeaths;
+}
+
 export function buildDashboardInsights(matches: MatchListItem[]): DashboardInsights {
   const overview = buildDashboardOverview(matches);
   const trackedMatches = buildTrackedMatches(matches, overview.trackedPlayerPuuid);

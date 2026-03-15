@@ -1,6 +1,7 @@
 import { ArrowDownUp, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import { AugmentIcon } from "@/components/features/augment-icon";
+import { MetricTile } from "@/components/features/metric-tile";
 import { PageIntro } from "@/components/features/page-intro";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -81,9 +82,9 @@ export function AugmentsPage() {
           <Button variant="outline" onClick={() => toggleSort("label")}><ArrowDownUp className="h-4 w-4" /> Name</Button>
         </div>
         <div className="grid gap-3 md:grid-cols-3">
-          <div className="metric-tile p-4"><div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Silver</div><div className="mt-2 text-2xl font-semibold">{rarityCounts.silver}</div></div>
-          <div className="metric-tile p-4"><div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Gold</div><div className="mt-2 text-2xl font-semibold">{rarityCounts.gold}</div></div>
-          <div className="metric-tile p-4"><div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Prismatic</div><div className="mt-2 text-2xl font-semibold">{rarityCounts.prismatic}</div></div>
+          <MetricTile label="Silver" value={rarityCounts.silver} className="p-4" />
+          <MetricTile label="Gold" value={rarityCounts.gold} className="p-4" />
+          <MetricTile label="Prismatic" value={rarityCounts.prismatic} className="p-4" />
         </div>
       </div>
       <div className="flex flex-wrap gap-2">
@@ -127,9 +128,9 @@ export function AugmentsPage() {
                       <DialogDescription>Détail rapide d’un augment pour comparer volume, rareté et rendement.</DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 md:grid-cols-3">
-                      <div className="metric-tile p-4"><div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Games</div><div className="mt-2 text-3xl font-semibold">{entry.matches}</div></div>
-                      <div className="metric-tile p-4"><div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Win rate</div><div className="mt-2 text-3xl font-semibold">{entry.winRate}%</div></div>
-                      <div className="metric-tile p-4"><div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Rarity</div><div className="mt-2 text-2xl font-semibold">{entry.rarity ?? "-"}</div></div>
+                      <MetricTile label="Games" value={entry.matches} className="p-4" />
+                      <MetricTile label="Win rate" value={`${entry.winRate}%`} className="p-4" />
+                      <MetricTile label="Rarity" value={entry.rarity ?? "-"} className="p-4" />
                     </div>
                   </DialogContent>
                 </Dialog>
