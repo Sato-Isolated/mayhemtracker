@@ -45,6 +45,9 @@ type ActivityHeatmapProps = {
 
 export function ActivityHeatmap({ items, variant = "card" }: ActivityHeatmapProps) {
   const debugMode = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("debugHeatmap") === "1";
+  const resolvedWeekdayColumnWidth = variant === "embedded" ? 22 : weekdayColumnWidth;
+  const resolvedActivityCellGap = variant === "embedded" ? 3 : activityCellGap;
+  const activityCellMaxSize = variant === "embedded" ? "18px" : "15px";
 
   const calendar = useMemo(() => {
     const latestDate = items.length ? parseUtcDate(items.at(-1)?.key ?? new Date().toISOString().slice(0, 10)) : startOfUtcDay(new Date());
@@ -52,7 +55,6 @@ export function ActivityHeatmap({ items, variant = "card" }: ActivityHeatmapProp
     const rangeEnd = startOfUtcDay(latestDate);
     const calendarStart = startOfUtcWeek(rangeStart);
     const calendarEnd = endOfUtcWeek(rangeEnd);
-    const weekPitch = activityCellSize + activityCellGap;
     const itemMap = new Map(items.map((item) => [item.key, item]));
     const days = [] as Array<{
       key: string;
@@ -115,22 +117,30 @@ export function ActivityHeatmap({ items, variant = "card" }: ActivityHeatmapProp
     });
     const visibleRangeLabel = `${rangeStart.toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" })} → ${rangeEnd.toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" })}`;
 
+    const weekCount = weeks.length;
+
     return {
       weeks,
+      weekCount,
       monthLabels,
       visibleDays,
       totalMatches,
       activeDays,
       hottestDay,
       visibleRangeLabel,
-      calendarWidth: weekdayColumnWidth + Math.max(weeks.length * weekPitch - activityCellGap, 0),
-      weekColumnsTemplate: `repeat(${weeks.length}, ${activityCellSize}px)`,
+      calendarMinWidth: resolvedWeekdayColumnWidth + weekCount * (activityCellSize + resolvedActivityCellGap),
+      weekColumnsTemplate: `repeat(${weekCount}, var(--activity-cell-size))`,
     };
-  }, [items]);
+  }, [items, resolvedActivityCellGap, resolvedWeekdayColumnWidth]);
+
+  const layoutClassName = [
+    "activity-heatmap-layout",
+    variant === "embedded" ? "activity-heatmap-layout-embedded" : null,
+  ].filter(Boolean).join(" ");
 
   const content = (
     <>
-      <div className="activity-heatmap-layout">
+      <div className={layoutClassName}>
         <div className="activity-heatmap-meta">
           <div className="activity-heatmap-heading">
             <div>
@@ -161,9 +171,9 @@ export function ActivityHeatmap({ items, variant = "card" }: ActivityHeatmapProp
 
           {debugMode ? (
             <div className="activity-debug-panel" data-testid="activity-debug-panel">
-              <span>{calendar.weeks.length} weeks</span>
+              <span>{calendar.weekCount} weeks</span>
               <span>{calendar.visibleDays.length} visible days</span>
-              <span>{activityCellSize}px cells</span>
+              <span>{activityCellSize}px min cells</span>
               <span>{calendar.visibleRangeLabel}</span>
             </div>
           ) : null}
@@ -174,12 +184,15 @@ export function ActivityHeatmap({ items, variant = "card" }: ActivityHeatmapProp
               className={`activity-calendar-track ${debugMode ? "activity-calendar-track-debug" : ""}`}
               style={{
                 width: "100%",
-                minWidth: `${calendar.calendarWidth}px`,
-                ["--activity-cell-size" as string]: `${activityCellSize}px`,
-                ["--activity-cell-gap" as string]: `${activityCellGap}px`,
+                minWidth: `${calendar.calendarMinWidth}px`,
+                ["--activity-week-count" as string]: String(calendar.weekCount),
+                ["--activity-weekday-column-width" as string]: `${resolvedWeekdayColumnWidth}px`,
+                ["--activity-cell-min-size" as string]: `${activityCellSize}px`,
+                ["--activity-cell-max-size" as string]: activityCellMaxSize,
+                ["--activity-cell-gap" as string]: `${resolvedActivityCellGap}px`,
               }}
             >
-              <div className="activity-calendar-months" style={{ gridTemplateColumns: `${weekdayColumnWidth}px ${calendar.weekColumnsTemplate}` }} data-testid="activity-month-labels">
+              <div className="activity-calendar-months" style={{ gridTemplateColumns: `var(--activity-weekday-column-width) ${calendar.weekColumnsTemplate}` }} data-testid="activity-month-labels">
                 <div />
                 {calendar.monthLabels.map((label) => (
                   <div
@@ -192,7 +205,7 @@ export function ActivityHeatmap({ items, variant = "card" }: ActivityHeatmapProp
                 ))}
               </div>
 
-              <div className="activity-calendar-grid" style={{ gridTemplateColumns: `${weekdayColumnWidth}px ${calendar.weekColumnsTemplate}` }} data-testid="activity-grid">
+              <div className="activity-calendar-grid" style={{ gridTemplateColumns: `var(--activity-weekday-column-width) ${calendar.weekColumnsTemplate}` }} data-testid="activity-grid">
                 <div className="activity-weekday-column">
                   {Array.from({ length: 7 }).map((_, rowIndex) => {
                     const label = weekdayLabels.find((entry) => entry.row === rowIndex);
