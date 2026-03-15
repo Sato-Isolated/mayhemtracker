@@ -1,0 +1,16 @@
+node_modules/
+dist/
+build/
+.turbo/
+.DS_Store
+*.log
+*.tsbuildinfo
+
+# Runtime data
+.mayhemtracker/
+server/storage/
+
+# Playwright
+playwright-report/
+test-results/
+.playwright/
