@@ -6,6 +6,7 @@ import { PageIntro } from "@/components/features/page-intro";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Surface } from "@/components/ui/surface";
 import { useTrackerAppData, useTrackerMatchData } from "@/state/tracker-data";
 
 export function MatchHistoryPage() {
@@ -71,7 +72,8 @@ export function MatchHistoryPage() {
             </div>
           </div>
 
-          <ScrollArea className="surface-subtle h-[74vh] rounded-[1.4rem] p-2" data-testid="match-history-scroll">
+          <Surface asChild variant="subtle" className="h-[74vh] rounded-[1.4rem] p-2">
+          <ScrollArea data-testid="match-history-scroll">
             <div className="space-y-3">
               {matches.data?.items.length ? matches.data.items.map((match) => (
                 <MatchHistoryRow
@@ -92,6 +94,7 @@ export function MatchHistoryPage() {
               )}
             </div>
           </ScrollArea>
+          </Surface>
         </CardContent>
       </Card>
     </div>

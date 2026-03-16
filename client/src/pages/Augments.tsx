@@ -74,7 +74,7 @@ export function AugmentsPage() {
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Rechercher un augment"
-              className="input-surface w-full rounded-2xl border border-border py-3 pl-10 pr-4 text-sm outline-none focus:border-primary"
+              className="bg-[color-mix(in_oklch,var(--card)_78%,var(--surface-2))] text-foreground placeholder:text-muted-foreground w-full rounded-2xl border border-border py-3 pl-10 pr-4 text-sm outline-none focus:border-primary"
             />
           </div>
           <Button variant="outline" onClick={() => toggleSort("matches")}><ArrowDownUp className="h-4 w-4" /> Games</Button>

@@ -57,9 +57,9 @@ export function MatchScoreboard({
         return (
           <section
             key={team.teamId}
-            className={`match-scoreboard-team rounded-[1.2rem] border ${team.teamId === trackedIdentifier.teamId ? "match-scoreboard-team--ally" : "match-scoreboard-team--enemy"}`}
+            className={`overflow-hidden rounded-[1.2rem] border bg-[color-mix(in_oklch,var(--card)_88%,transparent)] ${team.teamId === trackedIdentifier.teamId ? "border-[color-mix(in_oklch,var(--primary)_34%,var(--border))]" : "border-[color-mix(in_oklch,var(--destructive)_22%,var(--border))]"}`}
           >
-            <div className="match-scoreboard-team-header flex items-center justify-between gap-3 px-4 py-3">
+            <div className={`flex items-center justify-between gap-3 px-4 py-3 ${team.teamId === trackedIdentifier.teamId ? "bg-[color-mix(in_oklch,var(--primary)_18%,var(--muted))]" : "bg-[color-mix(in_oklch,var(--destructive)_10%,var(--muted))]"}`}>
               <div className="text-sm font-semibold text-foreground">{team.label} {team.win ? "— Victory" : "— Defeat"}</div>
               <div className="flex flex-wrap items-center gap-2">
                 {team.teamId === trackedIdentifier.teamId ? <Badge variant="outline">Tracked side</Badge> : null}
@@ -88,7 +88,7 @@ export function MatchScoreboard({
                 return (
                   <div
                     key={`${participant.puuid ?? index}-${participant.championId ?? index}`}
-                    className={`match-scoreboard-row px-4 py-2 ${tracked ? "match-scoreboard-row--tracked" : ""}`}
+                    className={`match-scoreboard-row px-4 py-2 ${tracked ? "bg-[color-mix(in_oklch,var(--accent)_14%,transparent)]" : ""}`}
                   >
                     <div className="match-scoreboard-player min-w-0">
                       {visual.icon ? <img src={visual.icon} alt={visual.name} className="h-10 w-10 rounded-xl object-cover" /> : null}
@@ -110,12 +110,12 @@ export function MatchScoreboard({
                       <div className="text-xs text-muted-foreground">{formatKdaRatio(participant.kills, participant.deaths, participant.assists).toFixed(2)}</div>
                     </div>
 
-                    <div className="match-scoreboard-statbar">
+                    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
                       <div className="match-scoreboard-bar match-scoreboard-bar--damage"><span style={{ width: damageWidth }} /></div>
                       <div className="text-xs font-semibold text-foreground">{formatCompactStat(participant.totalDamageDealt)}</div>
                     </div>
 
-                    <div className="match-scoreboard-statbar">
+                    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
                       <div className="match-scoreboard-bar match-scoreboard-bar--taken"><span style={{ width: takenWidth }} /></div>
                       <div className="text-xs font-semibold text-foreground">{formatCompactStat(participant.totalDamageTaken)}</div>
                     </div>

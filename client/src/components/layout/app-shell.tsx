@@ -3,6 +3,7 @@ import { useEffect, useMemo, type ReactNode } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Surface } from "@/components/ui/surface";
 import { cn } from "@/lib/utils";
 import { useTrackerAppData, useTrackerMatchData } from "@/state/tracker-data";
 
@@ -67,7 +68,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="grid min-h-screen grid-cols-[290px_minmax(0,1fr)] gap-5 p-5 max-[1100px]:grid-cols-1 max-sm:p-[0.85rem]">
       <aside className="app-sidebar flex min-h-[calc(100vh-2.5rem)] flex-col justify-between gap-4 sticky top-5 rounded-[2rem] p-4 overflow-hidden max-[1100px]:min-h-auto max-[1100px]:static">
         <div className="space-y-4">
-          <div className="panel-surface app-brand-panel rounded-[1.6rem] p-4">
+          <div className="panel-surface rounded-[1.6rem] p-4">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-muted-foreground">Mayhem local</p>
@@ -78,10 +79,10 @@ export function AppShell({ children }: { children: ReactNode }) {
             <p className="mt-3 text-sm leading-6 text-muted-foreground">
               Interface applicative dense et lisible pour le suivi ARAM local, avec des surfaces pensées pour rester nettes en clair comme en sombre.
             </p>
-            <div className="app-brand-pulse mt-4 rounded-[1.1rem] border border-border/60 px-3 py-3">
+            <div className="mt-4 rounded-[1.1rem] border border-border/60 bg-[linear-gradient(180deg,color-mix(in_oklch,var(--card)_76%,var(--accent)),color-mix(in_oklch,var(--surface-2)_90%,var(--background)))] px-3 py-3 shadow-[inset_0_1px_0_color-mix(in_oklch,white_45%,transparent)]">
               <div className="flex items-center justify-between gap-3">
                 <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Active route</span>
-                <span className="status-dot" />
+                <span className="size-2 rounded-full bg-primary shadow-[0_0_0_0.35rem_color-mix(in_oklch,var(--primary)_16%,transparent)]" />
               </div>
               <p className="mt-2 text-base font-semibold text-foreground">{currentRoute.title}</p>
               <p className="mt-1 text-xs leading-5 text-muted-foreground">{currentRoute.description}</p>
@@ -121,14 +122,14 @@ export function AppShell({ children }: { children: ReactNode }) {
           <p className="mt-3 text-lg font-semibold text-foreground">{dashboard.data?.overview.trackedPlayerName ?? "Sync requis"}</p>
           <p className="mt-1 text-sm text-muted-foreground">{dashboard.data?.overview.totalMatches ?? 0} matchs locaux • {dashboard.data?.overview.winRate ?? 0}% WR</p>
           <div className="mt-4 grid grid-cols-2 gap-2">
-            <div className="surface-soft rounded-[1rem] px-3 py-2">
+            <Surface className="rounded-[1rem] px-3 py-2">
               <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">KDA</div>
               <div className="mt-1 text-lg font-semibold text-foreground">{dashboard.data?.overview.averageKda ?? 0}</div>
-            </div>
-            <div className="surface-soft rounded-[1rem] px-3 py-2">
+            </Surface>
+            <Surface className="rounded-[1rem] px-3 py-2">
               <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Wins</div>
               <div className="mt-1 text-lg font-semibold text-foreground">{dashboard.data?.overview.wins ?? 0}</div>
-            </div>
+            </Surface>
           </div>
         </div>
       </aside>
@@ -152,12 +153,12 @@ export function AppShell({ children }: { children: ReactNode }) {
         </header>
 
         <div className="flex flex-wrap gap-[0.45rem]">
-          <div className="status-chip inline-flex items-center gap-[0.55rem] rounded-full px-[0.72rem] py-[0.42rem] text-[0.76rem]">
-            <span className="status-dot" />
+          <div className="inline-flex items-center gap-[0.55rem] rounded-full border border-[color-mix(in_oklch,var(--border)_74%,white)] bg-[color-mix(in_oklch,var(--card)_76%,var(--secondary))] px-[0.72rem] py-[0.42rem] text-[0.76rem] text-muted-foreground shadow-[inset_0_1px_0_color-mix(in_oklch,white_45%,transparent)]">
+            <span className="size-2 rounded-full bg-primary shadow-[0_0_0_0.35rem_color-mix(in_oklch,var(--primary)_16%,transparent)]" />
             Backend {status.data?.ok ? "reachable" : "idle"}
           </div>
           {statusChips.map((chip) => (
-            <div key={chip} className="status-chip inline-flex items-center gap-[0.55rem] rounded-full px-[0.72rem] py-[0.42rem] text-[0.76rem]">{chip}</div>
+            <div key={chip} className="inline-flex items-center gap-[0.55rem] rounded-full border border-[color-mix(in_oklch,var(--border)_74%,white)] bg-[color-mix(in_oklch,var(--card)_76%,var(--secondary))] px-[0.72rem] py-[0.42rem] text-[0.76rem] text-muted-foreground shadow-[inset_0_1px_0_color-mix(in_oklch,white_45%,transparent)]">{chip}</div>
           ))}
         </div>
 

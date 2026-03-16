@@ -6,6 +6,7 @@ import { ItemIcon } from "@/components/features/item-icon";
 import { MatchScoreboard, type ScoreboardTeam } from "@/components/features/match-scoreboard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Surface } from "@/components/ui/surface";
 import { formatDate, formatDuration, getChampionVisual } from "@/lib/tracker-utils";
 
 interface MatchHistoryRowProps {
@@ -45,11 +46,12 @@ export function MatchHistoryRow({
 
   return (
     <div data-testid={`match-history-row-${match.matchId}`}>
+      <Surface asChild variant={isExpanded ? undefined : "soft"} className={`relative overflow-hidden w-full rounded-[1.35rem] px-4 py-4 text-left transition ${isExpanded ? "border border-primary/45 bg-accent/20" : "hover:border-primary/35 hover:bg-accent/18"}`}>
       <button
         type="button"
         onClick={onToggle}
-        className={`match-history-row w-full rounded-[1.35rem] border px-4 py-4 text-left transition ${isExpanded ? "border-primary/45 bg-accent/20" : "surface-soft hover:border-primary/35 hover:bg-accent/18"}`}
       >
+        <div className="pointer-events-none absolute -right-4 top-4 h-16 w-16 rounded-full bg-[color-mix(in_oklch,var(--accent)_12%,transparent)] blur-[10px]" />
         <div className="relative z-[1] flex flex-wrap items-center gap-3 xl:gap-4 max-[1100px]:items-start">
           <div className="flex min-w-[4.4rem] shrink-0 flex-col gap-1 rounded-xl border border-border/60 bg-card/85 px-2.5 py-2 text-center">
             <div className={`text-[11px] font-semibold uppercase tracking-[0.16em] ${trackedParticipant?.win ? "text-success-foreground" : "text-error-foreground"}`}>
@@ -93,11 +95,12 @@ export function MatchHistoryRow({
           </div>
         </div>
       </button>
+      </Surface>
 
       <div className={`grid transition-[grid-template-rows] duration-200 ${isExpanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}>
         <div className="overflow-hidden">
           {isExpanded ? (
-            <div className="match-history-inline-panel mx-2 rounded-b-[1.35rem] border border-t-0 border-border/70 bg-card/76 p-4" data-testid={`match-history-inline-${match.matchId}`}>
+            <div className="mx-2 rounded-b-[1.35rem] border border-t-0 border-border/70 bg-card/76 p-4 shadow-[inset_0_1px_0_color-mix(in_oklch,var(--border)_55%,transparent)]" data-testid={`match-history-inline-${match.matchId}`}>
               {detail ? (
                 <div className="space-y-4">
                   <div className="flex flex-wrap items-center justify-between gap-3">
@@ -111,21 +114,21 @@ export function MatchHistoryRow({
                   </div>
 
                   <div className="items-stretch grid gap-3 md:grid-cols-3">
-                    <div className="surface-soft rounded-[1rem] p-4">
+                    <Surface className="rounded-[1rem] p-4">
                       <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Tracked line</div>
                       <div className="mt-2 text-lg font-semibold text-foreground">{trackedParticipant?.kills ?? 0}/{trackedParticipant?.deaths ?? 0}/{trackedParticipant?.assists ?? 0}</div>
                       <div className="mt-1 text-sm text-muted-foreground">Immediate read for the followed player.</div>
-                    </div>
-                    <div className="surface-soft rounded-[1rem] p-4">
+                    </Surface>
+                    <Surface className="rounded-[1rem] p-4">
                       <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Queue</div>
                       <div className="mt-2 text-lg font-semibold text-foreground">{detail.gameMode ?? "League"}</div>
                       <div className="mt-1 text-sm text-muted-foreground">Patch {detail.gameVersion ?? "unknown"}</div>
-                    </div>
-                    <div className="surface-soft rounded-[1rem] p-4">
+                    </Surface>
+                    <Surface className="rounded-[1rem] p-4">
                       <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Duration</div>
                       <div className="mt-2 text-lg font-semibold text-foreground">{formatDuration(detail.gameDuration)}</div>
                       <div className="mt-1 text-sm text-muted-foreground">Expanded detail without leaving the queue.</div>
-                    </div>
+                    </Surface>
                   </div>
 
                   <MatchScoreboard

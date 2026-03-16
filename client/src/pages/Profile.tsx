@@ -2,6 +2,7 @@ import { Trophy, User2 } from "lucide-react";
 import { MetricTile } from "@/components/features/metric-tile";
 import { PageIntro } from "@/components/features/page-intro";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Surface } from "@/components/ui/surface";
 import { formatDate } from "@/lib/tracker-utils";
 import { useTrackerAppData } from "@/state/tracker-data";
 
@@ -53,10 +54,10 @@ export function ProfilePage() {
           </CardHeader>
           <CardContent className="space-y-3">
             {topPool.map((entry) => (
-              <div key={String(entry.championId ?? entry.championName)} className="surface-soft rounded-[1rem] p-4">
+              <Surface key={String(entry.championId ?? entry.championName)} className="rounded-[1rem] p-4">
                 <div className="font-medium">{entry.championName ?? `Champion ${entry.championId ?? "-"}`}</div>
                 <div className="mt-1 text-sm text-muted-foreground">{entry.matches} games · {entry.winRate}% WR · {entry.averageKda} KDA</div>
-              </div>
+              </Surface>
             ))}
           </CardContent>
         </Card>
@@ -70,7 +71,7 @@ export function ProfilePage() {
             <div className="grid grid-cols-7 gap-3 lg:grid-cols-14">
               {trend.map((item) => (
                 <div key={item.key} className="space-y-2 text-center">
-                  <div className="chart-track mx-auto flex h-24 w-full items-end rounded-[0.9rem] border border-border/70 p-2">
+                  <div className="bg-[color-mix(in_oklch,var(--card)_74%,var(--surface-3))] mx-auto flex h-24 w-full items-end rounded-[0.9rem] border border-border/70 p-2">
                     <div className="w-full rounded-full bg-primary/70" style={{ height: `${Math.max(item.winRate, item.matches ? 14 : 4)}%` }} />
                   </div>
                   <div className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">{item.label}</div>

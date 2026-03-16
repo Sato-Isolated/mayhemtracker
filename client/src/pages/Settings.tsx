@@ -2,6 +2,7 @@ import { MonitorCog, Palette, PanelsTopLeft, SlidersHorizontal } from "lucide-re
 import { useMemo } from "react";
 import { MetricTile } from "@/components/features/metric-tile";
 import { PageIntro } from "@/components/features/page-intro";
+import { Surface } from "@/components/ui/surface";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -85,7 +86,7 @@ export function SettingsPage() {
                 <Button
                   key={option.value}
                   variant={settingMap.theme === option.value ? "default" : "outline"}
-                  className={`settings-theme-card h-auto justify-start px-0 py-0 text-left ${settingMap.theme === option.value ? "settings-theme-card-selected" : ""}`}
+                  className={`rounded-[1.2rem] h-auto justify-start px-0 py-0 text-left ${settingMap.theme === option.value ? "shadow-[0_20px_45px_-32px_color-mix(in_oklch,var(--primary)_38%,transparent)]" : ""}`}
                   data-testid={`theme-option-${option.value}`}
                   onClick={() => void updateSetting("theme", option.value)}
                 >
@@ -99,10 +100,10 @@ export function SettingsPage() {
                         {settingMap.theme === option.value ? "Active" : "Available"}
                       </span>
                     </div>
-                    <div className="settings-theme-miniature mt-4">
-                      <div className="settings-theme-miniature-bar" style={{ backgroundColor: option.swatches[0] }} />
-                      <div className="settings-theme-miniature-card" style={{ backgroundColor: option.swatches[1] }} />
-                      <div className="settings-theme-miniature-pill" style={{ backgroundColor: option.swatches[2] }} />
+                    <div className="mt-4 grid grid-cols-[1.1fr_0.95fr] gap-[0.7rem] items-end">
+                      <div className="h-[4.25rem] rounded-[0.9rem] shadow-[inset_0_0_0_1px_color-mix(in_oklch,black_10%,transparent)]" style={{ backgroundColor: option.swatches[0] }} />
+                      <div className="h-[3.1rem] rounded-[0.9rem] shadow-[inset_0_0_0_1px_color-mix(in_oklch,black_10%,transparent)]" style={{ backgroundColor: option.swatches[1] }} />
+                      <div className="col-span-full h-[0.7rem] rounded-full shadow-[inset_0_0_0_1px_color-mix(in_oklch,black_10%,transparent)]" style={{ backgroundColor: option.swatches[2] }} />
                     </div>
                     <div className="mt-4 text-xs leading-5 text-muted-foreground">{option.description}</div>
                   </div>
@@ -161,7 +162,8 @@ export function SettingsPage() {
           <CardDescription>Lecture rapide de l’état d’interface actuellement piloté par les préférences locales.</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
-          <div className="theme-preview-board relative min-h-[220px] p-5" data-testid="theme-preview-board">
+          <div className="relative min-h-[220px] overflow-hidden rounded-[1.35rem] border border-[color-mix(in_oklch,var(--border)_72%,white)] bg-[linear-gradient(160deg,color-mix(in_oklch,var(--topbar)_84%,var(--card)),color-mix(in_oklch,var(--page-end)_86%,var(--background)))] p-5" data-testid="theme-preview-board">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,color-mix(in_oklch,var(--accent)_18%,transparent),transparent_42%),radial-gradient(circle_at_bottom_right,color-mix(in_oklch,var(--primary)_16%,transparent),transparent_44%)]" />
             <div className="relative z-10 grid h-full gap-4 lg:grid-cols-[1.1fr_0.9fr]">
               <div className="flex flex-col justify-between rounded-[1.15rem] border border-border/70 bg-card/78 p-4 shadow-[0_16px_40px_-30px_color-mix(in_oklch,var(--foreground)_18%,transparent)]">
                 <div>
@@ -172,14 +174,14 @@ export function SettingsPage() {
                   </div>
                 </div>
                 <div className="items-start mt-4 flex flex-wrap gap-2">
-                  <span className="status-chip inline-flex items-center gap-[0.55rem] rounded-full px-[0.72rem] py-[0.42rem] text-[0.76rem] status-chip-strong">Primary</span>
-                  <span className="status-chip inline-flex items-center gap-[0.55rem] rounded-full px-[0.72rem] py-[0.42rem] text-[0.76rem]">Muted</span>
-                  <span className="status-chip inline-flex items-center gap-[0.55rem] rounded-full px-[0.72rem] py-[0.42rem] text-[0.76rem]">Surface</span>
+                  <span className="inline-flex items-center gap-[0.55rem] rounded-full border border-[color-mix(in_oklch,var(--border)_74%,white)] bg-[color-mix(in_oklch,var(--card)_68%,var(--primary))] px-[0.72rem] py-[0.42rem] text-[0.76rem] text-primary-foreground shadow-[inset_0_1px_0_color-mix(in_oklch,white_45%,transparent)]">Primary</span>
+                  <span className="inline-flex items-center gap-[0.55rem] rounded-full border border-[color-mix(in_oklch,var(--border)_74%,white)] bg-[color-mix(in_oklch,var(--card)_76%,var(--secondary))] px-[0.72rem] py-[0.42rem] text-[0.76rem] text-muted-foreground shadow-[inset_0_1px_0_color-mix(in_oklch,white_45%,transparent)]">Muted</span>
+                  <span className="inline-flex items-center gap-[0.55rem] rounded-full border border-[color-mix(in_oklch,var(--border)_74%,white)] bg-[color-mix(in_oklch,var(--card)_76%,var(--secondary))] px-[0.72rem] py-[0.42rem] text-[0.76rem] text-muted-foreground shadow-[inset_0_1px_0_color-mix(in_oklch,white_45%,transparent)]">Surface</span>
                 </div>
               </div>
 
               <div className="grid gap-3">
-                <div className="surface-elevated rounded-[1rem] p-4">
+                <Surface variant="elevated" className="rounded-[1rem] p-4">
                   <div className="flex items-center justify-between gap-3">
                     <div>
                       <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Preview card</div>
@@ -188,7 +190,7 @@ export function SettingsPage() {
                     <span className="inline-flex h-9 w-9 rounded-full bg-primary/18 ring-1 ring-border/60" />
                   </div>
                   <div className="mt-3 text-sm text-muted-foreground">Le texte principal, les surfaces et les accents restent hiérarchisés même si le fond devient sombre.</div>
-                </div>
+                </Surface>
                 <div className="grid grid-cols-3 gap-2">
                   <div className="rounded-[0.9rem] border border-border/70 bg-background/80 p-3">
                     <div className="h-2 rounded-full bg-primary/80" />
@@ -231,7 +233,7 @@ export function SettingsPage() {
         </CardHeader>
         <CardContent className="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
           <div className="space-y-4">
-            <div className="surface-elevated rounded-[1.2rem] p-4">
+            <Surface variant="elevated" className="rounded-[1.2rem] p-4">
               <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Controls</div>
               <div className="mt-4 flex flex-wrap gap-2">
                 <Button>Primary action</Button>
@@ -246,7 +248,7 @@ export function SettingsPage() {
                 <Badge variant="success">Success</Badge>
                 <Badge variant="error">Error</Badge>
               </div>
-            </div>
+            </Surface>
 
             <Alert>
               <AlertTitle>Hierarchy check</AlertTitle>
@@ -296,16 +298,16 @@ export function SettingsPage() {
             </TabsContent>
             <TabsContent value="states">
               <div className="grid gap-3 sm:grid-cols-2">
-                <div className="surface-soft rounded-[1rem] p-4">
+                <Surface className="rounded-[1rem] p-4">
                   <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Surface</div>
                   <div className="mt-2 text-base font-semibold text-foreground">Foreground remains clear</div>
                   <div className="mt-2 text-sm text-muted-foreground">Le texte principal et secondaire doivent garder un écart net.</div>
-                </div>
-                <div className="surface-subtle rounded-[1rem] p-4">
+                </Surface>
+                <Surface variant="subtle" className="rounded-[1rem] p-4">
                   <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Accent</div>
                   <div className="mt-2 text-base font-semibold text-foreground">Accent does not overpower</div>
                   <div className="mt-2 text-sm text-muted-foreground">Les hovers et surfaces d’accent restent lisibles même en mode sombre.</div>
-                </div>
+                </Surface>
               </div>
             </TabsContent>
           </Tabs>

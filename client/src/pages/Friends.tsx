@@ -41,7 +41,7 @@ export function FriendsPage() {
                 value={notes[entry.puuid] ?? entry.note ?? ""}
                 onChange={(event) => setNotes((current) => ({ ...current, [entry.puuid]: event.target.value }))}
                 placeholder="Note locale sur ce coéquipier"
-                className="input-surface min-h-24 w-full rounded-2xl border border-border px-4 py-3 text-sm outline-none focus:border-primary"
+                className="bg-[color-mix(in_oklch,var(--card)_78%,var(--surface-2))] text-foreground placeholder:text-muted-foreground min-h-24 w-full rounded-2xl border border-border px-4 py-3 text-sm outline-none focus:border-primary"
               />
               <Button variant="secondary" onClick={() => void updatePlayerRating(entry.puuid, entry.summonerName, entry.rating, notes[entry.puuid] ?? entry.note)}>Enregistrer la note</Button>
             </CardContent>

@@ -5,6 +5,7 @@ import { PageIntro } from "@/components/features/page-intro";
 import { TeamSnapshotCard } from "@/components/features/team-snapshot-card";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Surface } from "@/components/ui/surface";
 import { formatCompactStat } from "@/lib/stats-utils";
 import { formatDate, formatDuration } from "@/lib/tracker-utils";
 import { useTrackerAppData, useTrackerMatchData } from "@/state/tracker-data";
@@ -97,22 +98,22 @@ export function GameAnalysisPage() {
                   if (!snapshot) return null;
                   return (
                     <div className="grid gap-3 border-b border-border/60 px-4 py-4 md:grid-cols-4">
-                      <div className="surface-soft rounded-[1rem] p-4">
+                      <Surface className="rounded-[1rem] p-4">
                         <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Kills</div>
                         <div className="mt-2 text-2xl font-semibold text-foreground">{snapshot.totalKills}</div>
-                      </div>
-                      <div className="surface-soft rounded-[1rem] p-4">
+                      </Surface>
+                      <Surface className="rounded-[1rem] p-4">
                         <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Damage</div>
                         <div className="mt-2 text-2xl font-semibold text-foreground">{formatCompactStat(snapshot.totalDamage)}</div>
-                      </div>
-                      <div className="surface-soft rounded-[1rem] p-4">
+                      </Surface>
+                      <Surface className="rounded-[1rem] p-4">
                         <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Gold</div>
                         <div className="mt-2 text-2xl font-semibold text-foreground">{formatCompactStat(snapshot.totalGold)}</div>
-                      </div>
-                      <div className="surface-soft rounded-[1rem] p-4">
+                      </Surface>
+                      <Surface className="rounded-[1rem] p-4">
                         <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Heal</div>
                         <div className="mt-2 text-2xl font-semibold text-foreground">{formatCompactStat(snapshot.totalHeal)}</div>
-                      </div>
+                      </Surface>
                     </div>
                   );
                 }}

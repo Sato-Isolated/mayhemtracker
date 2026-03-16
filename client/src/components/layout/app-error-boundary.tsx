@@ -34,8 +34,8 @@ export class AppErrorBoundary extends Component<AppErrorBoundaryProps, AppErrorB
     }
 
     return (
-      <main className="app-error-shell min-h-screen px-6 py-12 text-foreground">
-        <div className="app-error-card mx-auto max-w-3xl rounded-[1.75rem] border border-border/70 p-8 shadow-[0_32px_100px_-48px_color-mix(in_oklch,var(--foreground)_24%,transparent)]">
+      <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,color-mix(in_oklch,var(--destructive)_12%,transparent),transparent_30%),radial-gradient(circle_at_bottom_right,color-mix(in_oklch,var(--accent)_14%,transparent),transparent_34%),linear-gradient(160deg,var(--page-start),var(--page-end))] px-6 py-12 text-foreground">
+        <div className="relative mx-auto max-w-3xl rounded-[1.75rem] border border-border/70 bg-[color-mix(in_oklch,var(--card)_86%,var(--background))] p-8 shadow-[0_32px_100px_-48px_color-mix(in_oklch,var(--foreground)_24%,transparent)] backdrop-blur-[18px]">
           <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-destructive/12 text-destructive shadow-[0_14px_28px_-18px_color-mix(in_oklch,var(--destructive)_40%,transparent)]">
             <AlertTriangle className="h-6 w-6" />
           </div>

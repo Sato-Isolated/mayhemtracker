@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Surface } from "@/components/ui/surface";
 import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -236,11 +237,11 @@ export function DebugPage() {
             <div className="space-y-2">
               {matches.data?.items.length ? (
                 matches.data.items.map((match) => (
+                  <Surface asChild variant={selectedMatchId === match.matchId ? undefined : "subtle"} className={`w-full rounded-2xl px-4 py-3 text-left transition ${selectedMatchId === match.matchId ? "border border-primary bg-primary/8" : "hover:bg-accent/30"}`}>
                   <button
                     key={match.matchId}
                     type="button"
                     onClick={() => void loadMatchDetail(match.matchId)}
-                    className={`w-full rounded-2xl border px-4 py-3 text-left transition ${selectedMatchId === match.matchId ? "border-primary bg-primary/8" : "surface-subtle hover:bg-accent/30"}`}
                   >
                     <div className="flex items-center justify-between gap-3">
                       <div>
@@ -261,6 +262,7 @@ export function DebugPage() {
                       })}
                     </div>
                   </button>
+                  </Surface>
                 ))
               ) : (
                 <div className="rounded-2xl border border-dashed p-6 text-center text-sm text-muted-foreground">

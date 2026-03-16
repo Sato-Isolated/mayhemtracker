@@ -193,17 +193,11 @@ body,
 .glass-panel,
 .panel-surface,
 .metric-tile,
-.surface-soft,
-.surface-subtle,
-.surface-elevated,
 .table-shell,
 .tabs-shell,
-.status-chip,
 .app-nav-link,
 .app-sidebar,
-.app-topbar,
-.input-surface,
-.theme-preview-board {
+.app-topbar {
   transition:
     background-color 220ms ease,
     border-color 220ms ease,
@@ -217,17 +211,11 @@ body,
   .glass-panel,
   .panel-surface,
   .metric-tile,
-  .surface-soft,
-  .surface-subtle,
-  .surface-elevated,
   .table-shell,
   .tabs-shell,
-  .status-chip,
   .app-nav-link,
   .app-sidebar,
-  .app-topbar,
-  .input-surface,
-  .theme-preview-board {
+  .app-topbar {
     transition: none;
   }
 }
@@ -242,9 +230,7 @@ body,
 }
 
 .card-shell::before,
-.panel-surface::before,
-.route-fallback-shell::before,
-.app-error-card::before {
+.panel-surface::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -254,33 +240,6 @@ body,
     linear-gradient(180deg, color-mix(in oklch, white 16%, transparent), transparent 26%);
 }
 
-.surface-soft {
-  border: 1px solid color-mix(in oklch, var(--border) 78%, white);
-  background: color-mix(in oklch, var(--card) 76%, var(--surface-2));
-}
-
-.surface-subtle {
-  border: 1px solid color-mix(in oklch, var(--border) 74%, white);
-  background: color-mix(in oklch, var(--card) 66%, var(--surface-2));
-}
-
-.surface-elevated {
-  border: 1px solid color-mix(in oklch, var(--border) 72%, white);
-  background: color-mix(in oklch, var(--card) 84%, var(--surface-1));
-}
-
-.input-surface {
-  background: color-mix(in oklch, var(--card) 78%, var(--surface-2));
-  color: var(--foreground);
-}
-
-.input-surface::placeholder {
-  color: var(--muted-foreground);
-}
-
-.chart-track {
-  background: color-mix(in oklch, var(--card) 74%, var(--surface-3));
-}
 
 .table-shell {
   border: 1px solid color-mix(in oklch, var(--border) 74%, white);
@@ -355,92 +314,6 @@ html[data-density="compact"] {
   background: color-mix(in oklch, var(--topbar) 84%, var(--card));
   box-shadow: 0 16px 36px -32px color-mix(in oklch, var(--foreground) 14%, transparent);
   backdrop-filter: blur(18px);
-}
-
-.status-chip {
-  border: 1px solid color-mix(in oklch, var(--border) 74%, white);
-  background: color-mix(in oklch, var(--card) 76%, var(--secondary));
-  color: var(--muted-foreground);
-  box-shadow: inset 0 1px 0 color-mix(in oklch, white 45%, transparent);
-}
-
-.page-intro-shell::after {
-  content: "";
-  position: absolute;
-  right: -3rem;
-  top: -3rem;
-  width: 10rem;
-  height: 10rem;
-  border-radius: 999px;
-  background: color-mix(in oklch, var(--primary) 12%, transparent);
-  filter: blur(18px);
-  pointer-events: none;
-}
-
-.status-chip-strong {
-  background: color-mix(in oklch, var(--card) 68%, var(--primary));
-  color: var(--primary-foreground);
-}
-
-.theme-preview-board {
-  overflow: hidden;
-  border: 1px solid color-mix(in oklch, var(--border) 72%, white);
-  border-radius: 1.35rem;
-  background: linear-gradient(160deg, color-mix(in oklch, var(--topbar) 84%, var(--card)), color-mix(in oklch, var(--page-end) 86%, var(--background)));
-}
-
-.theme-preview-board::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle at top left, color-mix(in oklch, var(--accent) 18%, transparent), transparent 42%),
-    radial-gradient(circle at bottom right, color-mix(in oklch, var(--primary) 16%, transparent), transparent 44%);
-  pointer-events: none;
-}
-
-.settings-theme-card {
-  border-radius: 1.2rem;
-}
-
-.settings-theme-card-selected {
-  box-shadow: 0 20px 45px -32px color-mix(in oklch, var(--primary) 38%, transparent);
-}
-
-.settings-theme-miniature {
-  display: grid;
-  grid-template-columns: 1.1fr 0.95fr;
-  gap: 0.7rem;
-  align-items: end;
-}
-
-.settings-theme-miniature-bar,
-.settings-theme-miniature-card,
-.settings-theme-miniature-pill {
-  border-radius: 0.9rem;
-  box-shadow: inset 0 0 0 1px color-mix(in oklch, black 10%, transparent);
-}
-
-.settings-theme-miniature-bar {
-  height: 4.25rem;
-}
-
-.settings-theme-miniature-card {
-  height: 3.1rem;
-}
-
-.settings-theme-miniature-pill {
-  grid-column: 1 / -1;
-  height: 0.7rem;
-  border-radius: 999px;
-}
-
-.status-dot {
-  width: 0.5rem;
-  height: 0.5rem;
-  border-radius: 999px;
-  background: var(--primary);
-  box-shadow: 0 0 0 0.35rem color-mix(in oklch, var(--primary) 16%, transparent);
 }
 
 .app-nav-link {
@@ -535,93 +408,6 @@ html[data-density="compact"] {
   box-shadow: inset 0 1px 0 color-mix(in oklch, white 55%, transparent);
 }
 
-
-
-.route-fallback-shell,
-.app-error-card,
-.app-brand-panel {
-  position: relative;
-}
-
-.route-fallback-card {
-  min-height: 8.5rem;
-  border: 1px solid color-mix(in oklch, var(--border) 74%, white);
-  border-radius: 1.2rem;
-  background:
-    linear-gradient(135deg, color-mix(in oklch, var(--card) 88%, var(--surface-2)), color-mix(in oklch, var(--surface-2) 82%, var(--background)));
-  box-shadow: inset 0 1px 0 color-mix(in oklch, white 45%, transparent);
-}
-
-.route-fallback-card-wide {
-  grid-column: 1 / -1;
-  min-height: 6.5rem;
-}
-
-.app-brand-pulse {
-  background: linear-gradient(180deg, color-mix(in oklch, var(--card) 76%, var(--accent)), color-mix(in oklch, var(--surface-2) 90%, var(--background)));
-  box-shadow: inset 0 1px 0 color-mix(in oklch, white 45%, transparent);
-}
-
-.app-error-shell {
-  background:
-    radial-gradient(circle at top left, color-mix(in oklch, var(--destructive) 12%, transparent), transparent 30%),
-    radial-gradient(circle at bottom right, color-mix(in oklch, var(--accent) 14%, transparent), transparent 34%),
-    linear-gradient(160deg, var(--page-start), var(--page-end));
-}
-
-.app-error-card {
-  background: color-mix(in oklch, var(--card) 86%, var(--background));
-  backdrop-filter: blur(18px);
-}
-
-
-.match-history-row {
-  position: relative;
-  overflow: hidden;
-}
-
-.match-history-row::after {
-  content: "";
-  position: absolute;
-  right: -1rem;
-  top: 1rem;
-  width: 4rem;
-  height: 4rem;
-  border-radius: 999px;
-  background: color-mix(in oklch, var(--accent) 12%, transparent);
-  filter: blur(10px);
-  pointer-events: none;
-}
-
-.match-history-inline-panel {
-  box-shadow: inset 0 1px 0 color-mix(in oklch, var(--border) 55%, transparent);
-}
-
-.match-scoreboard-team {
-  overflow: hidden;
-  background: color-mix(in oklch, var(--card) 88%, transparent);
-}
-
-.match-scoreboard-team--ally {
-  border-color: color-mix(in oklch, var(--primary) 34%, var(--border));
-}
-
-.match-scoreboard-team--enemy {
-  border-color: color-mix(in oklch, var(--destructive) 22%, var(--border));
-}
-
-.match-scoreboard-team-header {
-  background: color-mix(in oklch, var(--muted) 42%, transparent);
-}
-
-.match-scoreboard-team--ally .match-scoreboard-team-header {
-  background: color-mix(in oklch, var(--primary) 18%, var(--muted));
-}
-
-.match-scoreboard-team--enemy .match-scoreboard-team-header {
-  background: color-mix(in oklch, var(--destructive) 10%, var(--muted));
-}
-
 .match-scoreboard-columns,
 .match-scoreboard-row {
   display: grid;
@@ -632,17 +418,6 @@ html[data-density="compact"] {
 
 .match-scoreboard-row {
   border-top: 1px solid color-mix(in oklch, var(--border) 72%, transparent);
-}
-
-.match-scoreboard-row--tracked {
-  background: color-mix(in oklch, var(--accent) 14%, transparent);
-}
-
-.match-scoreboard-statbar {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 0.5rem;
 }
 
 .match-scoreboard-bar {
@@ -903,10 +678,6 @@ html[data-density="compact"] {
 
   .app-nav-link {
     padding: 0.8rem 0.85rem;
-  }
-
-  .theme-preview-board {
-    min-height: 0;
   }
 
   .activity-heatmap-layout {
