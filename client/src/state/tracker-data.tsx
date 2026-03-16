@@ -32,6 +32,7 @@ type MatchesState = { items: MatchListItem[]; total: number; page: number; pageS
 
 interface TrackerAppDataContextValue {
   status: AsyncState<StatusResponse>;
+  leagueConnected: boolean;
   auth: AsyncState<LeagueAuthResponse>;
   summoner: AsyncState<SummonerResponse>;
   powerShell: AsyncState<PowerShellResponse>;
@@ -79,6 +80,8 @@ const TrackerMatchDataContext = createContext<TrackerMatchDataContextValue | und
 
 export function TrackerDataProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<AsyncState<StatusResponse>>(initialState<StatusResponse>());
+  const [leagueConnected, setLeagueConnected] = useState(false);
+  const prevLeagueConnectedRef = useRef(false);
   const [auth, setAuth] = useState<AsyncState<LeagueAuthResponse>>(initialState<LeagueAuthResponse>());
   const [summoner, setSummoner] = useState<AsyncState<SummonerResponse>>(initialState<SummonerResponse>());
   const [powerShell, setPowerShell] = useState<AsyncState<PowerShellResponse>>(initialState<PowerShellResponse>());
@@ -286,6 +289,42 @@ export function TrackerDataProvider({ children }: { children: ReactNode }) {
   }, [loadMatches, loadSettings, loadStaticLists, refreshAnalytics]);
 
   useEffect(() => {
+    let active = true;
+
+    async function poll() {
+      try {
+        const response = await api.getLeagueConnection();
+        if (!active) return;
+        const wasConnected = prevLeagueConnectedRef.current;
+        const isConnected = response.connected;
+        prevLeagueConnectedRef.current = isConnected;
+        setLeagueConnected(isConnected);
+
+        if (!wasConnected && isConnected) {
+          debugLog.info("tracker-data", "league-client:reconnected, auto-syncing");
+          try {
+            const payload = await api.syncMatches();
+            if (!active) return;
+            debugLog.info("tracker-data", "auto-sync:success", payload.result);
+            toast.success(`Auto-sync: ${payload.result.stored} nouveaux, ${payload.result.updated} mis à jour`);
+            await Promise.all([loadMatches(), refreshAnalytics()]);
+          } catch (error) {
+            debugLog.error("tracker-data", "auto-sync:error", error);
+          }
+        }
+      } catch {
+        if (!active) return;
+        prevLeagueConnectedRef.current = false;
+        setLeagueConnected(false);
+      }
+    }
+
+    void poll();
+    const interval = setInterval(() => void poll(), 10_000);
+    return () => { active = false; clearInterval(interval); };
+  }, [loadMatches, refreshAnalytics]);
+
+  useEffect(() => {
     if (selectedMatchId) {
       if (requestedMatchDetailIdRef.current === selectedMatchId) {
         return;
@@ -298,6 +337,7 @@ export function TrackerDataProvider({ children }: { children: ReactNode }) {
 
   const appValue: TrackerAppDataContextValue = useMemo(() => ({
     status,
+    leagueConnected,
     auth,
     summoner,
     powerShell,
@@ -326,6 +366,7 @@ export function TrackerDataProvider({ children }: { children: ReactNode }) {
     runPowerShellTest,
     syncStaticData,
   }), [
+    leagueConnected,
     auth,
     augmentStats,
     augments,

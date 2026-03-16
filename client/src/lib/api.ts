@@ -3,6 +3,7 @@ import type {
   ChampionStatsResponse,
   DashboardResponse,
   LeagueAuthResponse,
+  LeagueConnectionResponse,
   MatchDetailResponse,
   MatchListResponse,
   MatchSyncResponse,
@@ -56,6 +57,7 @@ async function request<T>(input: string, init?: RequestInit) {
 
 export const api = {
   getStatus: () => request<StatusResponse>("/api/status"),
+  getLeagueConnection: () => request<LeagueConnectionResponse>("/api/league/connection"),
   getLeagueAuth: () => request<LeagueAuthResponse>("/api/league/auth"),
   getCurrentSummoner: () => request<SummonerResponse>("/api/league/summoner"),
   getPowerShellTest: () => request<PowerShellResponse>("/api/system/powershell-test"),

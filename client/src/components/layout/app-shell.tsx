@@ -1,4 +1,4 @@
-import { BarChart3, Bug, Cog, Home, LayoutGrid, ShieldCheck, Sparkles, Swords, Users } from "lucide-react";
+import { BarChart3, Bug, Cog, Home, LayoutGrid, Sparkles, Swords, Users } from "lucide-react";
 import { useEffect, useMemo, type ReactNode } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
@@ -31,7 +31,7 @@ const routeCopy: Record<string, { title: string; description: string }> = {
 
 export function AppShell({ children }: { children: ReactNode }) {
   const location = useLocation();
-  const { dashboard, status, champions, items, augments, settings, syncStaticData } = useTrackerAppData();
+  const { dashboard, status, leagueConnected, champions, items, augments, settings, syncStaticData } = useTrackerAppData();
   const { matches, syncMatches } = useTrackerMatchData();
 
   const routeKey = location.pathname.startsWith("/history/") ? "/history" : location.pathname;
@@ -66,29 +66,8 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="grid min-h-screen grid-cols-[290px_minmax(0,1fr)] gap-5 p-5 max-[1100px]:grid-cols-1 max-sm:p-[0.85rem]">
-      <aside className="app-sidebar flex min-h-[calc(100vh-2.5rem)] flex-col justify-between gap-4 sticky top-5 rounded-[2rem] p-4 overflow-hidden max-[1100px]:min-h-auto max-[1100px]:static">
+      <aside className="app-sidebar flex max-h-[calc(100vh-2.5rem)] flex-col justify-between gap-4 sticky top-5 rounded-[2rem] p-4 overflow-y-auto max-[1100px]:min-h-auto max-[1100px]:static">
         <div className="space-y-4">
-          <div className="panel-surface rounded-[1.6rem] p-4">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-muted-foreground">Mayhem local</p>
-                <h1 className="mt-2 text-xl font-semibold tracking-tight text-foreground">Mayhem Tracker</h1>
-              </div>
-              <Badge variant={status.data?.ok ? "success" : "outline"}>{status.data?.ok ? "online" : "idle"}</Badge>
-            </div>
-            <p className="mt-3 text-sm leading-6 text-muted-foreground">
-              Interface applicative dense et lisible pour le suivi ARAM local, avec des surfaces pensées pour rester nettes en clair comme en sombre.
-            </p>
-            <div className="mt-4 rounded-[1.1rem] border border-border/60 bg-[linear-gradient(180deg,color-mix(in_oklch,var(--card)_76%,var(--accent)),color-mix(in_oklch,var(--surface-2)_90%,var(--background)))] px-3 py-3 shadow-[inset_0_1px_0_color-mix(in_oklch,white_45%,transparent)]">
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Active route</span>
-                <span className="size-2 rounded-full bg-primary shadow-[0_0_0_0.35rem_color-mix(in_oklch,var(--primary)_16%,transparent)]" />
-              </div>
-              <p className="mt-2 text-base font-semibold text-foreground">{currentRoute.title}</p>
-              <p className="mt-1 text-xs leading-5 text-muted-foreground">{currentRoute.description}</p>
-            </div>
-          </div>
-
           <nav className="app-sidebar-nav space-y-1.5 max-[1100px]:grid max-[1100px]:grid-cols-2 max-[1100px]:gap-[0.65rem] max-sm:grid-cols-1" aria-label="Primary navigation">
             {navigation.map((item) => {
               const Icon = item.icon;
@@ -114,24 +93,20 @@ export function AppShell({ children }: { children: ReactNode }) {
           </nav>
         </div>
 
-        <div className="panel-surface rounded-[1.4rem] p-4">
-          <div className="flex items-center justify-between gap-3">
-            <span className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">Tracked player</span>
-            <ShieldCheck className="h-4 w-4 text-primary" />
+        <Surface className="rounded-[1.2rem] px-3.5 py-3">
+          <div className="flex items-center gap-2.5">
+            <span className={cn(
+              "size-2 shrink-0 rounded-full",
+              leagueConnected
+                ? "bg-emerald-500 shadow-[0_0_0_0.3rem_color-mix(in_oklch,oklch(0.75_0.18_155)_18%,transparent)]"
+                : "bg-muted-foreground/40 shadow-[0_0_0_0.3rem_color-mix(in_oklch,var(--muted-foreground)_10%,transparent)]",
+            )} />
+            <div className="min-w-0">
+              <div className="text-sm font-medium text-foreground">League client</div>
+              <div className="text-xs text-muted-foreground">{leagueConnected ? "Connecte — auto-sync actif" : "Deconnecte"}</div>
+            </div>
           </div>
-          <p className="mt-3 text-lg font-semibold text-foreground">{dashboard.data?.overview.trackedPlayerName ?? "Sync requis"}</p>
-          <p className="mt-1 text-sm text-muted-foreground">{dashboard.data?.overview.totalMatches ?? 0} matchs locaux • {dashboard.data?.overview.winRate ?? 0}% WR</p>
-          <div className="mt-4 grid grid-cols-2 gap-2">
-            <Surface className="rounded-[1rem] px-3 py-2">
-              <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">KDA</div>
-              <div className="mt-1 text-lg font-semibold text-foreground">{dashboard.data?.overview.averageKda ?? 0}</div>
-            </Surface>
-            <Surface className="rounded-[1rem] px-3 py-2">
-              <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Wins</div>
-              <div className="mt-1 text-lg font-semibold text-foreground">{dashboard.data?.overview.wins ?? 0}</div>
-            </Surface>
-          </div>
-        </div>
+        </Surface>
       </aside>
 
       <div className="min-w-0 flex flex-col gap-[0.8rem]">

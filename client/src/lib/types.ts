@@ -3,6 +3,11 @@ export interface StatusResponse {
   message: string;
 }
 
+export interface LeagueConnectionResponse {
+  ok: boolean;
+  connected: boolean;
+}
+
 export interface LeagueAuthResponse {
   ok: boolean;
   credentials?: {
