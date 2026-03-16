@@ -23,28 +23,28 @@ const themeOptions = [
     label: "Ember",
     tone: "Light / warm",
     description: "Palette sable, cuivre et crème, proche de l'identité actuelle.",
-    swatches: ["oklch(0.978 0.012 92)", "oklch(0.59 0.11 40)", "oklch(0.86 0.045 82)"],
+    swatches: ["oklch(0.956 0.026 78)", "oklch(0.56 0.148 32)", "oklch(0.868 0.072 74)"],
   },
   {
     value: "atlas",
     label: "Atlas",
     tone: "Light / analytic",
     description: "Palette minérale plus froide, utile pour les vues denses et analytiques.",
-    swatches: ["oklch(0.975 0.01 242)", "oklch(0.55 0.13 245)", "oklch(0.86 0.045 216)"],
+    swatches: ["oklch(0.952 0.028 228)", "oklch(0.52 0.162 247)", "oklch(0.856 0.070 216)"],
   },
   {
     value: "midnight",
     label: "Midnight",
     tone: "Dark / dashboard",
     description: "Fond ardoise profond, textes clairs et accents ambrés très lisibles.",
-    swatches: ["oklch(0.21 0.018 262)", "oklch(0.72 0.15 78)", "oklch(0.42 0.07 230)"],
+    swatches: ["oklch(0.182 0.032 264)", "oklch(0.74 0.165 72)", "oklch(0.465 0.100 226)"],
   },
   {
     value: "tide",
     label: "Tide",
     tone: "Dark / cool",
     description: "Bleu pétrole et accents cyan pour une lecture plus technique.",
-    swatches: ["oklch(0.2 0.022 208)", "oklch(0.75 0.132 188)", "oklch(0.42 0.085 197)"],
+    swatches: ["oklch(0.172 0.036 208)", "oklch(0.76 0.148 186)", "oklch(0.462 0.110 194)"],
   },
 ] as const;
 
@@ -189,7 +189,7 @@ export function SettingsPage() {
           <CardDescription>Lecture rapide de l'état d'interface actuellement piloté par les préférences locales.</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
-          <div className="relative min-h-[220px] overflow-hidden rounded-[1rem] border border-[color-mix(in_oklch,var(--border)_72%,white)] bg-[linear-gradient(160deg,color-mix(in_oklch,var(--topbar)_84%,var(--card)),color-mix(in_oklch,var(--page-end)_86%,var(--background)))] p-4" data-testid="theme-preview-board">
+          <div className="relative min-h-[220px] overflow-hidden rounded-[1rem] border border-[color-mix(in_oklch,var(--border)_80%,transparent)] bg-[linear-gradient(160deg,color-mix(in_oklch,var(--topbar)_84%,var(--card)),color-mix(in_oklch,var(--page-end)_86%,var(--background)))] p-4" data-testid="theme-preview-board">
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,color-mix(in_oklch,var(--accent)_18%,transparent),transparent_42%),radial-gradient(circle_at_bottom_right,color-mix(in_oklch,var(--primary)_16%,transparent),transparent_44%)]" />
             <div className="relative z-10 grid h-full gap-4 lg:grid-cols-[1.1fr_0.9fr]">
               <div className="flex flex-col justify-between rounded-[0.9rem] border border-border/70 bg-card/78 p-4 shadow-[0_16px_40px_-30px_color-mix(in_oklch,var(--foreground)_18%,transparent)]">
@@ -201,9 +201,9 @@ export function SettingsPage() {
                   </div>
                 </div>
                 <div className="items-start mt-4 flex flex-wrap gap-2">
-                  <span className="inline-flex items-center gap-[0.55rem] rounded-full border border-[color-mix(in_oklch,var(--border)_74%,white)] bg-[color-mix(in_oklch,var(--card)_68%,var(--primary))] px-[0.72rem] py-[0.42rem] text-[0.76rem] text-primary-foreground shadow-[inset_0_1px_0_color-mix(in_oklch,white_45%,transparent)]">Primary</span>
-                  <span className="inline-flex items-center gap-[0.55rem] rounded-full border border-[color-mix(in_oklch,var(--border)_74%,white)] bg-[color-mix(in_oklch,var(--card)_76%,var(--secondary))] px-[0.72rem] py-[0.42rem] text-[0.76rem] text-muted-foreground shadow-[inset_0_1px_0_color-mix(in_oklch,white_45%,transparent)]">Muted</span>
-                  <span className="inline-flex items-center gap-[0.55rem] rounded-full border border-[color-mix(in_oklch,var(--border)_74%,white)] bg-[color-mix(in_oklch,var(--card)_76%,var(--secondary))] px-[0.72rem] py-[0.42rem] text-[0.76rem] text-muted-foreground shadow-[inset_0_1px_0_color-mix(in_oklch,white_45%,transparent)]">Surface</span>
+                  <span className="inline-flex items-center gap-[0.55rem] rounded-full border border-border/60 bg-[color-mix(in_oklch,var(--card)_68%,var(--primary))] px-[0.72rem] py-[0.42rem] text-[0.76rem] text-primary-foreground shadow-[inset_0_1px_0_color-mix(in_oklch,white_45%,transparent)]">Primary</span>
+                  <span className="inline-flex items-center gap-[0.55rem] rounded-full border border-border/60 bg-[color-mix(in_oklch,var(--card)_76%,var(--secondary))] px-[0.72rem] py-[0.42rem] text-[0.76rem] text-muted-foreground shadow-[inset_0_1px_0_color-mix(in_oklch,white_45%,transparent)]">Muted</span>
+                  <span className="inline-flex items-center gap-[0.55rem] rounded-full border border-border/60 bg-[color-mix(in_oklch,var(--card)_76%,var(--secondary))] px-[0.72rem] py-[0.42rem] text-[0.76rem] text-muted-foreground shadow-[inset_0_1px_0_color-mix(in_oklch,white_45%,transparent)]">Surface</span>
                 </div>
               </div>
 

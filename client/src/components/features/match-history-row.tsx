@@ -54,7 +54,7 @@ export function MatchHistoryRow({
         <div className="pointer-events-none absolute -right-4 top-4 h-16 w-16 rounded-full bg-[color-mix(in_oklch,var(--accent)_12%,transparent)] blur-[10px]" />
         <div className="relative z-[1] flex flex-wrap items-center gap-3 xl:gap-4 max-[1100px]:items-start">
           <div className="flex min-w-[4.4rem] shrink-0 flex-col gap-1 rounded-xl border border-border/60 bg-card/85 px-2.5 py-2 text-center">
-            <div className={`text-[11px] font-semibold uppercase tracking-[0.16em] ${trackedParticipant?.win ? "text-success-foreground" : "text-error-foreground"}`}>
+            <div className={`text-[11px] font-semibold uppercase tracking-[0.16em] ${trackedParticipant?.win ? "text-success" : "text-error"}`}>
               {trackedParticipant?.win ? "WIN" : "LOSS"}
             </div>
             <div className="text-[11px] text-muted-foreground">{formatDuration(match.gameDuration)}</div>

@@ -7,11 +7,11 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default: "border-transparent bg-[color-mix(in_oklch,var(--primary)_16%,transparent)] text-primary shadow-[inset_0_1px_0_color-mix(in_oklch,white_55%,transparent)]",
+        default: "border-transparent bg-[color-mix(in_oklch,var(--primary)_22%,var(--card))] text-[color-mix(in_oklch,var(--primary)_80%,var(--foreground))] shadow-[inset_0_1px_0_color-mix(in_oklch,white_45%,transparent)]",
         secondary: "border-transparent bg-secondary/85 text-secondary-foreground shadow-[inset_0_1px_0_color-mix(in_oklch,white_55%,transparent)]",
         outline: "border-border/80 bg-[color-mix(in_oklch,var(--card)_82%,var(--surface-2))] text-foreground",
-        success: "border-transparent bg-[color-mix(in_oklch,var(--success)_18%,transparent)] text-[var(--success-foreground)] shadow-[inset_0_1px_0_color-mix(in_oklch,white_45%,transparent)]",
-        error: "border-transparent bg-[color-mix(in_oklch,var(--error)_18%,transparent)] text-[var(--error-foreground)] shadow-[inset_0_1px_0_color-mix(in_oklch,white_45%,transparent)]",
+        success: "border-transparent bg-[color-mix(in_oklch,var(--success)_22%,var(--card))] text-[color-mix(in_oklch,var(--success)_82%,var(--foreground))] shadow-[inset_0_1px_0_color-mix(in_oklch,white_40%,transparent)]",
+        error: "border-transparent bg-[color-mix(in_oklch,var(--error)_22%,var(--card))] text-[color-mix(in_oklch,var(--error)_80%,var(--foreground))] shadow-[inset_0_1px_0_color-mix(in_oklch,white_40%,transparent)]",
       },
     },
     defaultVariants: {

@@ -10,7 +10,7 @@ const buttonVariants = cva(
       variant: {
         default: "bg-[linear-gradient(135deg,color-mix(in_oklch,var(--primary)_88%,white),color-mix(in_oklch,var(--primary)_72%,var(--accent)))] text-primary-foreground shadow-[0_16px_30px_-18px_color-mix(in_oklch,var(--primary)_48%,transparent)] hover:shadow-[0_20px_34px_-18px_color-mix(in_oklch,var(--primary)_56%,transparent)] hover:saturate-110",
         secondary: "border-border/70 bg-[color-mix(in_oklch,var(--secondary)_82%,var(--card))] text-secondary-foreground shadow-[inset_0_1px_0_color-mix(in_oklch,white_58%,transparent)] hover:bg-[color-mix(in_oklch,var(--secondary)_72%,var(--accent))]",
-        outline: "border-border/80 bg-[color-mix(in_oklch,var(--card)_80%,var(--surface-2))] text-foreground shadow-[inset_0_1px_0_color-mix(in_oklch,white_55%,transparent)] hover:border-primary/25 hover:bg-[color-mix(in_oklch,var(--accent)_22%,var(--card))]",
+        outline: "border-border/80 bg-[var(--surface-card)] text-foreground shadow-[inset_0_1px_0_color-mix(in_oklch,white_55%,transparent)] hover:border-primary/25 hover:bg-[color-mix(in_oklch,var(--accent)_22%,var(--card))]",
         ghost: "text-foreground hover:bg-[color-mix(in_oklch,var(--accent)_20%,transparent)]",
         destructive: "bg-[linear-gradient(135deg,color-mix(in_oklch,var(--destructive)_88%,white),color-mix(in_oklch,var(--destructive)_76%,var(--accent)))] text-destructive-foreground shadow-[0_16px_30px_-18px_color-mix(in_oklch,var(--destructive)_45%,transparent)] hover:saturate-110",
       },

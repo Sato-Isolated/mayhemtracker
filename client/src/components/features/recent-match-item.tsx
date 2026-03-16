@@ -26,8 +26,8 @@ export function RecentMatchItem({
       className={cn(
         "flex items-center gap-3 rounded-lg border-l-[3px] px-4 py-3 transition-colors hover:bg-accent/30",
         isWin
-          ? "border-l-green-500 bg-green-500/5"
-          : "border-l-red-500 bg-red-500/5",
+          ? "border-l-success bg-[color-mix(in_oklch,var(--success)_14%,var(--card))]"
+          : "border-l-error bg-[color-mix(in_oklch,var(--error)_14%,var(--card))]",
       )}
     >
       {championIcon ? (
@@ -50,7 +50,7 @@ export function RecentMatchItem({
         </p>
       </div>
 
-      <p className="text-sm font-medium text-muted-foreground">{kda}</p>
+      <p className="text-sm font-medium text-foreground">{kda}</p>
 
       <Badge variant={isWin ? "success" : "error"}>
         {isWin ? "Win" : "Loss"}

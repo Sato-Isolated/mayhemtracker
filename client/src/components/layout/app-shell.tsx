@@ -98,7 +98,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <span className={cn(
               "size-2 shrink-0 rounded-full",
               leagueConnected
-                ? "bg-emerald-500 shadow-[0_0_0_0.3rem_color-mix(in_oklch,oklch(0.75_0.18_155)_18%,transparent)]"
+                ? "bg-success shadow-[0_0_0_0.3rem_color-mix(in_oklch,var(--success)_20%,transparent)]"
                 : "bg-muted-foreground/40 shadow-[0_0_0_0.3rem_color-mix(in_oklch,var(--muted-foreground)_10%,transparent)]",
             )} />
             <div className="min-w-0">

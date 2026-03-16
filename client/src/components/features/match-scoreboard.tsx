@@ -121,7 +121,7 @@ export function MatchScoreboard({
                     </div>
 
                     <div className="match-scoreboard-metric text-sm font-semibold text-foreground">{formatCompactStat(participant.goldEarned)}</div>
-                    <div className="match-scoreboard-metric text-sm font-semibold text-emerald-400">{formatCompactStat(participant.totalHeal)}</div>
+                    <div className="match-scoreboard-metric text-sm font-semibold text-success">{formatCompactStat(participant.totalHeal)}</div>
                   </div>
                 );
               })}
