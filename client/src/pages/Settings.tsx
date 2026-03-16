@@ -1,5 +1,6 @@
-import { MonitorCog, Palette, PanelsTopLeft, SlidersHorizontal } from "lucide-react";
-import { useMemo } from "react";
+import { Bell, MonitorCog, Palette, PanelsTopLeft, SlidersHorizontal } from "lucide-react";
+import { useMemo, useState } from "react";
+import { getNotificationPermission, requestNotificationPermission } from "@/lib/notifications";
 import { MetricTile } from "@/components/features/metric-tile";
 import { PageIntro } from "@/components/features/page-intro";
 import { Surface } from "@/components/ui/surface";
@@ -46,6 +47,24 @@ export function SettingsPage() {
   const { settings, updateSetting } = useTrackerAppData();
   const settingMap = useMemo(() => Object.fromEntries((settings.data ?? []).map((entry) => [entry.key, entry.value])), [settings.data]);
   const activeTheme = themeOptions.find((option) => option.value === (settingMap.theme ?? "ember")) ?? themeOptions[0];
+  const [notifPermission, setNotifPermission] = useState<NotificationPermission | "unsupported">(getNotificationPermission);
+  const notifEnabled = settingMap.nativeNotifications === "true";
+
+  async function toggleNotifications() {
+    if (notifEnabled) {
+      await updateSetting("nativeNotifications", "false");
+      return;
+    }
+    let permission = getNotificationPermission();
+    if (permission !== "granted") {
+      permission = await requestNotificationPermission();
+      setNotifPermission(permission);
+    }
+    if (permission === "granted") {
+      await updateSetting("nativeNotifications", "true");
+      setNotifPermission("granted");
+    }
+  }
 
   async function resetDefaults() {
     await Promise.all([
@@ -70,6 +89,7 @@ export function SettingsPage() {
         <MetricTile label="Accent" value={<span className="capitalize">{settingMap.accentMode ?? "warm"}</span>} icon={<Palette className="h-4 w-4" />} />
         <MetricTile label="Density" value={<span className="capitalize">{settingMap.density ?? "comfortable"}</span>} icon={<SlidersHorizontal className="h-4 w-4" />} />
         <MetricTile label="Sidebar" value={settingMap.compactSidebar === "true" ? "Compact" : "Expanded"} icon={<PanelsTopLeft className="h-4 w-4" />} />
+        <MetricTile label="Notifications" value={notifEnabled ? "On" : "Off"} icon={<Bell className="h-4 w-4" />} />
         <MetricTile label="Scope" value="Stored locally" hint="Ces préférences vivent dans SQLite." icon={<MonitorCog className="h-4 w-4" />} />
       </div>
 
@@ -151,6 +171,37 @@ export function SettingsPage() {
             <div className="flex gap-2">
             <Button variant={settingMap.compactSidebar === "false" ? "default" : "outline"} onClick={() => void updateSetting("compactSidebar", "false")}>Expanded</Button>
             <Button variant={settingMap.compactSidebar === "true" ? "default" : "outline"} onClick={() => void updateSetting("compactSidebar", "true")}>Compact</Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2"><Bell className="h-4 w-4" /> Notifications</CardTitle>
+            <CardDescription>Notifications Windows natives lors des syncs de matchs.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="rounded-[1rem] border border-border/70 bg-card/70 p-4 text-sm text-muted-foreground">
+              {notifPermission === "unsupported"
+                ? "Votre navigateur ne supporte pas les notifications natives."
+                : notifPermission === "denied"
+                  ? "Les notifications ont été bloquées par le navigateur. Réactivez-les dans les paramètres du site."
+                  : "Recevez une notification Windows quand un sync (auto ou manuel) détecte de nouveaux matchs."}
+            </div>
+            <div className="flex items-center gap-3">
+              <Button
+                variant={notifEnabled ? "default" : "outline"}
+                disabled={notifPermission === "unsupported" || notifPermission === "denied"}
+                onClick={() => void toggleNotifications()}
+              >
+                {notifEnabled ? "Activées" : "Désactivées"}
+              </Button>
+              {notifPermission === "denied" && (
+                <Badge variant="error">Bloqué</Badge>
+              )}
+              {notifEnabled && notifPermission === "granted" && (
+                <Badge variant="success">Actif</Badge>
+              )}
             </div>
           </CardContent>
         </Card>

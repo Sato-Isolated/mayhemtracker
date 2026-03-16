@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { debugLog } from "@/lib/debug-log";
+import { sendNotification } from "@/lib/notifications";
 import type {
   AppSetting,
   AugmentStats,
@@ -103,6 +104,11 @@ export function TrackerDataProvider({ children }: { children: ReactNode }) {
   const selectedMatchIdRef = useRef<string | null>(null);
   const requestedMatchDetailIdRef = useRef<string | null>(null);
   const matchPageRef = useRef(1);
+  const settingsRef = useRef<AppSetting[]>([]);
+
+  useEffect(() => {
+    settingsRef.current = settings.data ?? [];
+  }, [settings.data]);
 
   useEffect(() => {
     selectedMatchIdRef.current = selectedMatchId;
@@ -239,7 +245,11 @@ export function TrackerDataProvider({ children }: { children: ReactNode }) {
     debugLog.info("tracker-data", "syncMatches:start");
     const payload = await api.syncMatches();
     debugLog.info("tracker-data", "syncMatches:success", payload.result);
-    toast.success(`Sync matchs: ${payload.result.stored} nouveaux, ${payload.result.updated} mis à jour`);
+    const syncMsg = `Sync matchs: ${payload.result.stored} nouveaux, ${payload.result.updated} mis à jour`;
+    toast.success(syncMsg);
+    if (payload.result.stored > 0 && settingsRef.current.find((s) => s.key === "nativeNotifications")?.value === "true") {
+      sendNotification("Mayhem Tracker", { body: syncMsg });
+    }
     await Promise.all([loadMatches(), refreshAnalytics()]);
     return payload;
   }, [loadMatches, refreshAnalytics]);
@@ -306,7 +316,11 @@ export function TrackerDataProvider({ children }: { children: ReactNode }) {
             const payload = await api.syncMatches();
             if (!active) return;
             debugLog.info("tracker-data", "auto-sync:success", payload.result);
-            toast.success(`Auto-sync: ${payload.result.stored} nouveaux, ${payload.result.updated} mis à jour`);
+            const autoSyncMsg = `Auto-sync: ${payload.result.stored} nouveaux, ${payload.result.updated} mis à jour`;
+            toast.success(autoSyncMsg);
+            if (payload.result.stored > 0 && settingsRef.current.find((s) => s.key === "nativeNotifications")?.value === "true") {
+              sendNotification("Mayhem Tracker", { body: autoSyncMsg });
+            }
             await Promise.all([loadMatches(), refreshAnalytics()]);
           } catch (error) {
             debugLog.error("tracker-data", "auto-sync:error", error);

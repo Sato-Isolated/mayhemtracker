@@ -8,6 +8,7 @@ const defaultSettings = {
   accentMode: "warm",
   density: "comfortable",
   compactSidebar: "false",
+  nativeNotifications: "false",
 };
 
 export class SettingsService {
