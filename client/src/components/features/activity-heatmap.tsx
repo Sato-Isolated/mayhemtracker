@@ -41,9 +41,10 @@ function endOfUtcWeek(value: Date) {
 type ActivityHeatmapProps = {
   items: ActivityDay[];
   variant?: "card" | "embedded";
+  showStats?: boolean;
 };
 
-export function ActivityHeatmap({ items, variant = "card" }: ActivityHeatmapProps) {
+export function ActivityHeatmap({ items, variant = "card", showStats = true }: ActivityHeatmapProps) {
   const debugMode = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("debugHeatmap") === "1";
   const resolvedWeekdayColumnWidth = variant === "embedded" ? 22 : weekdayColumnWidth;
   const resolvedActivityCellGap = variant === "embedded" ? 3 : activityCellGap;
@@ -149,25 +150,27 @@ export function ActivityHeatmap({ items, variant = "card" }: ActivityHeatmapProp
               <div className="mt-[0.28rem] text-[0.84rem] text-muted-foreground max-sm:text-[0.78rem]">Vue annuelle continue, alignée par semaines comme une contribution graph.</div>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-[0.55rem]" data-testid="activity-summary">
-            <div className="col-span-full text-[0.72rem] font-semibold tracking-[0.08em] uppercase text-muted-foreground">12 derniers mois</div>
-            <div className="activity-stat-card grid gap-[0.18rem] px-[0.72rem] py-[0.65rem] rounded-[0.9rem]">
-              <span className="text-[0.64rem] font-semibold tracking-[0.08em] uppercase text-muted-foreground">Matches</span>
-              <strong className="text-[0.96rem] font-semibold leading-[1.1] text-foreground">{calendar.totalMatches}</strong>
+          {showStats ? (
+            <div className="grid grid-cols-2 gap-[0.55rem]" data-testid="activity-summary">
+              <div className="col-span-full text-[0.72rem] font-semibold tracking-[0.08em] uppercase text-muted-foreground">12 derniers mois</div>
+              <div className="activity-stat-card grid gap-[0.18rem] px-[0.72rem] py-[0.65rem] rounded-[0.9rem]">
+                <span className="text-[0.64rem] font-semibold tracking-[0.08em] uppercase text-muted-foreground">Matches</span>
+                <strong className="text-[0.96rem] font-semibold leading-[1.1] text-foreground">{calendar.totalMatches}</strong>
+              </div>
+              <div className="activity-stat-card grid gap-[0.18rem] px-[0.72rem] py-[0.65rem] rounded-[0.9rem]">
+                <span className="text-[0.64rem] font-semibold tracking-[0.08em] uppercase text-muted-foreground">Active days</span>
+                <strong className="text-[0.96rem] font-semibold leading-[1.1] text-foreground">{calendar.activeDays}</strong>
+              </div>
+              <div className="activity-stat-card grid gap-[0.18rem] px-[0.72rem] py-[0.65rem] rounded-[0.9rem]">
+                <span className="text-[0.64rem] font-semibold tracking-[0.08em] uppercase text-muted-foreground">Peak day</span>
+                <strong className="text-[0.96rem] font-semibold leading-[1.1] text-foreground">{calendar.hottestDay.label}</strong>
+              </div>
+              <div className="activity-stat-card grid gap-[0.18rem] px-[0.72rem] py-[0.65rem] rounded-[0.9rem]">
+                <span className="text-[0.64rem] font-semibold tracking-[0.08em] uppercase text-muted-foreground">Peak volume</span>
+                <strong className="text-[0.96rem] font-semibold leading-[1.1] text-foreground">{calendar.hottestDay.matches}</strong>
+              </div>
             </div>
-            <div className="activity-stat-card grid gap-[0.18rem] px-[0.72rem] py-[0.65rem] rounded-[0.9rem]">
-              <span className="text-[0.64rem] font-semibold tracking-[0.08em] uppercase text-muted-foreground">Active days</span>
-              <strong className="text-[0.96rem] font-semibold leading-[1.1] text-foreground">{calendar.activeDays}</strong>
-            </div>
-            <div className="activity-stat-card grid gap-[0.18rem] px-[0.72rem] py-[0.65rem] rounded-[0.9rem]">
-              <span className="text-[0.64rem] font-semibold tracking-[0.08em] uppercase text-muted-foreground">Peak day</span>
-              <strong className="text-[0.96rem] font-semibold leading-[1.1] text-foreground">{calendar.hottestDay.label}</strong>
-            </div>
-            <div className="activity-stat-card grid gap-[0.18rem] px-[0.72rem] py-[0.65rem] rounded-[0.9rem]">
-              <span className="text-[0.64rem] font-semibold tracking-[0.08em] uppercase text-muted-foreground">Peak volume</span>
-              <strong className="text-[0.96rem] font-semibold leading-[1.1] text-foreground">{calendar.hottestDay.matches}</strong>
-            </div>
-          </div>
+          ) : null}
 
           {debugMode ? (
             <div className="flex flex-wrap gap-[0.45rem] text-[0.72rem] text-muted-foreground" data-testid="activity-debug-panel">
