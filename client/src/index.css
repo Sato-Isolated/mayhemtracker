@@ -380,40 +380,6 @@ html[data-density="compact"] {
   overflow: hidden;
 }
 
-
-.match-scoreboard-columns,
-.match-scoreboard-row {
-  display: grid;
-  grid-template-columns: minmax(220px, 1.8fr) minmax(90px, 0.6fr) minmax(220px, 1.5fr) minmax(220px, 1.5fr) minmax(72px, 0.45fr) minmax(72px, 0.45fr);
-  gap: 0.75rem;
-  align-items: center;
-}
-
-.match-scoreboard-row {
-  border-top: 1px solid color-mix(in oklch, var(--border) 72%, transparent);
-}
-
-.match-scoreboard-bar {
-  height: 1.25rem;
-  overflow: hidden;
-  border-radius: 999px;
-  background: color-mix(in oklch, var(--muted) 70%, transparent);
-}
-
-.match-scoreboard-bar > span {
-  display: block;
-  height: 100%;
-  border-radius: 999px;
-}
-
-.match-scoreboard-bar--damage > span {
-  background: linear-gradient(90deg, color-mix(in oklch, var(--destructive) 85%, #f43f5e), color-mix(in oklch, var(--destructive) 60%, #fb7185));
-}
-
-.match-scoreboard-bar--taken > span {
-  background: linear-gradient(90deg, color-mix(in oklch, var(--primary) 80%, #0ea5e9), color-mix(in oklch, var(--primary) 58%, #38bdf8));
-}
-
 .activity-heatmap-panel {
   border: 1px solid var(--border-ui);
   border-radius: 1.25rem;

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import type { MatchDetail, MatchListItem, StaticDataEntry } from "@/lib/types";
 import { AugmentIcon } from "@/components/features/augment-icon";
 import { ItemIcon } from "@/components/features/item-icon";
-import { MatchScoreboard, type ScoreboardTeam } from "@/components/features/match-scoreboard";
+import { MatchPlayerScoreboard, type ScoreboardTeam } from "@/components/features/match-player-scoreboard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Surface } from "@/components/ui/surface";
@@ -131,7 +131,7 @@ export function MatchHistoryRow({
                     </Surface>
                   </div>
 
-                  <MatchScoreboard
+                  <MatchPlayerScoreboard
                     teams={scoreTeams}
                     trackedIdentifier={{
                       puuid: trackedParticipant?.puuid,
@@ -141,7 +141,6 @@ export function MatchHistoryRow({
                     champions={champions}
                     items={items}
                     augments={augments}
-                    maxAugments={10}
                   />
                 </div>
               ) : (

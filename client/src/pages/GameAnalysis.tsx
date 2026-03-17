@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { MatchScoreboard, type ScoreboardTeam } from "@/components/features/match-scoreboard";
+import { MatchPlayerScoreboard, type ScoreboardTeam } from "@/components/features/match-player-scoreboard";
 import { PageIntro } from "@/components/features/page-intro";
 import { TeamSnapshotCard } from "@/components/features/team-snapshot-card";
 import { Badge } from "@/components/ui/badge";
@@ -87,7 +87,7 @@ export function GameAnalysisPage() {
                 <Badge variant="outline">Map {match.mapId ?? "-"}</Badge>
                 {match.gameModeMutators.map((mutator) => <Badge key={mutator} variant="secondary">{mutator}</Badge>)}
               </div>
-              <MatchScoreboard
+              <MatchPlayerScoreboard
                 teams={scoreboardTeams}
                 trackedIdentifier={{ teamId: playerTeamId }}
                 champions={champions}

@@ -1,11 +1,11 @@
 import { ActivityHeatmap } from "@/components/features/activity-heatmap";
-import { RecentMatchesList } from "@/components/features/recent-matches-list";
+import { RecentMatchFeed } from "@/components/features/recent-match-feed";
 import { StatsOverview } from "@/components/features/stats-overview";
 import { Button } from "@/components/ui/button";
 import { useTrackerAppData, useTrackerMatchData } from "@/state/tracker-data";
 
 export function DashboardPage() {
-  const { dashboard, champions, loadDashboard } = useTrackerAppData();
+  const { dashboard, champions, items, augments, loadDashboard } = useTrackerAppData();
   const { syncMatches } = useTrackerMatchData();
 
   if (!dashboard.data) {
@@ -39,9 +39,11 @@ export function DashboardPage() {
 
       <ActivityHeatmap items={activity} variant="embedded" showStats={false} />
 
-      <RecentMatchesList
+      <RecentMatchFeed
         matches={recentMatches}
         champions={champions ?? []}
+        items={items ?? []}
+        augments={augments ?? []}
       />
     </div>
   );
