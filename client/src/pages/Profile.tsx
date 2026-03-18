@@ -32,21 +32,21 @@ export function ProfilePage() {
         <MetricTile label="Best streak" value={bestWinStreak} hint={`Worst skid ${bestLossStreak}`} icon={<Trophy className="h-4 w-4 text-primary" />} />
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Performance records</CardTitle>
-          <CardDescription>Premier socle de la future vue profil détaillée.</CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+      <section className="space-y-3">
+        <div className="px-1">
+          <h2 className="text-lg font-semibold tracking-tight text-foreground">Performance records</h2>
+          <p className="text-sm text-muted-foreground">Premier socle de la future vue profil détaillée.</p>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
           <MetricTile label="Highest kills" value={records.highestKills} />
           <MetricTile label="Highest assists" value={records.highestAssists} />
           <MetricTile label="Highest damage" value={records.highestDamage.toLocaleString("fr-FR")} />
           <MetricTile label="Highest gold" value={records.highestGold.toLocaleString("fr-FR")} />
           <MetricTile label="Pentakills" value={records.pentakills} />
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
-      <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
+      <div className="grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
         <Card>
           <CardHeader>
             <CardTitle>Preferred pool</CardTitle>
@@ -55,8 +55,21 @@ export function ProfilePage() {
           <CardContent className="space-y-3">
             {topPool.map((entry) => (
               <Surface key={String(entry.championId ?? entry.championName)} className="rounded-[1rem] p-4">
-                <div className="font-medium">{entry.championName ?? `Champion ${entry.championId ?? "-"}`}</div>
-                <div className="mt-1 text-sm text-muted-foreground">{entry.matches} games · {entry.winRate}% WR · {entry.averageKda} KDA</div>
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="font-medium">{entry.championName ?? `Champion ${entry.championId ?? "-"}`}</div>
+                    <div className="mt-1 text-sm text-muted-foreground">{entry.matches} games · {entry.averageKda} KDA</div>
+                  </div>
+                  <div className="shrink-0 text-right">
+                    <div className="text-sm font-semibold text-foreground">{entry.winRate}%</div>
+                    <div className="mt-1.5 h-1.5 w-16 overflow-hidden rounded-full bg-muted">
+                      <div
+                        className="h-full rounded-full bg-[linear-gradient(90deg,color-mix(in_oklch,var(--accent)_58%,var(--surface-2)),color-mix(in_oklch,var(--primary)_76%,var(--surface-1)))]"
+                        style={{ width: `${entry.winRate}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
               </Surface>
             ))}
           </CardContent>
@@ -70,11 +83,18 @@ export function ProfilePage() {
           <CardContent>
             <div className="grid grid-cols-7 gap-3 lg:grid-cols-14">
               {trend.map((item) => (
-                <div key={item.key} className="space-y-2 text-center">
-                  <div className="bg-[color-mix(in_oklch,var(--card)_74%,var(--surface-3))] mx-auto flex h-24 w-full items-end rounded-[0.9rem] border border-border/70 p-2">
-                    <div className="w-full rounded-full bg-primary/70" style={{ height: `${Math.max(item.winRate, item.matches ? 14 : 4)}%` }} />
+                <div key={item.key} className="flex min-w-0 flex-col items-center gap-2">
+                  <div className="bg-[color-mix(in_oklch,var(--card)_74%,var(--surface-3))] flex h-32 w-full items-end justify-center rounded-[1rem] border border-border/70 px-2 pb-2">
+                    <div
+                      className="w-full rounded-full bg-[linear-gradient(180deg,color-mix(in_oklch,var(--accent)_58%,var(--surface-2)),color-mix(in_oklch,var(--primary)_76%,var(--surface-1)))]"
+                      style={{ height: `${Math.max(item.winRate, item.matches ? 14 : 4)}%` }}
+                      title={`${item.label} · ${item.matches} game(s) · ${item.winRate}% WR`}
+                    />
                   </div>
-                  <div className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">{item.label}</div>
+                  <div className="text-center">
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">{item.label}</div>
+                    <div className="text-xs text-foreground">{item.winRate}%</div>
+                  </div>
                 </div>
               ))}
             </div>

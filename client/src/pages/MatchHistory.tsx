@@ -10,7 +10,8 @@ import { Surface } from "@/components/ui/surface";
 import { useTrackerAppData, useTrackerMatchData } from "@/state/tracker-data";
 
 export function MatchHistoryPage() {
-  const { champions, items, augments } = useTrackerAppData();
+  const { champions, items, augments, dashboard } = useTrackerAppData();
+  const trackedPuuid = dashboard.data?.overview.trackedPlayerPuuid;
   const {
     matches,
     matchPage,
@@ -23,6 +24,12 @@ export function MatchHistoryPage() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const totalPages = Math.max(Math.ceil((matches.data?.total ?? 0) / matchPageSize), 1);
   const totalMatches = matches.data?.total ?? 0;
+  const pageItems = matches.data?.items ?? [];
+  const pageWins = pageItems.filter((m) => {
+    const tracked = trackedPuuid ? m.participants.find((p) => p.puuid === trackedPuuid) : m.participants[0];
+    return tracked?.win;
+  }).length;
+  const pageWinRate = pageItems.length ? Math.round((pageWins / pageItems.length) * 100) : 0;
 
   async function toggleMatch(matchId: string) {
     if (expandedId === matchId) {
@@ -47,7 +54,7 @@ export function MatchHistoryPage() {
       <section className="items-stretch grid gap-4 md:grid-cols-3" data-testid="match-history-summary-grid">
         <MetricTile label="Stored locally" value={totalMatches} hint="Matches available in the current local queue." />
         <MetricTile label="Current page" value={`${matchPage} / ${totalPages}`} hint="Navigation stays compact while inline detail handles the deep read." />
-        <MetricTile label="Density note" value="Tap a row to inspect the scoreboard." hint="The expanded state keeps the player context and avoids a full page jump." />
+        <MetricTile label="Page win rate" value={`${pageWinRate}%`} hint={`${pageWins}W · ${pageItems.length - pageWins}L on this page`} />
       </section>
 
       <Card data-testid="match-history-card">
@@ -55,22 +62,15 @@ export function MatchHistoryPage() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <CardTitle>Match queue</CardTitle>
-              <CardDescription>{matches.data?.total ?? 0} matchs disponibles localement. Page {matchPage} / {totalPages}.</CardDescription>
+              <CardDescription>{totalMatches} matchs disponibles · page {matchPage}/{totalPages}</CardDescription>
             </div>
-            <div className="rounded-xl border border-border/70 bg-muted/35 px-3 py-2 text-right">
-              <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Window</div>
-              <div className="text-sm font-medium text-foreground">{matchPageSize} rows</div>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={() => void setMatchPage(matchPage - 1)} disabled={matchPage <= 1}>Previous</Button>
+              <Button variant="outline" size="sm" onClick={() => void setMatchPage(matchPage + 1)} disabled={matchPage >= totalPages}>Next</Button>
             </div>
           </div>
         </CardHeader>
         <CardContent>
-          <div className="mb-4 flex items-center justify-between gap-3 max-sm:flex-col max-sm:items-stretch">
-            <div className="text-sm text-muted-foreground">Cliquez une ligne pour afficher le détail inline, ou ouvrez l'analyse complète.</div>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => void setMatchPage(matchPage - 1)} disabled={matchPage <= 1}>Previous</Button>
-              <Button variant="outline" onClick={() => void setMatchPage(matchPage + 1)} disabled={matchPage >= totalPages}>Next</Button>
-            </div>
-          </div>
 
           <Surface asChild variant="subtle" className="h-[74vh] rounded-[1.4rem] p-2">
           <ScrollArea data-testid="match-history-scroll">
@@ -79,6 +79,7 @@ export function MatchHistoryPage() {
                 <MatchHistoryRow
                   key={match.matchId}
                   match={match}
+                  trackedPuuid={trackedPuuid}
                   isExpanded={expandedId === match.matchId}
                   detail={selectedMatchId === match.matchId ? matchDetail.data : undefined}
                   champions={champions}

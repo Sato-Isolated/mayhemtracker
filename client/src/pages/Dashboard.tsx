@@ -1,4 +1,5 @@
 import { ActivityHeatmap } from "@/components/features/activity-heatmap";
+import { PageIntro } from "@/components/features/page-intro";
 import { RecentMatchFeed } from "@/components/features/recent-match-feed";
 import { StatsOverview } from "@/components/features/stats-overview";
 import { Button } from "@/components/ui/button";
@@ -21,19 +22,12 @@ export function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold tracking-tight text-foreground">
-            {overview.trackedPlayerName}
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            {overview.totalMatches} matches tracked
-          </p>
-        </div>
-        <Button size="sm" onClick={() => void syncMatches()}>
-          Synchronize
-        </Button>
-      </div>
+      <PageIntro
+        eyebrow="Operational dashboard"
+        title={overview.trackedPlayerName}
+        description={`${overview.totalMatches} matches tracked`}
+        actions={<Button size="sm" onClick={() => void syncMatches()}>Synchronize</Button>}
+      />
 
       <StatsOverview overview={overview} session={recentSession} streak={streak} />
 

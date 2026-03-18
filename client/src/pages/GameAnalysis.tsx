@@ -12,7 +12,8 @@ import { useTrackerAppData, useTrackerMatchData } from "@/state/tracker-data";
 
 export function GameAnalysisPage() {
   const { matchId } = useParams();
-  const { champions, items, augments } = useTrackerAppData();
+  const { champions, items, augments, dashboard } = useTrackerAppData();
+  const trackedPuuid = dashboard.data?.overview.trackedPlayerPuuid;
   const { matchDetail, loadMatchDetail } = useTrackerMatchData();
 
   useEffect(() => {
@@ -22,7 +23,10 @@ export function GameAnalysisPage() {
   }, [loadMatchDetail, matchDetail.data?.matchId, matchDetail.loading, matchId]);
 
   const match = matchDetail.data;
-  const playerTeamId = match?.participants.find((participant) => participant.win)?.teamId ?? match?.participants[0]?.teamId;
+  const trackedParticipant = trackedPuuid
+    ? match?.participants.find((p) => p.puuid === trackedPuuid)
+    : match?.participants[0];
+  const playerTeamId = trackedParticipant?.teamId;
   const teamSnapshots = match?.teams.map((team) => {
     const members = match.participants.filter((participant) => participant.teamId === team.teamId);
     const totalDamage = members.reduce((sum, participant) => sum + (participant.totalDamageDealt ?? 0), 0);
@@ -89,7 +93,7 @@ export function GameAnalysisPage() {
               </div>
               <MatchPlayerScoreboard
                 teams={scoreboardTeams}
-                trackedIdentifier={{ teamId: playerTeamId }}
+                trackedIdentifier={{ puuid: trackedPuuid, teamId: playerTeamId }}
                 champions={champions}
                 items={items}
                 augments={augments}

@@ -31,7 +31,7 @@ const routeCopy: Record<string, { title: string; description: string }> = {
 
 export function AppShell({ children }: { children: ReactNode }) {
   const location = useLocation();
-  const { dashboard, status, leagueConnected, champions, items, augments, settings, syncStaticData } = useTrackerAppData();
+  const { dashboard, leagueConnected, champions, items, augments, settings, syncStaticData } = useTrackerAppData();
   const { matches, syncMatches } = useTrackerMatchData();
 
   const routeKey = location.pathname.startsWith("/history/") ? "/history" : location.pathname;
@@ -45,15 +45,6 @@ export function AppShell({ children }: { children: ReactNode }) {
       { label: `${augments.length} augments` },
     ],
     [augments.length, champions.length, items.length, matches.data?.total],
-  );
-  const statusChips = useMemo(
-    () => [
-      `Theme ${settingMap.theme ?? "ember"}`,
-      `Win rate ${dashboard.data?.overview.winRate ?? 0}%`,
-      `Avg KDA ${dashboard.data?.overview.averageKda ?? 0}`,
-      `Density ${settingMap.density ?? "comfortable"}`,
-    ],
-    [dashboard.data?.overview.averageKda, dashboard.data?.overview.winRate, settingMap.density, settingMap.theme],
   );
 
   useEffect(() => {
@@ -77,7 +68,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   to={item.to}
                   className={({ isActive }) =>
                     cn(
-                      "app-nav-link flex items-center gap-[0.8rem] relative rounded-[1.2rem] px-[0.95rem] py-[0.85rem] no-underline overflow-hidden group",
+                      "app-nav-link flex items-center gap-3 relative rounded-[1.2rem] px-4 py-3 no-underline overflow-hidden group",
                       isActive && "app-nav-link-active",
                     )
                   }
@@ -109,8 +100,8 @@ export function AppShell({ children }: { children: ReactNode }) {
         </Surface>
       </aside>
 
-      <div className="min-w-0 flex flex-col gap-[0.8rem]">
-        <header className="app-topbar flex flex-wrap items-center justify-between gap-[0.8rem] sticky top-5 z-10 rounded-[1.3rem] px-4 py-[0.9rem] max-[1100px]:static">
+      <div className="min-w-0 flex flex-col gap-4">
+        <header className="app-topbar flex flex-wrap items-center justify-between gap-3 sticky top-5 z-10 rounded-[1.3rem] px-4 py-3.5 max-[1100px]:static">
           <div className="min-w-0">
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">Product surface</p>
             <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
@@ -126,16 +117,6 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Button variant="outline" onClick={() => void syncStaticData()}>Sync static</Button>
           </div>
         </header>
-
-        <div className="flex flex-wrap gap-[0.45rem]">
-          <div className="inline-flex items-center gap-[0.55rem] rounded-full border border-[color-mix(in_oklch,var(--border)_74%,white)] bg-[color-mix(in_oklch,var(--card)_76%,var(--secondary))] px-[0.72rem] py-[0.42rem] text-[0.76rem] text-muted-foreground shadow-[inset_0_1px_0_color-mix(in_oklch,white_45%,transparent)]">
-            <span className="size-2 rounded-full bg-primary shadow-[0_0_0_0.35rem_color-mix(in_oklch,var(--primary)_16%,transparent)]" />
-            Backend {status.data?.ok ? "reachable" : "idle"}
-          </div>
-          {statusChips.map((chip) => (
-            <div key={chip} className="inline-flex items-center gap-[0.55rem] rounded-full border border-[color-mix(in_oklch,var(--border)_74%,white)] bg-[color-mix(in_oklch,var(--card)_76%,var(--secondary))] px-[0.72rem] py-[0.42rem] text-[0.76rem] text-muted-foreground shadow-[inset_0_1px_0_color-mix(in_oklch,white_45%,transparent)]">{chip}</div>
-          ))}
-        </div>
 
         <main className="min-w-0 flex-1">{children}</main>
       </div>

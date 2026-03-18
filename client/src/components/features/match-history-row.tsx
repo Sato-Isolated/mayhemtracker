@@ -11,6 +11,7 @@ import { formatDate, formatDuration, getChampionVisual } from "@/lib/tracker-uti
 
 interface MatchHistoryRowProps {
   match: MatchListItem;
+  trackedPuuid?: string;
   isExpanded: boolean;
   detail?: MatchDetail;
   champions: StaticDataEntry[];
@@ -21,6 +22,7 @@ interface MatchHistoryRowProps {
 
 export function MatchHistoryRow({
   match,
+  trackedPuuid,
   isExpanded,
   detail,
   champions,
@@ -28,7 +30,9 @@ export function MatchHistoryRow({
   augments,
   onToggle,
 }: MatchHistoryRowProps) {
-  const trackedParticipant = match.participants[0];
+  const trackedParticipant = trackedPuuid
+    ? match.participants.find((p) => p.puuid === trackedPuuid) ?? match.participants[0]
+    : match.participants[0];
   const visual = trackedParticipant ? getChampionVisual(trackedParticipant, champions) : { name: "Unknown", icon: "" };
 
   const scoreTeams: ScoreboardTeam[] = detail?.teams.map((team, teamIndex) => {
