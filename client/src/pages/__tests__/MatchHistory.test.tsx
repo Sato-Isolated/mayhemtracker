@@ -12,6 +12,15 @@ vi.mock("@/state/tracker-data", () => ({
     items: [],
     augments: [],
   }),
+  useShellSettings: () => ({
+    settingMap: {
+      showPageDescriptions: "true",
+      stickyToolbars: "true",
+      dataDensity: "dense",
+      density: "comfortable",
+      defaultHistoryView: "split",
+    },
+  }),
   useAnalytics: () => ({
     dashboard: {
       loading: false,
@@ -147,7 +156,7 @@ vi.mock("@/state/tracker-data", () => ({
 }));
 
 describe("MatchHistoryPage", () => {
-  it("expands a stored match into inline detail from the history queue", async () => {
+  it("opens a stored match inside the split review panel", async () => {
     const user = userEvent.setup();
 
     render(
@@ -158,7 +167,8 @@ describe("MatchHistoryPage", () => {
 
     await user.click(screen.getByRole("button", { name: /aatrox/i }));
 
-    expect(await screen.findByText(/inline scoreboard/i)).toBeInTheDocument();
+    expect(await screen.findByText(/selected match/i)).toBeInTheDocument();
+    expect(screen.getByTestId("match-history-detail-panel")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /full analysis/i })).toHaveAttribute("href", "/history/match-1");
   });
 });

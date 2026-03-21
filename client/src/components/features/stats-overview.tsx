@@ -25,11 +25,11 @@ export function StatsOverview({ overview, session, streak }: StatsOverviewProps)
 
   const streakValue =
     streak.type === "neutral"
-      ? "—"
+      ? "-"
       : `${streak.value}${streak.type === "win" ? "W" : "L"}`;
 
   return (
-    <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+    <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
       <MetricTile
         label="Win Rate"
         value={`${overview.winRate}%`}
@@ -51,7 +51,7 @@ export function StatsOverview({ overview, session, streak }: StatsOverviewProps)
       <MetricTile
         label="Tracked"
         value={overview.totalMatches}
-        hint={`${overview.wins}W · ${overview.losses}L`}
+        hint={`${overview.wins}W - ${overview.losses}L`}
         icon={<Target className="h-4 w-4 text-primary" />}
       />
     </div>

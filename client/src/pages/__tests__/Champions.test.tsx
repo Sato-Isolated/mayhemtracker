@@ -34,6 +34,14 @@ vi.mock("@/state/tracker-data", () => ({
     },
     loadChampionStats: vi.fn(),
   }),
+  useShellSettings: () => ({
+    settingMap: {
+      showPageDescriptions: "true",
+      stickyToolbars: "true",
+      dataDensity: "dense",
+      density: "comfortable",
+    },
+  }),
 }));
 
 describe("ChampionsPage", () => {
@@ -42,7 +50,9 @@ describe("ChampionsPage", () => {
 
     render(<ChampionsPage />);
 
-    await user.type(screen.getByLabelText(/rechercher un champion/i), "lux");
+    expect(screen.getByTestId("champions-toolbar")).toHaveAttribute("data-density", "dense");
+
+    await user.type(screen.getByLabelText(/search champion/i), "lux");
 
     expect(screen.getByRole("button", { name: "Lux" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Garen" })).not.toBeInTheDocument();
@@ -50,7 +60,7 @@ describe("ChampionsPage", () => {
     await user.click(screen.getByRole("button", { name: "Lux" }));
 
     expect(await screen.findByRole("dialog")).toBeInTheDocument();
-    expect(screen.getByText(/lecture compacte des signaux principaux/i)).toBeInTheDocument();
+    expect(screen.getByText(/compact signal read/i)).toBeInTheDocument();
     expect(screen.getAllByText("Lux").length).toBeGreaterThan(0);
   });
 });

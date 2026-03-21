@@ -20,8 +20,8 @@
 .app-sidebar {
   border: 1px solid var(--border-ui);
   background:
-    linear-gradient(180deg, color-mix(in oklch, var(--sidebar) 92%, var(--card)), color-mix(in oklch, var(--surface-2) 88%, var(--background)));
-  box-shadow: 0 28px 70px -42px color-mix(in oklch, var(--foreground) 20%, transparent);
+    linear-gradient(180deg, color-mix(in oklch, var(--sidebar) 94%, var(--card)), color-mix(in oklch, var(--surface-2) 92%, var(--background)));
+  box-shadow: 0 24px 54px -42px color-mix(in oklch, var(--foreground) 18%, transparent);
 }
 
 .app-sidebar::before {
@@ -29,16 +29,16 @@
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at top center, color-mix(in oklch, var(--accent) 16%, transparent), transparent 38%),
-    linear-gradient(180deg, color-mix(in oklch, white 10%, transparent), transparent 24%);
+    radial-gradient(circle at top center, color-mix(in oklch, var(--accent) 11%, transparent), transparent 34%),
+    linear-gradient(180deg, color-mix(in oklch, white 8%, transparent), transparent 22%);
   pointer-events: none;
 }
 
 .app-topbar {
   border: 1px solid var(--border-ui);
-  background: color-mix(in oklch, var(--topbar) 84%, var(--card));
-  box-shadow: 0 16px 36px -32px color-mix(in oklch, var(--foreground) 14%, transparent);
-  backdrop-filter: blur(18px);
+  background: color-mix(in oklch, var(--topbar) 88%, var(--card));
+  box-shadow: 0 14px 28px -30px color-mix(in oklch, var(--foreground) 14%, transparent);
+  backdrop-filter: blur(14px);
 }
 
 .app-nav-link {
@@ -56,12 +56,12 @@
 .app-nav-link::after {
   content: "";
   position: absolute;
-  inset: auto auto 0.6rem 0.7rem;
-  width: 2.4rem;
-  height: 2.4rem;
+  inset: auto auto 0.55rem 0.55rem;
+  width: 2rem;
+  height: 2rem;
   border-radius: 999px;
-  background: color-mix(in oklch, var(--accent) 14%, transparent);
-  filter: blur(10px);
+  background: color-mix(in oklch, var(--accent) 10%, transparent);
+  filter: blur(8px);
   opacity: 0;
   transition: opacity 160ms ease;
 }
@@ -72,9 +72,9 @@
 }
 
 .app-nav-link-active {
-  background: linear-gradient(135deg, color-mix(in oklch, var(--accent) 80%, var(--card)), color-mix(in oklch, var(--card) 76%, var(--primary)));
+  background: linear-gradient(135deg, color-mix(in oklch, var(--accent) 76%, var(--card)), color-mix(in oklch, var(--card) 82%, var(--primary)));
   border-color: color-mix(in oklch, var(--primary) 32%, var(--border));
-  box-shadow: 0 18px 38px -34px color-mix(in oklch, var(--primary) 36%, transparent);
+  box-shadow: 0 14px 28px -28px color-mix(in oklch, var(--primary) 30%, transparent);
 }
 
 @media (max-width: 640px) {
@@ -90,4 +90,14 @@
 
 html[data-compact-sidebar="true"] .sidebar-copy {
   display: none;
+}
+
+html[data-data-density="dense"] .app-nav-link {
+  padding-top: 0.55rem;
+  padding-bottom: 0.55rem;
+}
+
+html[data-data-density="dense"] .app-topbar {
+  padding-top: 0.7rem;
+  padding-bottom: 0.7rem;
 }

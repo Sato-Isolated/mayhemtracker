@@ -1,11 +1,11 @@
 import type { ReactNode } from "react";
-import type { MatchParticipantSummary, StaticDataEntry } from "@/lib/types";
 import { AugmentIcon } from "@/components/features/augment-icon";
 import { ItemIcon } from "@/components/features/item-icon";
 import { Badge } from "@/components/ui/badge";
 import { Surface } from "@/components/ui/surface";
 import { formatCompactStat, formatKdaRatio } from "@/lib/stats-utils";
 import { getChampionVisual } from "@/lib/tracker-utils";
+import type { MatchParticipantSummary, StaticDataEntry } from "@/lib/types";
 
 export interface ScoreboardTeam {
   teamId: number;
@@ -64,7 +64,7 @@ function renderItemSlots(participant: MatchParticipantSummary, items: StaticData
 
 function renderAugmentSlots(participant: MatchParticipantSummary, augments: StaticDataEntry[], rowKey: string) {
   if (!participant.augments.length) {
-    return <span className="text-xs text-muted-foreground">Aucun augment</span>;
+    return <span className="text-xs text-muted-foreground">No augment</span>;
   }
 
   return (
@@ -85,7 +85,7 @@ function StatBar({ value, maxValue, tone }: { value?: number; maxValue: number; 
 
   return (
     <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
-      <div className="h-5 overflow-hidden rounded-full bg-[color-mix(in_oklch,var(--muted)_72%,transparent)]">
+      <div className="h-4.5 overflow-hidden rounded-full bg-[color-mix(in_oklch,var(--muted)_72%,transparent)]">
         <span className={`block h-full rounded-full ${barClass}`} style={{ width }} />
       </div>
       <div className="text-xs font-semibold text-foreground">{formatCompactStat(safeValue)}</div>
@@ -109,18 +109,18 @@ export function MatchPlayerScoreboard({
         return (
           <section
             key={team.teamId}
-            className={`overflow-hidden rounded-[1.35rem] border bg-[color-mix(in_oklch,var(--card)_88%,transparent)] ${trackedTeam ? "border-[color-mix(in_oklch,var(--primary)_34%,var(--border))]" : "border-[color-mix(in_oklch,var(--destructive)_22%,var(--border))]"}`}
+            className={`overflow-hidden rounded-[1.05rem] border bg-[color-mix(in_oklch,var(--card)_88%,transparent)] ${trackedTeam ? "border-[color-mix(in_oklch,var(--primary)_34%,var(--border))]" : "border-[color-mix(in_oklch,var(--destructive)_22%,var(--border))]"}`}
           >
-            <div className={`flex flex-wrap items-center justify-between gap-3 px-4 py-3 ${trackedTeam ? "bg-[color-mix(in_oklch,var(--primary)_16%,var(--muted))]" : "bg-[color-mix(in_oklch,var(--destructive)_10%,var(--muted))]"}`}>
+            <div className={`flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 ${trackedTeam ? "bg-[color-mix(in_oklch,var(--primary)_16%,var(--muted))]" : "bg-[color-mix(in_oklch,var(--destructive)_10%,var(--muted))]"}`}>
               <div className="flex items-center gap-3">
                 <div>
                   <div className="text-sm font-semibold text-foreground">{team.label}</div>
-                  <div className="text-xs text-muted-foreground">{team.win ? "Victoire" : "Défaite"}</div>
+                  <div className="text-xs text-muted-foreground">{team.win ? "Victory" : "Defeat"}</div>
                 </div>
-                <Badge variant={team.win ? "success" : "error"}>{team.members.length} joueurs</Badge>
+                <Badge variant={team.win ? "success" : "error"}>{team.members.length} players</Badge>
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                {trackedTeam ? <Badge variant="outline">Côté suivi</Badge> : null}
+                {trackedTeam ? <Badge variant="outline">Tracked side</Badge> : null}
               </div>
             </div>
 
@@ -132,14 +132,14 @@ export function MatchPlayerScoreboard({
                   className="grid gap-3 border-b border-border/60 px-2 pb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground"
                   style={{ gridTemplateColumns: scoreboardGridColumns }}
                 >
-                  <div>Joueur</div>
-                  <div>Sorts</div>
+                  <div>Player</div>
+                  <div>Spells</div>
                   <div>KDA</div>
-                  <div>Dégâts</div>
-                  <div>Subis</div>
-                  <div>Niv.</div>
-                  <div>Or</div>
-                  <div>Soin</div>
+                  <div>Damage</div>
+                  <div>Taken</div>
+                  <div>Lvl.</div>
+                  <div>Gold</div>
+                  <div>Heal</div>
                   <div>Items</div>
                   <div>Augments</div>
                 </div>
@@ -153,15 +153,15 @@ export function MatchPlayerScoreboard({
                     return (
                       <div
                         key={rowKey}
-                        className={`grid gap-3 px-2 py-3 ${tracked ? "bg-[color-mix(in_oklch,var(--accent)_14%,transparent)]" : ""}`}
+                        className={`grid gap-3 px-2 py-2.5 ${tracked ? "bg-[color-mix(in_oklch,var(--accent)_14%,transparent)]" : ""}`}
                         style={{ gridTemplateColumns: scoreboardGridColumns }}
                       >
                         <div className="flex min-w-0 items-center gap-3">
                           {visual.icon ? <img src={visual.icon} alt={visual.name} className="h-12 w-12 rounded-2xl object-cover" /> : <div className="h-12 w-12 rounded-2xl bg-secondary/70" />}
                           <div className="min-w-0 space-y-1">
                             <div className="flex items-center gap-2">
-                              <div className="truncate text-sm font-semibold text-foreground">{participant.summonerName ?? participant.riotIdGameName ?? "Inconnu"}</div>
-                              {tracked ? <Badge variant="secondary" className="px-2 py-0.5 text-[0.58rem]">Suivi</Badge> : null}
+                              <div className="truncate text-sm font-semibold text-foreground">{participant.summonerName ?? participant.riotIdGameName ?? "Unknown"}</div>
+                              {tracked ? <Badge variant="secondary" className="px-2 py-0.5 text-[0.58rem]">Tracked</Badge> : null}
                             </div>
                             <div className="truncate text-xs text-muted-foreground">{visual.name}</div>
                           </div>

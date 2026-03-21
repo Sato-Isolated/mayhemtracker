@@ -7,7 +7,11 @@ const defaultSettings = {
   theme: "ember",
   accentMode: "warm",
   density: "comfortable",
+  dataDensity: "comfortable",
   compactSidebar: "false",
+  showPageDescriptions: "true",
+  stickyToolbars: "true",
+  defaultHistoryView: "split",
   nativeNotifications: "false",
 };
 

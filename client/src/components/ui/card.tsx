@@ -5,7 +5,7 @@ const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElemen
   <div
     ref={ref}
     className={cn(
-      "card-shell glass-panel relative overflow-hidden rounded-[1.4rem] border border-border/70 shadow-[0_20px_60px_-25px_color-mix(in_oklch,var(--foreground)_20%,transparent)]",
+      "card-shell glass-panel relative overflow-hidden rounded-[1.15rem] border border-border/70 shadow-[0_18px_42px_-34px_color-mix(in_oklch,var(--foreground)_18%,transparent)]",
       className,
     )}
     {...props}
@@ -14,7 +14,7 @@ const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElemen
 Card.displayName = "Card";
 
 const CardHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("relative flex flex-col gap-2 p-6", className)} {...props} />
+  <div ref={ref} className={cn("relative flex flex-col gap-2 p-5", className)} {...props} />
 ));
 CardHeader.displayName = "CardHeader";
 
@@ -29,7 +29,7 @@ const CardDescription = React.forwardRef<HTMLParagraphElement, React.HTMLAttribu
 CardDescription.displayName = "CardDescription";
 
 const CardContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("relative px-6 pb-6", className)} {...props} />
+  <div ref={ref} className={cn("relative px-5 pb-5", className)} {...props} />
 ));
 CardContent.displayName = "CardContent";
 

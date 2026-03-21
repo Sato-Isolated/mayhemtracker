@@ -22,28 +22,28 @@ const themeOptions = [
     value: "ember",
     label: "Ember",
     tone: "Light / warm",
-    description: "Palette sable, cuivre et crème, proche de l'identité actuelle.",
+    description: "Warm sand, copper, and cream tones close to the current identity.",
     swatches: ["oklch(0.956 0.026 78)", "oklch(0.56 0.148 32)", "oklch(0.868 0.072 74)"],
   },
   {
     value: "atlas",
     label: "Atlas",
     tone: "Light / analytic",
-    description: "Palette minérale plus froide, utile pour les vues denses et analytiques.",
+    description: "Cooler mineral palette built for dense analytical views.",
     swatches: ["oklch(0.952 0.028 228)", "oklch(0.52 0.162 247)", "oklch(0.856 0.070 216)"],
   },
   {
     value: "midnight",
     label: "Midnight",
     tone: "Dark / dashboard",
-    description: "Fond ardoise profond, textes clairs et accents ambrés très lisibles.",
+    description: "Deep slate base with bright text and warm accents.",
     swatches: ["oklch(0.182 0.032 264)", "oklch(0.74 0.165 72)", "oklch(0.465 0.100 226)"],
   },
   {
     value: "tide",
     label: "Tide",
     tone: "Dark / cool",
-    description: "Bleu pétrole et accents cyan pour une lecture plus technique.",
+    description: "Petrol blue palette with cooler technical accents.",
     swatches: ["oklch(0.172 0.036 208)", "oklch(0.76 0.148 186)", "oklch(0.462 0.110 194)"],
   },
 ] as const;
@@ -53,17 +53,23 @@ export function SettingsPage() {
   const activeTheme = themeOptions.find((option) => option.value === (settingMap.theme ?? "ember")) ?? themeOptions[0];
   const [notifPermission, setNotifPermission] = useState<NotificationPermission | "unsupported">(getNotificationPermission);
   const notifEnabled = settingMap.nativeNotifications === "true";
+  const dataDensity = settingMap.dataDensity ?? "comfortable";
+  const showPageDescriptions = settingMap.showPageDescriptions ?? "true";
+  const stickyToolbars = settingMap.stickyToolbars ?? "true";
+  const defaultHistoryView = settingMap.defaultHistoryView ?? "split";
 
   async function toggleNotifications() {
     if (notifEnabled) {
       await updateSetting("nativeNotifications", "false");
       return;
     }
+
     let permission = getNotificationPermission();
     if (permission !== "granted") {
       permission = await requestNotificationPermission();
       setNotifPermission(permission);
     }
+
     if (permission === "granted") {
       await updateSetting("nativeNotifications", "true");
       setNotifPermission("granted");
@@ -75,7 +81,11 @@ export function SettingsPage() {
       updateSetting("theme", "ember"),
       updateSetting("accentMode", "warm"),
       updateSetting("density", "comfortable"),
+      updateSetting("dataDensity", "comfortable"),
       updateSetting("compactSidebar", "false"),
+      updateSetting("showPageDescriptions", "true"),
+      updateSetting("stickyToolbars", "true"),
+      updateSetting("defaultHistoryView", "split"),
     ]);
   }
 
@@ -84,25 +94,28 @@ export function SettingsPage() {
       <PageIntro
         eyebrow="Settings"
         title="Local interface preferences"
-        description="Les réglages persistants pilotent déjà le shell de la nouvelle interface. Cette surface doit progressivement remplacer les réglages implicites de dev."
+        description="Persistent desktop-first preferences for shell density, toolbars, reading flow, and local visual polish."
         actions={<Button variant="outline" onClick={() => void resetDefaults()}>Reset defaults</Button>}
       />
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         <MetricTile label="Theme" value={<span className="capitalize">{settingMap.theme ?? "ember"}</span>} icon={<Palette className="h-4 w-4" />} />
         <MetricTile label="Accent" value={<span className="capitalize">{settingMap.accentMode ?? "warm"}</span>} icon={<Palette className="h-4 w-4" />} />
         <MetricTile label="Density" value={<span className="capitalize">{settingMap.density ?? "comfortable"}</span>} icon={<SlidersHorizontal className="h-4 w-4" />} />
+        <MetricTile label="Data density" value={<span className="capitalize">{dataDensity}</span>} icon={<SlidersHorizontal className="h-4 w-4" />} />
         <MetricTile label="Sidebar" value={settingMap.compactSidebar === "true" ? "Compact" : "Expanded"} icon={<PanelsTopLeft className="h-4 w-4" />} />
+        <MetricTile label="Descriptions" value={showPageDescriptions === "true" ? "Visible" : "Hidden"} icon={<PanelsTopLeft className="h-4 w-4" />} />
+        <MetricTile label="Toolbars" value={stickyToolbars === "true" ? "Sticky" : "Inline"} icon={<PanelsTopLeft className="h-4 w-4" />} />
+        <MetricTile label="History view" value={<span className="capitalize">{defaultHistoryView}</span>} icon={<MonitorCog className="h-4 w-4" />} />
         <MetricTile label="Notifications" value={notifEnabled ? "On" : "Off"} icon={<Bell className="h-4 w-4" />} />
         <MetricTile label="Scope" value="Stored locally" icon={<MonitorCog className="h-4 w-4" />} />
       </div>
 
-      <div className="grid grid-cols-2 max-[1100px]:grid-cols-1 gap-4">
-        {/* Theme */}
+      <div className="grid grid-cols-2 gap-4 max-[1100px]:grid-cols-1">
         <SettingCard
           title="Theme"
-          description="4 palettes complètes, avec hiérarchie lisible en clair comme en sombre."
-          hint="Chaque thème redéfinit le fond, le texte, les surfaces, les bordures et les états pour éviter les combinaisons peu lisibles."
+          description="Four complete palettes with reliable hierarchy in both light and dark surfaces."
+          hint="Each theme redefines background, text, surfaces, borders, and states so the app stays readable in dense analytical views."
         >
           <div className="grid gap-3 md:grid-cols-2">
             {themeOptions.map((option) => (
@@ -116,55 +129,103 @@ export function SettingsPage() {
           </div>
         </SettingCard>
 
-        {/* Accent mode */}
         <SettingCard
           title="Accent mode"
-          description="Balance entre chaleur visuelle et contraste produit."
-          hint="warm garde l'ADN du thème choisi. contrast renforce l'écart entre primary et accent pour une hiérarchie plus ferme."
+          description="Balance warmth versus strict product contrast."
+          hint="Warm keeps the current tone. Contrast increases the gap between primary and accent for a firmer hierarchy."
         >
           <ToggleGroup
             options={[{ value: "warm", label: "Warm" }, { value: "contrast", label: "Contrast" }]}
             value={(settingMap.accentMode as "warm" | "contrast") ?? "warm"}
-            onValueChange={(v) => void updateSetting("accentMode", v)}
+            onValueChange={(value) => void updateSetting("accentMode", value)}
           />
         </SettingCard>
 
-        {/* Density */}
         <SettingCard
           title="Density"
-          description="Compacte davantage les surfaces et les tableaux."
-          hint="Le mode compact réduit la taille perçue et aide les pages analytiques denses."
+          description="Controls the overall shell spacing."
+          hint="Compact tightens shared shell spacing. This is the broad interface density, not the dedicated data-density mode."
         >
           <ToggleGroup
             options={[{ value: "comfortable", label: "Comfortable" }, { value: "compact", label: "Compact" }]}
             value={(settingMap.density as "comfortable" | "compact") ?? "comfortable"}
-            onValueChange={(v) => void updateSetting("density", v)}
+            onValueChange={(value) => void updateSetting("density", value)}
           />
         </SettingCard>
 
-        {/* Sidebar mode */}
+        <SettingCard
+          title="Data density"
+          description="Applies a denser reading mode to tables, cards, rows, and analytical panels."
+          hint="Use dense when the goal is to fit more information on screen without turning the whole shell tiny."
+        >
+          <ToggleGroup
+            options={[
+              { value: "comfortable", label: "Comfortable" },
+              { value: "compact", label: "Compact" },
+              { value: "dense", label: "Dense" },
+            ]}
+            value={dataDensity as "comfortable" | "compact" | "dense"}
+            onValueChange={(value) => void updateSetting("dataDensity", value)}
+          />
+        </SettingCard>
+
         <SettingCard
           title="Sidebar mode"
-          description="Réduit la quantité de texte dans la navigation persistante."
-          hint="Le mode compact enlève les lignes secondaires dans la navigation pour rapprocher le shell d'un comportement desktop dense."
+          description="Reduces the amount of persistent navigation copy."
+          hint="Compact hides secondary lines in the navigation so the shell behaves more like a dense local utility."
         >
           <ToggleGroup
             options={[{ value: "false", label: "Expanded" }, { value: "true", label: "Compact" }]}
             value={(settingMap.compactSidebar ?? "false") as "false" | "true"}
-            onValueChange={(v) => void updateSetting("compactSidebar", v)}
+            onValueChange={(value) => void updateSetting("compactSidebar", value)}
           />
         </SettingCard>
 
-        {/* Notifications */}
+        <SettingCard
+          title="Page descriptions"
+          description="Shows or hides secondary copy in page headers and shell surfaces."
+          hint="Hide descriptions when you want a tighter, more tool-like surface with stronger focus on data."
+        >
+          <ToggleGroup
+            options={[{ value: "true", label: "Visible" }, { value: "false", label: "Hidden" }]}
+            value={showPageDescriptions as "true" | "false"}
+            onValueChange={(value) => void updateSetting("showPageDescriptions", value)}
+          />
+        </SettingCard>
+
+        <SettingCard
+          title="Toolbar behavior"
+          description="Controls whether analytical toolbars stay pinned while you scroll."
+          hint="Sticky is recommended for dense desktop reading because filters and actions remain available without extra travel."
+        >
+          <ToggleGroup
+            options={[{ value: "true", label: "Sticky" }, { value: "false", label: "Inline" }]}
+            value={stickyToolbars as "true" | "false"}
+            onValueChange={(value) => void updateSetting("stickyToolbars", value)}
+          />
+        </SettingCard>
+
+        <SettingCard
+          title="History default view"
+          description="Chooses the default reading flow for the stored match archive."
+          hint="Split keeps the list on the left and the selected match on the right. Inline expands rows directly in the queue."
+        >
+          <ToggleGroup
+            options={[{ value: "split", label: "Split" }, { value: "inline", label: "Inline" }]}
+            value={defaultHistoryView as "split" | "inline"}
+            onValueChange={(value) => void updateSetting("defaultHistoryView", value)}
+          />
+        </SettingCard>
+
         <SettingCard
           title={<span className="flex items-center gap-2"><Bell className="h-4 w-4" /> Notifications</span>}
-          description="Notifications Windows natives lors des syncs de matchs."
+          description="Native Windows notifications for match sync activity."
           hint={
             notifPermission === "unsupported"
-              ? "Votre navigateur ne supporte pas les notifications natives."
+              ? "Your browser does not support native notifications."
               : notifPermission === "denied"
-                ? "Les notifications ont été bloquées par le navigateur. Réactivez-les dans les paramètres du site."
-                : "Recevez une notification Windows quand un sync (auto ou manuel) détecte de nouveaux matchs."
+                ? "Notifications were blocked by the browser. Re-enable them in the site permissions."
+                : "Receive a Windows notification when auto-sync or manual sync finds new matches."
           }
         >
           <div className="flex items-center gap-3">
@@ -173,19 +234,18 @@ export function SettingsPage() {
               disabled={notifPermission === "unsupported" || notifPermission === "denied"}
               onClick={() => void toggleNotifications()}
             >
-              {notifEnabled ? "Activées" : "Désactivées"}
+              {notifEnabled ? "Enabled" : "Disabled"}
             </Button>
-            {notifPermission === "denied" && <Badge variant="error">Bloqué</Badge>}
-            {notifEnabled && notifPermission === "granted" && <Badge variant="success">Actif</Badge>}
+            {notifPermission === "denied" && <Badge variant="error">Blocked</Badge>}
+            {notifEnabled && notifPermission === "granted" && <Badge variant="success">Active</Badge>}
           </div>
         </SettingCard>
       </div>
 
-      {/* Preview */}
       <Card>
         <CardHeader>
           <CardTitle>Preview</CardTitle>
-          <CardDescription>Lecture rapide de l'état d'interface actuellement piloté par les préférences locales.</CardDescription>
+          <CardDescription>Quick read of the current interface state driven by local desktop preferences.</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
           <div className="relative min-h-[220px] overflow-hidden rounded-[1rem] border border-[color-mix(in_oklch,var(--border)_80%,transparent)] bg-[linear-gradient(160deg,color-mix(in_oklch,var(--topbar)_84%,var(--card)),color-mix(in_oklch,var(--page-end)_86%,var(--background)))] p-4" data-testid="theme-preview-board">
@@ -199,7 +259,7 @@ export function SettingsPage() {
                     <span>{settingMap.theme ?? "ember"} / {settingMap.accentMode ?? "warm"}</span>
                   </div>
                 </div>
-                <div className="items-start mt-4 flex flex-wrap gap-2">
+                <div className="mt-4 flex flex-wrap items-start gap-2">
                   <span className="inline-flex items-center gap-[0.55rem] rounded-full border border-border/60 bg-[color-mix(in_oklch,var(--card)_68%,var(--primary))] px-[0.72rem] py-[0.42rem] text-[0.76rem] text-primary-foreground shadow-[inset_0_1px_0_color-mix(in_oklch,white_45%,transparent)]">Primary</span>
                   <span className="inline-flex items-center gap-[0.55rem] rounded-full border border-border/60 bg-[color-mix(in_oklch,var(--card)_76%,var(--secondary))] px-[0.72rem] py-[0.42rem] text-[0.76rem] text-muted-foreground shadow-[inset_0_1px_0_color-mix(in_oklch,white_45%,transparent)]">Muted</span>
                   <span className="inline-flex items-center gap-[0.55rem] rounded-full border border-border/60 bg-[color-mix(in_oklch,var(--card)_76%,var(--secondary))] px-[0.72rem] py-[0.42rem] text-[0.76rem] text-muted-foreground shadow-[inset_0_1px_0_color-mix(in_oklch,white_45%,transparent)]">Surface</span>
@@ -215,7 +275,7 @@ export function SettingsPage() {
                     </div>
                     <span className="inline-flex h-9 w-9 rounded-full bg-primary/18 ring-1 ring-border/60" />
                   </div>
-                  <div className="mt-3 text-sm text-muted-foreground">Le texte principal, les surfaces et les accents restent hiérarchisés même si le fond devient sombre.</div>
+                  <div className="mt-3 text-sm text-muted-foreground">Primary text, surfaces, and accents stay separated even when the theme turns dark.</div>
                 </Surface>
                 <div className="grid grid-cols-3 gap-2">
                   <div className="rounded-[0.9rem] border border-border/70 bg-background/80 p-3">
@@ -238,7 +298,7 @@ export function SettingsPage() {
           <div className="grid gap-4 sm:grid-cols-3 xl:grid-cols-1">
             <InfoBox>
               <SectionLabel>Information density</SectionLabel>
-              <div className="mt-3 text-sm text-foreground">Current mode: <strong>{settingMap.density ?? "comfortable"}</strong></div>
+              <div className="mt-3 text-sm text-foreground">Shell: <strong>{settingMap.density ?? "comfortable"}</strong> / Data: <strong>{dataDensity}</strong></div>
             </InfoBox>
             <InfoBox>
               <SectionLabel>Navigation mode</SectionLabel>
@@ -248,15 +308,18 @@ export function SettingsPage() {
               <SectionLabel>Theme intent</SectionLabel>
               <div className="mt-3 text-sm text-foreground">{activeTheme.description}</div>
             </InfoBox>
+            <InfoBox>
+              <SectionLabel>Reading flow</SectionLabel>
+              <div className="mt-3 text-sm text-foreground">{defaultHistoryView === "split" ? "History opens in split review by default." : "History expands rows inline by default."}</div>
+            </InfoBox>
           </div>
         </CardContent>
       </Card>
 
-      {/* Theme diagnostics */}
       <Card data-testid="theme-diagnostics-card">
         <CardHeader>
           <CardTitle>Theme diagnostics</CardTitle>
-          <CardDescription>Lecture en conditions réelles des composants sensibles au contraste avant de quitter la page.</CardDescription>
+          <CardDescription>Quick contrast checks for the most sensitive components before leaving the page.</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
           <div className="space-y-4">
@@ -279,12 +342,12 @@ export function SettingsPage() {
 
             <Alert>
               <AlertTitle>Hierarchy check</AlertTitle>
-              <AlertDescription>Le texte secondaire, les bordures et les surfaces doivent rester distincts sans écraser l'action primaire.</AlertDescription>
+              <AlertDescription>Muted text, borders, and surfaces should stay distinct without competing with primary actions.</AlertDescription>
             </Alert>
 
             <Alert variant="destructive">
               <AlertTitle>Critical state</AlertTitle>
-              <AlertDescription>La couleur destructive doit rester visible sans casser la lisibilité globale du thème.</AlertDescription>
+              <AlertDescription>Destructive color must remain visible without breaking the global readability of the theme.</AlertDescription>
             </Alert>
           </div>
 
@@ -328,12 +391,12 @@ export function SettingsPage() {
                 <Surface className="rounded-[1rem] p-4">
                   <SectionLabel>Surface</SectionLabel>
                   <div className="mt-2 text-base font-semibold text-foreground">Foreground remains clear</div>
-                  <div className="mt-2 text-sm text-muted-foreground">Le texte principal et secondaire doivent garder un écart net.</div>
+                  <div className="mt-2 text-sm text-muted-foreground">Primary and secondary copy must keep a clear visual gap.</div>
                 </Surface>
                 <Surface variant="subtle" className="rounded-[1rem] p-4">
                   <SectionLabel>Accent</SectionLabel>
                   <div className="mt-2 text-base font-semibold text-foreground">Accent does not overpower</div>
-                  <div className="mt-2 text-sm text-muted-foreground">Les hovers et surfaces d'accent restent lisibles même en mode sombre.</div>
+                  <div className="mt-2 text-sm text-muted-foreground">Hover and accent surfaces should remain readable even in dark mode.</div>
                 </Surface>
               </div>
             </TabsContent>

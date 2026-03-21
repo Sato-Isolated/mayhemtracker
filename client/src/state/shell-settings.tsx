@@ -55,8 +55,11 @@ export function ShellSettingsProvider({ children }: { children: ReactNode }) {
     const root = document.documentElement;
     root.dataset.theme = settingMap.theme ?? "ember";
     root.dataset.density = settingMap.density ?? "comfortable";
+    root.dataset.dataDensity = settingMap.dataDensity ?? settingMap.density ?? "comfortable";
     root.dataset.accentMode = settingMap.accentMode ?? "warm";
     root.dataset.compactSidebar = settingMap.compactSidebar ?? "false";
+    root.dataset.showPageDescriptions = settingMap.showPageDescriptions ?? "true";
+    root.dataset.stickyToolbars = settingMap.stickyToolbars ?? "true";
   }, [settingMap]);
 
   const value = useMemo(

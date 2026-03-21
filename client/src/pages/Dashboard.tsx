@@ -1,8 +1,10 @@
 import { useEffect } from "react";
 import { ActivityHeatmap } from "@/components/features/activity-heatmap";
 import { PageIntro } from "@/components/features/page-intro";
+import { PageToolbar } from "@/components/features/page-toolbar";
 import { RecentMatchFeed } from "@/components/features/recent-match-feed";
 import { StatsOverview } from "@/components/features/stats-overview";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useAnalytics, useMatches, useStaticData } from "@/state/tracker-data";
 
@@ -20,7 +22,7 @@ export function DashboardPage() {
   if (!dashboard.data) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-20 text-center">
-        <p className="text-sm text-muted-foreground">Loading dashboard data…</p>
+        <p className="text-sm text-muted-foreground">Loading dashboard data...</p>
         <Button onClick={() => void loadDashboard()}>Reload</Button>
       </div>
     );
@@ -33,8 +35,19 @@ export function DashboardPage() {
       <PageIntro
         eyebrow="Operational dashboard"
         title={overview.trackedPlayerName}
-        description={`${overview.totalMatches} matches tracked`}
-        actions={<Button size="sm" onClick={() => void syncMatches()}>Synchronize</Button>}
+        description={`${overview.totalMatches} matches tracked locally with a desktop-first reading flow.`}
+      />
+
+      <PageToolbar
+        testId="dashboard-toolbar"
+        meta={(
+          <>
+            <Badge variant="outline">{overview.totalMatches} tracked</Badge>
+            <Badge variant="secondary">{recentSession.matches} this session</Badge>
+            <Badge variant="outline">{recentMatches.length} recent rows</Badge>
+          </>
+        )}
+        actions={<Button size="sm" onClick={() => void syncMatches()}>Sync now</Button>}
       />
 
       <StatsOverview overview={overview} session={recentSession} streak={streak} />

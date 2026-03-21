@@ -11,7 +11,11 @@ vi.mock("@/state/tracker-data", () => ({
       theme: "ember",
       accentMode: "warm",
       density: "comfortable",
+      dataDensity: "comfortable",
       compactSidebar: "false",
+      showPageDescriptions: "true",
+      stickyToolbars: "true",
+      defaultHistoryView: "split",
       nativeNotifications: "false",
     },
     updateSetting,
@@ -35,10 +39,14 @@ describe("SettingsPage", () => {
 
     await user.click(screen.getByRole("button", { name: /reset defaults/i }));
 
-    await waitFor(() => expect(updateSetting).toHaveBeenCalledTimes(4));
+    await waitFor(() => expect(updateSetting).toHaveBeenCalledTimes(8));
     expect(updateSetting).toHaveBeenCalledWith("theme", "ember");
     expect(updateSetting).toHaveBeenCalledWith("accentMode", "warm");
     expect(updateSetting).toHaveBeenCalledWith("density", "comfortable");
+    expect(updateSetting).toHaveBeenCalledWith("dataDensity", "comfortable");
     expect(updateSetting).toHaveBeenCalledWith("compactSidebar", "false");
+    expect(updateSetting).toHaveBeenCalledWith("showPageDescriptions", "true");
+    expect(updateSetting).toHaveBeenCalledWith("stickyToolbars", "true");
+    expect(updateSetting).toHaveBeenCalledWith("defaultHistoryView", "split");
   });
 });

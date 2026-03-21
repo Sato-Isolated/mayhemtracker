@@ -5,53 +5,60 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Surface } from "@/components/ui/surface";
 import { cn } from "@/lib/utils";
-import { useLeagueConnection, useMatches, useStaticData } from "@/state/tracker-data";
+import { useLeagueConnection, useMatches, useShellSettings, useStaticData } from "@/state/tracker-data";
 import "./app-shell.css";
 
 const navigation = [
-  { to: "/", label: "Dashboard", description: "Vue centrale", icon: Home },
-  { to: "/profile", label: "Profile", description: "Identité locale", icon: LayoutGrid },
-  { to: "/history", label: "History", description: "Liste et analyse", icon: Swords },
-  { to: "/champions", label: "Champions", description: "Perf par pick", icon: BarChart3 },
-  { to: "/augments", label: "Augments", description: "Synergies et taux", icon: Sparkles },
-  { to: "/friends", label: "Friends", description: "Coéquipiers", icon: Users },
-  { to: "/settings", label: "Settings", description: "Préférences locales", icon: Cog },
-  { to: "/debug", label: "Debug", description: "Outils internes", icon: Bug },
+  { to: "/", label: "Dashboard", description: "Operational overview", icon: Home },
+  { to: "/profile", label: "Profile", description: "Local identity", icon: LayoutGrid },
+  { to: "/history", label: "History", description: "Dense review queue", icon: Swords },
+  { to: "/champions", label: "Champions", description: "Pick performance", icon: BarChart3 },
+  { to: "/augments", label: "Augments", description: "Meta signals", icon: Sparkles },
+  { to: "/friends", label: "Friends", description: "Teammate notes", icon: Users },
+  { to: "/settings", label: "Settings", description: "Local preferences", icon: Cog },
+  { to: "/debug", label: "Debug", description: "Internal tools", icon: Bug },
 ];
 
 const routeCopy: Record<string, { title: string; description: string }> = {
-  "/": { title: "Operational dashboard", description: "Pilotage des performances, du sync local et des signaux de session." },
-  "/profile": { title: "Player profile", description: "Résumé du compte suivi, records et dynamique récente." },
-  "/history": { title: "Match history", description: "Navigation dans l’historique local et accès aux analyses de partie." },
-  "/champions": { title: "Champion insights", description: "Lecture des performances par champion et distribution du pool." },
-  "/augments": { title: "Augment insights", description: "Lecture des augments les plus utilisés et les plus rentables." },
-  "/friends": { title: "Teammates", description: "Suivi des partenaires fréquents avec rating local persistant." },
-  "/settings": { title: "Interface settings", description: "Préférences locales pour le shell et la densité d’affichage." },
-  "/debug": { title: "Debug console", description: "Outils de vérification technique et contrats backend." },
+  "/": { title: "Dashboard", description: "Performance, sync, and session signals at a glance." },
+  "/profile": { title: "Profile", description: "Tracked account summary, records, and recent direction." },
+  "/history": { title: "History", description: "Dense queue for browsing and reviewing stored matches." },
+  "/champions": { title: "Champions", description: "Fast read on champion performance and pool shape." },
+  "/augments": { title: "Augments", description: "Compact meta board for value and rarity." },
+  "/friends": { title: "Friends", description: "Frequent teammates with local notes and ratings." },
+  "/settings": { title: "Settings", description: "Desktop-first preferences for the local shell." },
+  "/debug": { title: "Debug", description: "Verification tools and backend checks." },
 };
 
 export function AppShell({ children }: { children: ReactNode }) {
   const location = useLocation();
+  const { settingMap } = useShellSettings();
   const { leagueConnected } = useLeagueConnection();
   const { champions, items, augments, syncStaticData } = useStaticData();
   const { matches, syncMatches } = useMatches();
 
   const routeKey = location.pathname.startsWith("/history/") ? "/history" : location.pathname;
   const currentRoute = routeCopy[routeKey] ?? routeCopy["/"];
+  const showPageDescriptions = settingMap.showPageDescriptions !== "false";
+  const compactSidebar = settingMap.compactSidebar === "true";
+
   const shellBadges = useMemo(
     () => [
-      { label: `${matches.data?.total ?? 0} matches` },
-      { label: `${champions.length} champs` },
-      { label: `${items.length} items` },
-      { label: `${augments.length} augments` },
+      { label: `${matches.data?.total ?? 0} matches`, variant: "outline" as const },
+      { label: `${champions.length + items.length + augments.length} static`, variant: "secondary" as const },
     ],
     [augments.length, champions.length, items.length, matches.data?.total],
   );
 
   return (
-    <div className="grid min-h-screen grid-cols-[290px_minmax(0,1fr)] gap-5 p-5 max-[1100px]:grid-cols-1 max-sm:p-[0.85rem]">
-      <aside className="app-sidebar flex max-h-[calc(100vh-2.5rem)] flex-col justify-between gap-4 sticky top-5 rounded-[2rem] p-4 overflow-y-auto max-[1100px]:min-h-auto max-[1100px]:static">
-        <div className="space-y-4">
+    <div className="grid min-h-screen grid-cols-[254px_minmax(0,1fr)] gap-4 p-4 max-[1100px]:grid-cols-1 max-sm:p-3">
+      <aside className="app-sidebar sticky top-4 flex max-h-[calc(100vh-2rem)] flex-col justify-between gap-4 overflow-y-auto rounded-[1.45rem] p-3.5 max-[1100px]:static max-[1100px]:min-h-auto">
+        <div className="space-y-3">
+          <div className="px-1">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">Mayhem Tracker</div>
+            <div className="mt-1 text-sm font-semibold text-foreground">Local desktop utility</div>
+          </div>
+
           <nav className="app-sidebar-nav space-y-1.5 max-[1100px]:grid max-[1100px]:grid-cols-2 max-[1100px]:gap-[0.65rem] max-sm:grid-cols-1" aria-label="Primary navigation">
             {navigation.map((item) => {
               const Icon = item.icon;
@@ -61,7 +68,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   to={item.to}
                   className={({ isActive }) =>
                     cn(
-                      "app-nav-link flex items-center gap-3 relative rounded-[1.2rem] px-4 py-3 no-underline overflow-hidden group",
+                      "app-nav-link group relative flex items-center gap-3 overflow-hidden rounded-[0.95rem] px-3 py-2.5 no-underline",
                       isActive && "app-nav-link-active",
                     )
                   }
@@ -69,7 +76,9 @@ export function AppShell({ children }: { children: ReactNode }) {
                   <Icon className="h-4 w-4 shrink-0" />
                   <div className="min-w-0 flex-1">
                     <div className="truncate text-sm font-medium">{item.label}</div>
-                    <div className="truncate text-xs text-muted-foreground/90 sidebar-copy">{item.description}</div>
+                    {!compactSidebar && showPageDescriptions ? (
+                      <div className="sidebar-copy truncate text-[11px] text-muted-foreground/90">{item.description}</div>
+                    ) : null}
                   </div>
                 </NavLink>
               );
@@ -77,37 +86,41 @@ export function AppShell({ children }: { children: ReactNode }) {
           </nav>
         </div>
 
-        <Surface className="rounded-[1.2rem] px-3.5 py-3">
+        <Surface className="rounded-[1rem] px-3 py-3">
           <div className="flex items-center gap-2.5">
-            <span className={cn(
-              "size-2 shrink-0 rounded-full",
-              leagueConnected
-                ? "bg-success shadow-[0_0_0_0.3rem_color-mix(in_oklch,var(--success)_20%,transparent)]"
-                : "bg-muted-foreground/40 shadow-[0_0_0_0.3rem_color-mix(in_oklch,var(--muted-foreground)_10%,transparent)]",
-            )} />
+            <span
+              className={cn(
+                "size-2 shrink-0 rounded-full",
+                leagueConnected
+                  ? "bg-success shadow-[0_0_0_0.3rem_color-mix(in_oklch,var(--success)_20%,transparent)]"
+                  : "bg-muted-foreground/40 shadow-[0_0_0_0.3rem_color-mix(in_oklch,var(--muted-foreground)_10%,transparent)]",
+              )}
+            />
             <div className="min-w-0">
               <div className="text-sm font-medium text-foreground">League client</div>
-              <div className="text-xs text-muted-foreground">{leagueConnected ? "Connecté · auto-sync actif" : "Déconnecté"}</div>
+              <div className="text-xs text-muted-foreground">{leagueConnected ? "Online - auto-sync ready" : "Offline - waiting for client"}</div>
             </div>
           </div>
         </Surface>
       </aside>
 
       <div className="min-w-0 flex flex-col gap-4">
-        <header className="app-topbar flex flex-wrap items-center justify-between gap-3 sticky top-5 z-10 rounded-[1.3rem] px-4 py-3.5 max-[1100px]:static">
+        <header className="app-topbar sticky top-4 z-10 flex flex-wrap items-center justify-between gap-3 rounded-[1rem] px-4 py-3 max-[1100px]:static">
           <div className="min-w-0">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">Product surface</p>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">Current surface</div>
             <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
-              <h2 className="text-xl font-semibold tracking-tight text-foreground">{currentRoute.title}</h2>
-              <p className="text-sm text-muted-foreground">{currentRoute.description}</p>
+              <h2 className="text-lg font-semibold tracking-tight text-foreground">{currentRoute.title}</h2>
+              {showPageDescriptions ? <p className="text-sm text-muted-foreground">{currentRoute.description}</p> : null}
             </div>
           </div>
-          <div className="justify-end flex flex-wrap items-center gap-2 max-[1100px]:w-full max-[1100px]:justify-start">
+
+          <div className="flex flex-wrap items-center justify-end gap-2 max-[1100px]:w-full max-[1100px]:justify-start">
+            <Badge variant={leagueConnected ? "success" : "outline"}>{leagueConnected ? "League online" : "League offline"}</Badge>
             {shellBadges.map((entry) => (
-              <Badge key={entry.label} variant="outline">{entry.label}</Badge>
+              <Badge key={entry.label} variant={entry.variant}>{entry.label}</Badge>
             ))}
-            <Button onClick={() => void syncMatches()}>Sync matches</Button>
-            <Button variant="outline" onClick={() => void syncStaticData()}>Sync static</Button>
+            <Button size="sm" onClick={() => void syncMatches()}>Sync matches</Button>
+            <Button size="sm" variant="outline" onClick={() => void syncStaticData()}>Sync static</Button>
           </div>
         </header>
 
