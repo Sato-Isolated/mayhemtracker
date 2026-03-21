@@ -1,16 +1,14 @@
-import { LayoutPanelLeft, ListFilter, Swords } from "lucide-react";
-import { useEffect, useState } from "react";
+import { ChevronLeft, ChevronRight, LayoutPanelLeft, Swords } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { MatchDetailPanel } from "@/components/features/match-detail-panel";
 import { MatchHistoryRow } from "@/components/features/match-history-row";
-import { MetricTile } from "@/components/features/metric-tile";
-import { PageIntro } from "@/components/features/page-intro";
-import { PageToolbar } from "@/components/features/page-toolbar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Surface } from "@/components/ui/surface";
+import { formatDate } from "@/lib/tracker-utils";
 import { useAnalytics, useMatches, useShellSettings, useStaticData } from "@/state/tracker-data";
+import "@/components/features/history-feed.css";
 
 export function MatchHistoryPage() {
   const { champions, items, augments } = useStaticData();
@@ -38,9 +36,59 @@ export function MatchHistoryPage() {
   const pageWinRate = pageItems.length ? Math.round((pageWins / pageItems.length) * 100) : 0;
   const activeMatchId = expandedId ?? selectedMatchId ?? null;
   const activeMatch = pageItems.find((match) => match.matchId === activeMatchId);
+  const activeTrackedParticipant = trackedPuuid && activeMatch
+    ? activeMatch.participants.find((participant) => participant.puuid === trackedPuuid) ?? activeMatch.participants[0]
+    : activeMatch?.participants[0];
+  const latestPageDate = pageItems[0] ? formatDate(pageItems[0].gameCreation ?? pageItems[0].retrievedAt) : "No matches yet";
+
+  const heroMetrics = useMemo(
+    () => [
+      {
+        label: "Archive",
+        value: totalMatches.toLocaleString("fr-FR"),
+        hint: "Stored locally and ready for review.",
+        tone: "accent",
+      },
+      {
+        label: "Current page",
+        value: `${matchPage} / ${totalPages}`,
+        hint: `${pageItems.length} matches in this slice.`,
+        tone: "muted",
+      },
+      {
+        label: "Page win rate",
+        value: `${pageWinRate}%`,
+        hint: `${pageWins} wins on the visible page.`,
+        tone: "success",
+      },
+      {
+        label: "Selection",
+        value: activeTrackedParticipant?.championName ?? "Select a match",
+        hint: activeMatch ? `${activeMatch.gameMode ?? "League"} - ${latestPageDate}` : "Pick a match to open the details.",
+        tone: "muted",
+      },
+    ],
+    [activeMatch, activeTrackedParticipant?.championName, latestPageDate, matchPage, pageItems.length, pageWinRate, pageWins, totalMatches, totalPages],
+  );
+
+  useEffect(() => {
+    if (!splitView || !pageItems.length || activeMatchId) {
+      return;
+    }
+
+    const firstMatchId = pageItems[0]?.matchId;
+    if (!firstMatchId) {
+      return;
+    }
+
+    setExpandedId(firstMatchId);
+    if (selectedMatchId !== firstMatchId) {
+      void loadMatchDetail(firstMatchId);
+    }
+  }, [activeMatchId, loadMatchDetail, pageItems, selectedMatchId, splitView]);
 
   async function toggleMatch(matchId: string) {
-    if (expandedId === matchId) {
+    if (!splitView && expandedId === matchId) {
       setExpandedId(null);
       return;
     }
@@ -52,110 +100,119 @@ export function MatchHistoryPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <PageIntro
-        eyebrow="History"
-        title="Stored matches"
-        description="Dense review queue for the local archive, with split detail on wide screens and fast paging."
-      />
+    <div className="space-y-4">
+      <section className="history-hero px-4 py-3.5 max-sm:px-3.5" data-testid="match-history-summary-grid">
+        <div className="history-hero-grid">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="min-w-0 max-w-3xl">
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant="outline">History</Badge>
+                <Badge variant="secondary">{splitView ? "Split review" : "Inline review"}</Badge>
+              </div>
+              <h1 className="mt-2 text-[1.4rem] font-semibold tracking-[-0.04em] text-foreground md:text-[1.7rem]">
+                Stored matches
+              </h1>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Compact local archive for quick browsing, comparison, and post-game review.
+              </p>
+            </div>
 
-      <section className="grid items-stretch gap-3 md:grid-cols-3" data-testid="match-history-summary-grid">
-        <MetricTile label="Stored locally" value={totalMatches} hint="Matches available in the current local archive." />
-        <MetricTile label="Current page" value={`${matchPage} / ${totalPages}`} hint={splitView ? "Split review keeps queue and detail side by side." : "Inline review stays inside the queue."} />
-        <MetricTile label="Page win rate" value={`${pageWinRate}%`} hint={`${pageWins}W - ${pageItems.length - pageWins}L on this page`} />
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="history-feed-chip inline-flex items-center gap-2 px-3 py-1.5 text-xs text-muted-foreground">
+                {latestPageDate}
+              </span>
+              <span className="history-feed-chip inline-flex items-center gap-2 px-3 py-1.5 text-xs text-muted-foreground">
+                <LayoutPanelLeft className="h-3.5 w-3.5" />
+                {splitView ? "Split" : "Inline"}
+              </span>
+              <Button variant="outline" size="sm" onClick={() => void setMatchPage(matchPage - 1)} disabled={matchPage <= 1}>
+                <ChevronLeft className="h-4 w-4" />
+                Previous
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => void setMatchPage(matchPage + 1)} disabled={matchPage >= totalPages}>
+                Next
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          <div className="history-hero-metrics">
+                {heroMetrics.map((metric) => (
+              <div key={metric.label} className="history-hero-stat" data-tone={metric.tone}>
+                <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">{metric.label}</div>
+                <div className="mt-1 text-lg font-semibold tracking-[-0.03em] text-foreground">{metric.value}</div>
+                <div className="mt-0.5 text-[11px] leading-5 text-muted-foreground">{metric.hint}</div>
+              </div>
+            ))}
+          </div>
+        </div>
       </section>
 
-      <PageToolbar
-        testId="match-history-toolbar"
-        meta={(
-          <>
-            <Badge variant="outline">{totalMatches} stored</Badge>
-            <Badge variant="secondary">{splitView ? "Split review" : "Inline review"}</Badge>
-            <Badge variant="outline">{matchPageSize} rows per page</Badge>
-          </>
-        )}
-        actions={(
-          <>
-            <Button variant="outline" size="sm" onClick={() => void setMatchPage(matchPage - 1)} disabled={matchPage <= 1}>Previous</Button>
-            <Button variant="outline" size="sm" onClick={() => void setMatchPage(matchPage + 1)} disabled={matchPage >= totalPages}>Next</Button>
-          </>
-        )}
-        filters={(
-          <>
-            <span className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-card/70 px-3 py-1.5 text-xs text-muted-foreground">
-              <ListFilter className="h-3.5 w-3.5" />
-              Page {matchPage} of {totalPages}
-            </span>
-            <span className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-card/70 px-3 py-1.5 text-xs text-muted-foreground">
-              <LayoutPanelLeft className="h-3.5 w-3.5" />
-              {splitView ? "Desktop split layout" : "Inline expansion"}
-            </span>
-          </>
-        )}
-      />
-
-      <Card data-testid="match-history-card">
-        <CardHeader>
-          <div>
-            <CardTitle>Match queue</CardTitle>
-            <CardDescription>{totalMatches} stored matches - page {matchPage}/{totalPages}</CardDescription>
+      <div className={splitView ? "grid gap-3 xl:grid-cols-[minmax(0,0.98fr)_minmax(360px,0.82fr)]" : "space-y-3"}>
+        <Surface variant="subtle" className="history-feed-shell min-w-0 overflow-hidden p-2.5" data-testid="match-history-card">
+          <div className="mb-2.5 flex flex-wrap items-center justify-between gap-3 px-1">
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="text-sm font-semibold text-foreground">Match list</div>
+                <Badge variant="outline">{totalMatches} stored</Badge>
+                <Badge variant="outline">{matchPageSize} per page</Badge>
+              </div>
+              <div className="mt-1 text-xs text-muted-foreground">
+                Page {matchPage} of {totalPages}.
+              </div>
+            </div>
+            <div className="text-xs text-muted-foreground">{activeMatch ? "Detail ready" : "Select a match"}</div>
           </div>
-        </CardHeader>
-        <CardContent>
-          <div className={splitView ? "grid gap-4 xl:grid-cols-[minmax(0,0.95fr)_minmax(360px,0.82fr)]" : ""}>
-            <Surface asChild variant="subtle" className="h-[74vh] rounded-[1rem] p-2">
-              <ScrollArea data-testid="match-history-scroll">
-                <div className="space-y-2.5">
-                  {matches.data?.items.length ? matches.data.items.map((match) => (
-                    <MatchHistoryRow
-                      key={match.matchId}
-                      match={match}
-                      trackedPuuid={trackedPuuid}
-                      isExpanded={!splitView && expandedId === match.matchId}
-                      detail={selectedMatchId === match.matchId ? matchDetail.data : undefined}
-                      champions={champions}
-                      items={items}
-                      augments={augments}
-                      onToggle={() => void toggleMatch(match.matchId)}
-                    />
-                  )) : (
-                    <div className="rounded-[1rem] border border-dashed p-8 text-center text-sm text-muted-foreground">
-                      <Swords className="mx-auto mb-3 h-5 w-5" />
-                      No local matches yet. Run a sync to populate the archive.
-                    </div>
-                  )}
-                </div>
-              </ScrollArea>
-            </Surface>
 
-            {splitView ? (
-              <Surface variant="subtle" className="hidden h-[74vh] rounded-[1rem] p-3 xl:flex xl:flex-col" data-testid="match-history-detail-panel">
-                <div className="mb-3 border-b border-border/60 pb-3">
-                  <div className="text-sm font-semibold text-foreground">Review panel</div>
-                  <div className="text-xs text-muted-foreground">Selection stays visible while you browse the queue.</div>
+          <ScrollArea data-testid="match-history-scroll" className="h-[72vh] pr-1">
+            <div className="space-y-2.5">
+              {matches.data?.items.length ? matches.data.items.map((match) => (
+                <MatchHistoryRow
+                  key={match.matchId}
+                  match={match}
+                  trackedPuuid={trackedPuuid}
+                  isExpanded={!splitView && expandedId === match.matchId}
+                  isActive={activeMatchId === match.matchId}
+                  detail={selectedMatchId === match.matchId ? matchDetail.data : undefined}
+                  champions={champions}
+                  items={items}
+                  augments={augments}
+                  onToggle={() => void toggleMatch(match.matchId)}
+                />
+              )) : (
+                <div className="history-spotlight-empty flex min-h-[18rem] flex-col items-center justify-center rounded-[1rem] px-6 text-center text-sm text-muted-foreground">
+                  <Swords className="mb-3 h-5 w-5" />
+                  <div className="text-base font-medium text-foreground">No local matches yet</div>
+                  <div className="mt-2 max-w-sm leading-6">
+                    The archive is still empty. Run a sync to populate the history.
+                  </div>
                 </div>
-                <ScrollArea className="flex-1 pr-2">
-                  {activeMatch ? (
-                    <MatchDetailPanel
-                      match={activeMatch}
-                      detail={selectedMatchId === activeMatch.matchId ? matchDetail.data : undefined}
-                      trackedPuuid={trackedPuuid}
-                      champions={champions}
-                      items={items}
-                      augments={augments}
-                      variant="panel"
-                    />
-                  ) : (
-                    <div className="flex min-h-[18rem] items-center justify-center rounded-[0.95rem] border border-dashed border-border/70 bg-card/60 text-sm text-muted-foreground">
-                      Select a match to inspect it in split view.
-                    </div>
-                  )}
-                </ScrollArea>
-              </Surface>
-            ) : null}
-          </div>
-        </CardContent>
-      </Card>
+              )}
+            </div>
+          </ScrollArea>
+        </Surface>
+
+        {splitView ? (
+          <Surface variant="subtle" className="history-spotlight hidden h-[72vh] min-w-0 flex-col p-2.5 xl:flex" data-testid="match-history-detail-panel">
+            <ScrollArea className="flex-1 pr-2">
+              {activeMatch ? (
+                <MatchDetailPanel
+                  match={activeMatch}
+                  detail={selectedMatchId === activeMatch.matchId ? matchDetail.data : undefined}
+                  trackedPuuid={trackedPuuid}
+                  champions={champions}
+                  items={items}
+                  augments={augments}
+                />
+              ) : (
+                <div className="history-spotlight-empty flex min-h-[18rem] items-center justify-center rounded-[1rem] px-6 text-center text-sm text-muted-foreground">
+                  Select a match to show its details.
+                </div>
+              )}
+            </ScrollArea>
+          </Surface>
+        ) : null}
+      </div>
     </div>
   );
 }

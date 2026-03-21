@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
@@ -167,8 +167,10 @@ describe("MatchHistoryPage", () => {
 
     await user.click(screen.getByRole("button", { name: /aatrox/i }));
 
-    expect(await screen.findByText(/selected match/i)).toBeInTheDocument();
-    expect(screen.getByTestId("match-history-detail-panel")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /full analysis/i })).toHaveAttribute("href", "/history/match-1");
+    const detailPanel = screen.getByTestId("match-history-detail-panel");
+
+    expect(detailPanel).toBeInTheDocument();
+    expect(within(detailPanel).getByText(/team scoreboard/i)).toBeInTheDocument();
+    expect(within(detailPanel).getByRole("link", { name: /full analysis/i })).toHaveAttribute("href", "/history/match-1");
   });
 });
