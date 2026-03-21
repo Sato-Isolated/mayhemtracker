@@ -1,64 +1,98 @@
-import { getDb } from "./index.js";
-import { schemaStatements } from "./schema.js";
+import crypto from "node:crypto";
+import fs from "node:fs";
+import path from "node:path";
+import { migrate } from "drizzle-orm/better-sqlite3/migrator";
+import { paths } from "../config/paths.js";
+import { db, getSqlite } from "./index.js";
 
-function addColumnIfMissing(tableName: string, columnName: string, definition: string) {
-  const db = getDb();
-  const columns = db.prepare(`PRAGMA table_info(${tableName})`).all() as Array<{ name: string }>;
-  if (!columns.some((column) => column.name === columnName)) {
-    db.exec(`ALTER TABLE ${tableName} ADD COLUMN ${columnName} ${definition}`);
+const APP_TABLES = [
+  "app_metadata",
+  "app_settings",
+  "match_participants",
+  "match_teams",
+  "matches",
+  "player_ratings",
+  "static_augments",
+  "static_champions",
+  "static_items",
+  "sync_runs",
+] as const;
+
+type MigrationJournal = {
+  entries: Array<{
+    tag: string;
+    when: number;
+  }>;
+};
+
+function getMigrationsFolder() {
+  return path.join(paths.appRoot, "drizzle");
+}
+
+function listExistingTables() {
+  const sqlite = getSqlite();
+  return new Set(
+    (sqlite.prepare("SELECT name FROM sqlite_master WHERE type = 'table'").all() as Array<{ name: string }>)
+      .map((row) => row.name),
+  );
+}
+
+function readMigrationJournal(migrationsFolder: string) {
+  const journalPath = path.join(migrationsFolder, "meta", "_journal.json");
+  if (!fs.existsSync(journalPath)) {
+    return undefined;
   }
+
+  return JSON.parse(fs.readFileSync(journalPath, "utf8")) as MigrationJournal;
+}
+
+function ensureMigrationBaseline(migrationsFolder: string) {
+  const sqlite = getSqlite();
+  const existingTables = listExistingTables();
+  const hasAppTables = APP_TABLES.some((table) => existingTables.has(table));
+
+  if (!hasAppTables) {
+    return;
+  }
+
+  sqlite.exec(`
+    CREATE TABLE IF NOT EXISTS __drizzle_migrations (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      hash text NOT NULL,
+      created_at numeric
+    )
+  `);
+
+  const appliedCount = sqlite.prepare("SELECT COUNT(*) AS total FROM __drizzle_migrations").get() as { total: number };
+  if (appliedCount.total > 0) {
+    return;
+  }
+
+  const journal = readMigrationJournal(migrationsFolder);
+  if (!journal?.entries.length) {
+    return;
+  }
+
+  const insertMigration = sqlite.prepare(
+    "INSERT INTO __drizzle_migrations (hash, created_at) VALUES (?, ?)",
+  );
+
+  const tx = sqlite.transaction(() => {
+    for (const entry of journal.entries) {
+      const migrationPath = path.join(migrationsFolder, `${entry.tag}.sql`);
+      const query = fs.readFileSync(migrationPath, "utf8");
+      const hash = crypto.createHash("sha256").update(query).digest("hex");
+      insertMigration.run(hash, entry.when);
+    }
+  });
+
+  tx();
 }
 
 export function runMigrations() {
-  const db = getDb();
-  const transaction = db.transaction(() => {
-    for (const statement of schemaStatements) {
-      db.exec(statement);
-    }
-
-    addColumnIfMissing("matches", "game_version", "TEXT");
-    addColumnIfMissing("matches", "game_mode_mutators_json", "TEXT NOT NULL DEFAULT '[]'");
-
-    addColumnIfMissing("match_participants", "participant_id", "INTEGER");
-    addColumnIfMissing("match_participants", "spell1_id", "INTEGER");
-    addColumnIfMissing("match_participants", "spell2_id", "INTEGER");
-    addColumnIfMissing("match_participants", "double_kills", "INTEGER");
-    addColumnIfMissing("match_participants", "triple_kills", "INTEGER");
-    addColumnIfMissing("match_participants", "quadra_kills", "INTEGER");
-    addColumnIfMissing("match_participants", "penta_kills", "INTEGER");
-    addColumnIfMissing("match_participants", "total_damage_dealt", "INTEGER");
-    addColumnIfMissing("match_participants", "total_damage_taken", "INTEGER");
-    addColumnIfMissing("match_participants", "gold_earned", "INTEGER");
-    addColumnIfMissing("match_participants", "total_heal", "INTEGER");
-    addColumnIfMissing("match_participants", "total_cs", "INTEGER");
-    addColumnIfMissing("match_participants", "champion_level", "INTEGER");
-    addColumnIfMissing("match_participants", "vision_score", "INTEGER");
-    addColumnIfMissing("match_participants", "time_cc_others", "INTEGER");
-    addColumnIfMissing("match_participants", "largest_killing_spree", "INTEGER");
-    addColumnIfMissing("match_participants", "damage_to_turrets", "INTEGER");
-
-    addColumnIfMissing("match_teams", "bans_json", "TEXT NOT NULL DEFAULT '[]'");
-
-    addColumnIfMissing("sync_runs", "stored", "INTEGER NOT NULL DEFAULT 0");
-    addColumnIfMissing("sync_runs", "updated", "INTEGER NOT NULL DEFAULT 0");
-    addColumnIfMissing("sync_runs", "skipped", "INTEGER NOT NULL DEFAULT 0");
-    addColumnIfMissing("sync_runs", "error_code", "TEXT");
-    addColumnIfMissing("sync_runs", "error_message", "TEXT");
-
-    db.prepare(
-      `
-        INSERT INTO app_metadata (key, value, updated_at)
-        VALUES (@key, @value, @updated_at)
-        ON CONFLICT(key) DO UPDATE SET
-          value = excluded.value,
-          updated_at = excluded.updated_at
-      `,
-    ).run({
-      key: "schema_version",
-      value: "4",
-      updated_at: Date.now(),
-    });
+  const migrationsFolder = getMigrationsFolder();
+  ensureMigrationBaseline(migrationsFolder);
+  migrate(db, {
+    migrationsFolder,
   });
-
-  transaction();
 }

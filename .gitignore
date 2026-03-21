@@ -9,6 +9,9 @@ build/
 # Runtime data
 .mayhemtracker/
 server/storage/
+.tmp-*/
+*.sqlite-shm
+*.sqlite-wal
 
 # Playwright
 playwright-report/

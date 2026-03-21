@@ -1,155 +1,148 @@
-import { getDb } from "../db/index.js";
+import { asc, eq } from "drizzle-orm";
+import { db } from "../db/index.js";
+import {
+  appMetadata,
+  staticAugments,
+  staticChampions,
+  staticItems,
+  type StaticAugmentRow,
+  type StaticChampionRow,
+  type StaticItemRow,
+} from "../db/schema.js";
 import type {
   AugmentStaticData,
   ChampionStaticData,
   ItemStaticData,
 } from "../types/static-data.js";
 
-const db = getDb();
-
 export class StaticDataRepository {
   upsertChampions(champions: ChampionStaticData[]) {
-    const statement = db.prepare(`
-      INSERT INTO static_champions (id, numeric_id, key, name, title, icon_path, icon_url, version, raw_payload)
-      VALUES (@id, @numericId, @key, @name, @title, @iconPath, @iconUrl, @version, @rawPayload)
-      ON CONFLICT(id) DO UPDATE SET
-        numeric_id = excluded.numeric_id,
-        key = excluded.key,
-        name = excluded.name,
-        title = excluded.title,
-        icon_path = excluded.icon_path,
-        icon_url = excluded.icon_url,
-        version = excluded.version,
-        raw_payload = excluded.raw_payload
-    `);
-
-    const transaction = db.transaction((rows: ChampionStaticData[]) => {
-      for (const row of rows) {
-        statement.run(row);
+    db.transaction((tx) => {
+      for (const row of champions) {
+        tx.insert(staticChampions)
+          .values(row)
+          .onConflictDoUpdate({
+            target: staticChampions.id,
+            set: {
+              numericId: row.numericId,
+              key: row.key,
+              name: row.name,
+              title: row.title ?? null,
+              iconPath: row.iconPath,
+              iconUrl: row.iconUrl,
+              version: row.version,
+              rawPayload: row.rawPayload,
+            },
+          })
+          .run();
       }
     });
-
-    transaction(champions);
   }
 
   upsertItems(items: ItemStaticData[]) {
-    const statement = db.prepare(`
-      INSERT INTO static_items (id, name, description, icon_path, icon_url, version, raw_payload)
-      VALUES (@id, @name, @description, @iconPath, @iconUrl, @version, @rawPayload)
-      ON CONFLICT(id) DO UPDATE SET
-        name = excluded.name,
-        description = excluded.description,
-        icon_path = excluded.icon_path,
-        icon_url = excluded.icon_url,
-        version = excluded.version,
-        raw_payload = excluded.raw_payload
-    `);
-
-    const transaction = db.transaction((rows: ItemStaticData[]) => {
-      for (const row of rows) {
-        statement.run(row);
+    db.transaction((tx) => {
+      for (const row of items) {
+        tx.insert(staticItems)
+          .values(row)
+          .onConflictDoUpdate({
+            target: staticItems.id,
+            set: {
+              name: row.name,
+              description: row.description ?? null,
+              iconPath: row.iconPath,
+              iconUrl: row.iconUrl,
+              version: row.version,
+              rawPayload: row.rawPayload,
+            },
+          })
+          .run();
       }
     });
-
-    transaction(items);
   }
 
   upsertAugments(augments: AugmentStaticData[]) {
-    const statement = db.prepare(`
-      INSERT INTO static_augments (id, name, description, rarity, icon_path, icon_url, version, raw_payload)
-      VALUES (@id, @name, @description, @rarity, @iconPath, @iconUrl, @version, @rawPayload)
-      ON CONFLICT(id) DO UPDATE SET
-        name = excluded.name,
-        description = excluded.description,
-        rarity = excluded.rarity,
-        icon_path = excluded.icon_path,
-        icon_url = excluded.icon_url,
-        version = excluded.version,
-        raw_payload = excluded.raw_payload
-    `);
-
-    const transaction = db.transaction((rows: AugmentStaticData[]) => {
-      for (const row of rows) {
-        statement.run(row);
+    db.transaction((tx) => {
+      for (const row of augments) {
+        tx.insert(staticAugments)
+          .values(row)
+          .onConflictDoUpdate({
+            target: staticAugments.id,
+            set: {
+              name: row.name,
+              description: row.description ?? null,
+              rarity: row.rarity ?? null,
+              iconPath: row.iconPath,
+              iconUrl: row.iconUrl ?? null,
+              version: row.version,
+              rawPayload: row.rawPayload,
+            },
+          })
+          .run();
       }
     });
-
-    transaction(augments);
   }
 
   setMetadata(key: string, value: string) {
-    db.prepare(
-      `
-        INSERT INTO app_metadata (key, value, updated_at)
-        VALUES (?, ?, ?)
-        ON CONFLICT(key) DO UPDATE SET
-          value = excluded.value,
-          updated_at = excluded.updated_at
-      `,
-    ).run(key, value, Date.now());
+    const updatedAt = Date.now();
+    db.insert(appMetadata)
+      .values({ key, value, updatedAt })
+      .onConflictDoUpdate({
+        target: appMetadata.key,
+        set: {
+          value,
+          updatedAt,
+        },
+      })
+      .run();
   }
 
   getMetadata(key: string) {
-    return db.prepare(`SELECT value FROM app_metadata WHERE key = ?`).get(key) as
-      | { value: string }
-      | undefined;
+    return db.select({ value: appMetadata.value })
+      .from(appMetadata)
+      .where(eq(appMetadata.key, key))
+      .get();
   }
 
   listChampions() {
-    return db.prepare(`SELECT * FROM static_champions ORDER BY name ASC`).all() as Array<{
-      id: string;
-      numeric_id: number;
-      key: string;
-      name: string;
-      title?: string;
-      icon_path: string;
-      icon_url: string;
-      version: string;
-      raw_payload: string;
-    }>;
+    return db.select()
+      .from(staticChampions)
+      .orderBy(asc(staticChampions.name))
+      .all() as StaticChampionRow[];
   }
 
   listItems() {
-    return db.prepare(`SELECT * FROM static_items ORDER BY name ASC`).all() as Array<{
-      id: string;
-      name: string;
-      description?: string;
-      icon_path: string;
-      icon_url: string;
-      version: string;
-      raw_payload: string;
-    }>;
+    return db.select()
+      .from(staticItems)
+      .orderBy(asc(staticItems.name))
+      .all() as StaticItemRow[];
   }
 
   listAugments() {
-    return db.prepare(`SELECT * FROM static_augments ORDER BY name ASC`).all() as Array<{
-      id: string;
-      name: string;
-      description?: string;
-      rarity?: string;
-      icon_path: string;
-      icon_url?: string;
-      version: string;
-      raw_payload: string;
-    }>;
+    return db.select()
+      .from(staticAugments)
+      .orderBy(asc(staticAugments.name))
+      .all() as StaticAugmentRow[];
   }
 
   getChampionByNumericId(numericId: number) {
-    return db.prepare(`SELECT * FROM static_champions WHERE numeric_id = ?`).get(numericId) as
-      | Record<string, unknown>
-      | undefined;
+    return db.select()
+      .from(staticChampions)
+      .where(eq(staticChampions.numericId, numericId))
+      .get();
   }
 
   getItemById(id: string) {
-    return db.prepare(`SELECT * FROM static_items WHERE id = ?`).get(id) as
-      | Record<string, unknown>
-      | undefined;
+    return db.select()
+      .from(staticItems)
+      .where(eq(staticItems.id, id))
+      .get();
   }
 
   getAugmentById(id: string) {
-    return db.prepare(`SELECT * FROM static_augments WHERE id = ?`).get(id) as
-      | Record<string, unknown>
-      | undefined;
+    return db.select()
+      .from(staticAugments)
+      .where(eq(staticAugments.id, id))
+      .get();
   }
 }
 

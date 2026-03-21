@@ -1,163 +1,166 @@
-export const schemaStatements = [
-  `
-    CREATE TABLE IF NOT EXISTS app_metadata (
-      key TEXT PRIMARY KEY,
-      value TEXT NOT NULL,
-      updated_at INTEGER NOT NULL
-    )
-  `,
-  `
-    CREATE TABLE IF NOT EXISTS matches (
-      match_id TEXT PRIMARY KEY,
-      queue_id INTEGER,
-      game_mode TEXT,
-      game_version TEXT,
-      game_mode_mutators_json TEXT NOT NULL,
-      map_id INTEGER,
-      game_creation INTEGER,
-      game_start_timestamp INTEGER,
-      game_end_timestamp INTEGER,
-      game_duration INTEGER,
-      retrieved_at INTEGER NOT NULL,
-      summary TEXT NOT NULL,
-      raw_payload TEXT NOT NULL
-    )
-  `,
-  `
-    CREATE TABLE IF NOT EXISTS match_participants (
-      match_id TEXT NOT NULL,
-      participant_index INTEGER NOT NULL,
-      participant_id INTEGER,
-      puuid TEXT,
-      riot_id_game_name TEXT,
-      riot_id_tagline TEXT,
-      summoner_name TEXT,
-      team_id INTEGER,
-      champion_id INTEGER,
-      champion_name TEXT,
-      spell1_id INTEGER,
-      spell2_id INTEGER,
-      kills INTEGER,
-      deaths INTEGER,
-      assists INTEGER,
-      double_kills INTEGER,
-      triple_kills INTEGER,
-      quadra_kills INTEGER,
-      penta_kills INTEGER,
-      total_damage_dealt INTEGER,
-      total_damage_taken INTEGER,
-      gold_earned INTEGER,
-      total_heal INTEGER,
-      total_cs INTEGER,
-      champion_level INTEGER,
-      vision_score INTEGER,
-      time_cc_others INTEGER,
-      largest_killing_spree INTEGER,
-      damage_to_turrets INTEGER,
-      win INTEGER,
-      placement INTEGER,
-      items_json TEXT NOT NULL,
-      augments_json TEXT NOT NULL,
-      perks_json TEXT NOT NULL,
-      stats_json TEXT NOT NULL,
-      raw_payload TEXT NOT NULL,
-      PRIMARY KEY (match_id, participant_index),
-      FOREIGN KEY (match_id) REFERENCES matches(match_id) ON DELETE CASCADE
-    )
-  `,
-  `
-    CREATE TABLE IF NOT EXISTS match_teams (
-      match_id TEXT NOT NULL,
-      team_id INTEGER NOT NULL,
-      win INTEGER,
-      bans_json TEXT NOT NULL DEFAULT '[]',
-      objectives_json TEXT NOT NULL,
-      raw_payload TEXT NOT NULL,
-      PRIMARY KEY (match_id, team_id),
-      FOREIGN KEY (match_id) REFERENCES matches(match_id) ON DELETE CASCADE
-    )
-  `,
-  `
-    CREATE TABLE IF NOT EXISTS static_champions (
-      id TEXT PRIMARY KEY,
-      numeric_id INTEGER NOT NULL,
-      key TEXT NOT NULL,
-      name TEXT NOT NULL,
-      title TEXT,
-      icon_path TEXT NOT NULL,
-      icon_url TEXT NOT NULL,
-      version TEXT NOT NULL,
-      raw_payload TEXT NOT NULL
-    )
-  `,
-  `
-    CREATE TABLE IF NOT EXISTS static_items (
-      id TEXT PRIMARY KEY,
-      name TEXT NOT NULL,
-      description TEXT,
-      icon_path TEXT NOT NULL,
-      icon_url TEXT NOT NULL,
-      version TEXT NOT NULL,
-      raw_payload TEXT NOT NULL
-    )
-  `,
-  `
-    CREATE TABLE IF NOT EXISTS static_augments (
-      id TEXT PRIMARY KEY,
-      name TEXT NOT NULL,
-      description TEXT,
-      rarity TEXT,
-      icon_path TEXT NOT NULL,
-      icon_url TEXT,
-      version TEXT NOT NULL,
-      raw_payload TEXT NOT NULL
-    )
-  `,
-  `
-    CREATE TABLE IF NOT EXISTS app_settings (
-      key TEXT PRIMARY KEY,
-      value TEXT NOT NULL,
-      updated_at INTEGER NOT NULL
-    )
-  `,
-  `
-    CREATE TABLE IF NOT EXISTS player_ratings (
-      target_puuid TEXT PRIMARY KEY,
-      summoner_name TEXT,
-      rating INTEGER,
-      note TEXT,
-      updated_at INTEGER NOT NULL
-    )
-  `,
-  `
-    CREATE TABLE IF NOT EXISTS sync_runs (
-      id TEXT PRIMARY KEY,
-      status TEXT NOT NULL,
-      started_at INTEGER NOT NULL,
-      finished_at INTEGER,
-      stored INTEGER NOT NULL DEFAULT 0,
-      updated INTEGER NOT NULL DEFAULT 0,
-      skipped INTEGER NOT NULL DEFAULT 0,
-      error_code TEXT,
-      error_message TEXT
-    )
-  `,
-  `
-    CREATE INDEX IF NOT EXISTS idx_matches_retrieved_at ON matches(retrieved_at DESC)
-  `,
-  `
-    CREATE INDEX IF NOT EXISTS idx_match_participants_match_id ON match_participants(match_id)
-  `,
-  `
-    CREATE INDEX IF NOT EXISTS idx_match_participants_champion_id ON match_participants(champion_id)
-  `,
-  `
-    CREATE INDEX IF NOT EXISTS idx_match_participants_puuid ON match_participants(puuid)
-  `,
-  `
-    CREATE INDEX IF NOT EXISTS idx_match_teams_match_id ON match_teams(match_id)
-  `,
-  `
-    CREATE INDEX IF NOT EXISTS idx_sync_runs_started_at ON sync_runs(started_at DESC)
-  `,
-];
+import { index, integer, primaryKey, sqliteTable, text } from "drizzle-orm/sqlite-core";
+
+export const appMetadata = sqliteTable("app_metadata", {
+  key: text("key").primaryKey(),
+  value: text("value").notNull(),
+  updatedAt: integer("updated_at").notNull(),
+});
+
+export const matches = sqliteTable("matches", {
+  matchId: text("match_id").primaryKey(),
+  queueId: integer("queue_id"),
+  gameMode: text("game_mode"),
+  gameVersion: text("game_version"),
+  gameModeMutatorsJson: text("game_mode_mutators_json").notNull(),
+  mapId: integer("map_id"),
+  gameCreation: integer("game_creation"),
+  gameStartTimestamp: integer("game_start_timestamp"),
+  gameEndTimestamp: integer("game_end_timestamp"),
+  gameDuration: integer("game_duration"),
+  retrievedAt: integer("retrieved_at").notNull(),
+  summary: text("summary").notNull(),
+  rawPayload: text("raw_payload").notNull(),
+}, (table) => ({
+  retrievedAtIdx: index("idx_matches_retrieved_at").on(table.retrievedAt),
+}));
+
+export const matchParticipants = sqliteTable("match_participants", {
+  matchId: text("match_id").notNull().references(() => matches.matchId, { onDelete: "cascade" }),
+  participantIndex: integer("participant_index").notNull(),
+  participantId: integer("participant_id"),
+  puuid: text("puuid"),
+  riotIdGameName: text("riot_id_game_name"),
+  riotIdTagline: text("riot_id_tagline"),
+  summonerName: text("summoner_name"),
+  teamId: integer("team_id"),
+  championId: integer("champion_id"),
+  championName: text("champion_name"),
+  spell1Id: integer("spell1_id"),
+  spell2Id: integer("spell2_id"),
+  kills: integer("kills"),
+  deaths: integer("deaths"),
+  assists: integer("assists"),
+  doubleKills: integer("double_kills"),
+  tripleKills: integer("triple_kills"),
+  quadraKills: integer("quadra_kills"),
+  pentaKills: integer("penta_kills"),
+  totalDamageDealt: integer("total_damage_dealt"),
+  totalDamageTaken: integer("total_damage_taken"),
+  goldEarned: integer("gold_earned"),
+  totalHeal: integer("total_heal"),
+  totalCs: integer("total_cs"),
+  championLevel: integer("champion_level"),
+  visionScore: integer("vision_score"),
+  timeCcOthers: integer("time_cc_others"),
+  largestKillingSpree: integer("largest_killing_spree"),
+  damageToTurrets: integer("damage_to_turrets"),
+  win: integer("win", { mode: "boolean" }),
+  placement: integer("placement"),
+  itemsJson: text("items_json").notNull(),
+  augmentsJson: text("augments_json").notNull(),
+  perksJson: text("perks_json").notNull(),
+  statsJson: text("stats_json").notNull(),
+  rawPayload: text("raw_payload").notNull(),
+}, (table) => ({
+  pk: primaryKey({ columns: [table.matchId, table.participantIndex] }),
+  matchIdIdx: index("idx_match_participants_match_id").on(table.matchId),
+  championIdIdx: index("idx_match_participants_champion_id").on(table.championId),
+  puuidIdx: index("idx_match_participants_puuid").on(table.puuid),
+}));
+
+export const matchTeams = sqliteTable("match_teams", {
+  matchId: text("match_id").notNull().references(() => matches.matchId, { onDelete: "cascade" }),
+  teamId: integer("team_id").notNull(),
+  win: integer("win", { mode: "boolean" }),
+  bansJson: text("bans_json").notNull().default("[]"),
+  objectivesJson: text("objectives_json").notNull(),
+  rawPayload: text("raw_payload").notNull(),
+}, (table) => ({
+  pk: primaryKey({ columns: [table.matchId, table.teamId] }),
+  matchIdIdx: index("idx_match_teams_match_id").on(table.matchId),
+}));
+
+export const staticChampions = sqliteTable("static_champions", {
+  id: text("id").primaryKey(),
+  numericId: integer("numeric_id").notNull(),
+  key: text("key").notNull(),
+  name: text("name").notNull(),
+  title: text("title"),
+  iconPath: text("icon_path").notNull(),
+  iconUrl: text("icon_url").notNull(),
+  version: text("version").notNull(),
+  rawPayload: text("raw_payload").notNull(),
+});
+
+export const staticItems = sqliteTable("static_items", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  iconPath: text("icon_path").notNull(),
+  iconUrl: text("icon_url").notNull(),
+  version: text("version").notNull(),
+  rawPayload: text("raw_payload").notNull(),
+});
+
+export const staticAugments = sqliteTable("static_augments", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  rarity: text("rarity"),
+  iconPath: text("icon_path").notNull(),
+  iconUrl: text("icon_url"),
+  version: text("version").notNull(),
+  rawPayload: text("raw_payload").notNull(),
+});
+
+export const appSettings = sqliteTable("app_settings", {
+  key: text("key").primaryKey(),
+  value: text("value").notNull(),
+  updatedAt: integer("updated_at").notNull(),
+});
+
+export const playerRatings = sqliteTable("player_ratings", {
+  targetPuuid: text("target_puuid").primaryKey(),
+  summonerName: text("summoner_name"),
+  rating: integer("rating"),
+  note: text("note"),
+  updatedAt: integer("updated_at").notNull(),
+});
+
+export const syncRuns = sqliteTable("sync_runs", {
+  id: text("id").primaryKey(),
+  status: text("status").notNull(),
+  startedAt: integer("started_at").notNull(),
+  finishedAt: integer("finished_at"),
+  stored: integer("stored").notNull().default(0),
+  updated: integer("updated").notNull().default(0),
+  skipped: integer("skipped").notNull().default(0),
+  errorCode: text("error_code"),
+  errorMessage: text("error_message"),
+}, (table) => ({
+  startedAtIdx: index("idx_sync_runs_started_at").on(table.startedAt),
+}));
+
+export const schema = {
+  appMetadata,
+  matches,
+  matchParticipants,
+  matchTeams,
+  staticChampions,
+  staticItems,
+  staticAugments,
+  appSettings,
+  playerRatings,
+  syncRuns,
+};
+
+export type AppMetadataRow = typeof appMetadata.$inferSelect;
+export type MatchRow = typeof matches.$inferSelect;
+export type MatchParticipantRow = typeof matchParticipants.$inferSelect;
+export type MatchTeamRow = typeof matchTeams.$inferSelect;
+export type StaticChampionRow = typeof staticChampions.$inferSelect;
+export type StaticItemRow = typeof staticItems.$inferSelect;
+export type StaticAugmentRow = typeof staticAugments.$inferSelect;
+export type AppSettingRow = typeof appSettings.$inferSelect;
+export type PlayerRatingRow = typeof playerRatings.$inferSelect;
+export type SyncRunRow = typeof syncRuns.$inferSelect;

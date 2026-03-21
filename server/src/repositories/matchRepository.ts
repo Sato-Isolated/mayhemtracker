@@ -1,8 +1,33 @@
-import { getDb } from "../db/index.js";
+import { asc, count, desc, eq, inArray, isNotNull, max } from "drizzle-orm";
+import { db } from "../db/index.js";
+import {
+  matchParticipants as matchParticipantsTable,
+  matches as matchesTable,
+  matchTeams as matchTeamsTable,
+  syncRuns as syncRunsTable,
+  type MatchParticipantRow,
+  type MatchRow,
+  type MatchTeamRow,
+} from "../db/schema.js";
 import type { MatchDetailDto, MatchEntity, MatchListItemDto } from "../types/match.js";
 
-const db = getDb();
 const SQLITE_PARAM_LIMIT = 900;
+
+const matchSelection = {
+  matchId: matchesTable.matchId,
+  queueId: matchesTable.queueId,
+  gameMode: matchesTable.gameMode,
+  gameVersion: matchesTable.gameVersion,
+  gameModeMutatorsJson: matchesTable.gameModeMutatorsJson,
+  mapId: matchesTable.mapId,
+  gameCreation: matchesTable.gameCreation,
+  gameStartTimestamp: matchesTable.gameStartTimestamp,
+  gameEndTimestamp: matchesTable.gameEndTimestamp,
+  gameDuration: matchesTable.gameDuration,
+  retrievedAt: matchesTable.retrievedAt,
+  summary: matchesTable.summary,
+  rawPayload: matchesTable.rawPayload,
+};
 
 function parseJson<T>(value: string): T {
   return JSON.parse(value) as T;
@@ -16,217 +41,165 @@ function chunkValues<T>(items: T[], size: number) {
   return output;
 }
 
+function mapMatchRow(match: MatchRow): MatchListItemDto {
+  return {
+    matchId: match.matchId,
+    queueId: match.queueId ?? undefined,
+    gameMode: match.gameMode ?? undefined,
+    gameVersion: match.gameVersion ?? undefined,
+    gameModeMutators: parseJson<string[]>(match.gameModeMutatorsJson),
+    gameCreation: match.gameCreation ?? undefined,
+    gameDuration: match.gameDuration ?? undefined,
+    retrievedAt: match.retrievedAt,
+    summary: match.summary,
+    participants: [],
+  };
+}
+
+function mapParticipantRow(participant: MatchParticipantRow): MatchListItemDto["participants"][number] {
+  return {
+    participantId: participant.participantId ?? undefined,
+    puuid: participant.puuid ?? undefined,
+    summonerName: participant.summonerName ?? undefined,
+    riotIdGameName: participant.riotIdGameName ?? undefined,
+    riotIdTagline: participant.riotIdTagline ?? undefined,
+    teamId: participant.teamId ?? undefined,
+    championId: participant.championId ?? undefined,
+    championName: participant.championName ?? undefined,
+    spell1Id: participant.spell1Id ?? undefined,
+    spell2Id: participant.spell2Id ?? undefined,
+    kills: participant.kills ?? undefined,
+    deaths: participant.deaths ?? undefined,
+    assists: participant.assists ?? undefined,
+    pentaKills: participant.pentaKills ?? undefined,
+    totalDamageDealt: participant.totalDamageDealt ?? undefined,
+    totalDamageTaken: participant.totalDamageTaken ?? undefined,
+    goldEarned: participant.goldEarned ?? undefined,
+    totalHeal: participant.totalHeal ?? undefined,
+    totalCs: participant.totalCs ?? undefined,
+    championLevel: participant.championLevel ?? undefined,
+    win: participant.win ?? undefined,
+    items: parseJson<string[]>(participant.itemsJson),
+    augments: parseJson<string[]>(participant.augmentsJson),
+  };
+}
+
+function mapTeamRow(team: MatchTeamRow) {
+  return {
+    teamId: team.teamId,
+    win: team.win ?? undefined,
+    objectives: parseJson<Record<string, unknown>>(team.objectivesJson),
+    rawPayload: team.rawPayload,
+  };
+}
+
 export class MatchRepository {
   upsertMatches(matches: MatchEntity[]) {
-    const upsertMatch = db.prepare(`
-      INSERT INTO matches (
-        match_id,
-        queue_id,
-        game_mode,
-        game_version,
-        game_mode_mutators_json,
-        map_id,
-        game_creation,
-        game_start_timestamp,
-        game_end_timestamp,
-        game_duration,
-        retrieved_at,
-        summary,
-        raw_payload
-      )
-      VALUES (
-        @matchId,
-        @queueId,
-        @gameMode,
-        @gameVersion,
-        @gameModeMutatorsJson,
-        @mapId,
-        @gameCreation,
-        @gameStartTimestamp,
-        @gameEndTimestamp,
-        @gameDuration,
-        @retrievedAt,
-        @summary,
-        @rawPayload
-      )
-      ON CONFLICT(match_id) DO UPDATE SET
-        queue_id = excluded.queue_id,
-        game_mode = excluded.game_mode,
-        game_version = excluded.game_version,
-        game_mode_mutators_json = excluded.game_mode_mutators_json,
-        map_id = excluded.map_id,
-        game_creation = excluded.game_creation,
-        game_start_timestamp = excluded.game_start_timestamp,
-        game_end_timestamp = excluded.game_end_timestamp,
-        game_duration = excluded.game_duration,
-        retrieved_at = excluded.retrieved_at,
-        summary = excluded.summary,
-        raw_payload = excluded.raw_payload
-    `);
-
-    const deleteParticipants = db.prepare(`DELETE FROM match_participants WHERE match_id = ?`);
-    const deleteTeams = db.prepare(`DELETE FROM match_teams WHERE match_id = ?`);
-    const insertParticipant = db.prepare(`
-      INSERT INTO match_participants (
-        match_id,
-        participant_index,
-        participant_id,
-        puuid,
-        riot_id_game_name,
-        riot_id_tagline,
-        summoner_name,
-        team_id,
-        champion_id,
-        champion_name,
-        spell1_id,
-        spell2_id,
-        kills,
-        deaths,
-        assists,
-        double_kills,
-        triple_kills,
-        quadra_kills,
-        penta_kills,
-        total_damage_dealt,
-        total_damage_taken,
-        gold_earned,
-        total_heal,
-        total_cs,
-        champion_level,
-        vision_score,
-        time_cc_others,
-        largest_killing_spree,
-        damage_to_turrets,
-        win,
-        placement,
-        items_json,
-        augments_json,
-        perks_json,
-        stats_json,
-        raw_payload
-      )
-      VALUES (
-        @matchId,
-        @participantIndex,
-        @participantId,
-        @puuid,
-        @riotIdGameName,
-        @riotIdTagline,
-        @summonerName,
-        @teamId,
-        @championId,
-        @championName,
-        @spell1Id,
-        @spell2Id,
-        @kills,
-        @deaths,
-        @assists,
-        @doubleKills,
-        @tripleKills,
-        @quadraKills,
-        @pentaKills,
-        @totalDamageDealt,
-        @totalDamageTaken,
-        @goldEarned,
-        @totalHeal,
-        @totalCs,
-        @championLevel,
-        @visionScore,
-        @timeCcOthers,
-        @largestKillingSpree,
-        @damageToTurrets,
-        @win,
-        @placement,
-        @itemsJson,
-        @augmentsJson,
-        @perksJson,
-        @statsJson,
-        @rawPayload
-      )
-    `);
-    const insertTeam = db.prepare(`
-      INSERT INTO match_teams (
-        match_id,
-        team_id,
-        win,
-        bans_json,
-        objectives_json,
-        raw_payload
-      )
-      VALUES (
-        @matchId,
-        @teamId,
-        @win,
-        @bansJson,
-        @objectivesJson,
-        @rawPayload
-      )
-    `);
-
-    const transaction = db.transaction((rows: MatchEntity[]) => {
-      for (const match of rows) {
-        upsertMatch.run({
-          ...match,
-          gameModeMutatorsJson: JSON.stringify(match.gameModeMutators),
-        });
-        deleteParticipants.run(match.matchId);
-        deleteTeams.run(match.matchId);
-
-        match.participants.forEach((participant, participantIndex) => {
-          insertParticipant.run({
+    db.transaction((tx) => {
+      for (const match of matches) {
+        tx.insert(matchesTable)
+          .values({
             matchId: match.matchId,
-            participantIndex,
-            participantId: participant.participantId,
-            puuid: participant.puuid,
-            riotIdGameName: participant.riotIdGameName,
-            riotIdTagline: participant.riotIdTagline,
-            summonerName: participant.summonerName,
-            teamId: participant.teamId,
-            championId: participant.championId,
-            championName: participant.championName,
-            spell1Id: participant.spell1Id,
-            spell2Id: participant.spell2Id,
-            kills: participant.kills,
-            deaths: participant.deaths,
-            assists: participant.assists,
-            doubleKills: participant.doubleKills,
-            tripleKills: participant.tripleKills,
-            quadraKills: participant.quadraKills,
-            pentaKills: participant.pentaKills,
-            totalDamageDealt: participant.totalDamageDealt,
-            totalDamageTaken: participant.totalDamageTaken,
-            goldEarned: participant.goldEarned,
-            totalHeal: participant.totalHeal,
-            totalCs: participant.totalCs,
-            championLevel: participant.championLevel,
-            visionScore: participant.visionScore,
-            timeCcOthers: participant.timeCcOthers,
-            largestKillingSpree: participant.largestKillingSpree,
-            damageToTurrets: participant.damageToTurrets,
-            win: participant.win ? 1 : 0,
-            placement: participant.placement,
-            itemsJson: JSON.stringify(participant.items),
-            augmentsJson: JSON.stringify(participant.augments),
-            perksJson: JSON.stringify(participant.perks),
-            statsJson: JSON.stringify(participant.stats),
-            rawPayload: participant.rawPayload,
-          });
-        });
+            queueId: match.queueId ?? null,
+            gameMode: match.gameMode ?? null,
+            gameVersion: match.gameVersion ?? null,
+            gameModeMutatorsJson: JSON.stringify(match.gameModeMutators),
+            mapId: match.mapId ?? null,
+            gameCreation: match.gameCreation ?? null,
+            gameStartTimestamp: match.gameStartTimestamp ?? null,
+            gameEndTimestamp: match.gameEndTimestamp ?? null,
+            gameDuration: match.gameDuration ?? null,
+            retrievedAt: match.retrievedAt,
+            summary: match.summary,
+            rawPayload: match.rawPayload,
+          })
+          .onConflictDoUpdate({
+            target: matchesTable.matchId,
+            set: {
+              queueId: match.queueId ?? null,
+              gameMode: match.gameMode ?? null,
+              gameVersion: match.gameVersion ?? null,
+              gameModeMutatorsJson: JSON.stringify(match.gameModeMutators),
+              mapId: match.mapId ?? null,
+              gameCreation: match.gameCreation ?? null,
+              gameStartTimestamp: match.gameStartTimestamp ?? null,
+              gameEndTimestamp: match.gameEndTimestamp ?? null,
+              gameDuration: match.gameDuration ?? null,
+              retrievedAt: match.retrievedAt,
+              summary: match.summary,
+              rawPayload: match.rawPayload,
+            },
+          })
+          .run();
 
-        match.teams.forEach((team) => {
-          insertTeam.run({
-            matchId: match.matchId,
-            teamId: team.teamId,
-            win: team.win ? 1 : 0,
-            bansJson: JSON.stringify([]),
-            objectivesJson: JSON.stringify(team.objectives),
-            rawPayload: team.rawPayload,
-          });
-        });
+        tx.delete(matchParticipantsTable)
+          .where(eq(matchParticipantsTable.matchId, match.matchId))
+          .run();
+        tx.delete(matchTeamsTable)
+          .where(eq(matchTeamsTable.matchId, match.matchId))
+          .run();
+
+        if (match.participants.length) {
+          tx.insert(matchParticipantsTable)
+            .values(
+              match.participants.map((participant, participantIndex) => ({
+                matchId: match.matchId,
+                participantIndex,
+                participantId: participant.participantId ?? null,
+                puuid: participant.puuid ?? null,
+                riotIdGameName: participant.riotIdGameName ?? null,
+                riotIdTagline: participant.riotIdTagline ?? null,
+                summonerName: participant.summonerName ?? null,
+                teamId: participant.teamId ?? null,
+                championId: participant.championId ?? null,
+                championName: participant.championName ?? null,
+                spell1Id: participant.spell1Id ?? null,
+                spell2Id: participant.spell2Id ?? null,
+                kills: participant.kills ?? null,
+                deaths: participant.deaths ?? null,
+                assists: participant.assists ?? null,
+                doubleKills: participant.doubleKills ?? null,
+                tripleKills: participant.tripleKills ?? null,
+                quadraKills: participant.quadraKills ?? null,
+                pentaKills: participant.pentaKills ?? null,
+                totalDamageDealt: participant.totalDamageDealt ?? null,
+                totalDamageTaken: participant.totalDamageTaken ?? null,
+                goldEarned: participant.goldEarned ?? null,
+                totalHeal: participant.totalHeal ?? null,
+                totalCs: participant.totalCs ?? null,
+                championLevel: participant.championLevel ?? null,
+                visionScore: participant.visionScore ?? null,
+                timeCcOthers: participant.timeCcOthers ?? null,
+                largestKillingSpree: participant.largestKillingSpree ?? null,
+                damageToTurrets: participant.damageToTurrets ?? null,
+                win: participant.win ?? null,
+                placement: participant.placement ?? null,
+                itemsJson: JSON.stringify(participant.items),
+                augmentsJson: JSON.stringify(participant.augments),
+                perksJson: JSON.stringify(participant.perks),
+                statsJson: JSON.stringify(participant.stats),
+                rawPayload: participant.rawPayload,
+              })),
+            )
+            .run();
+        }
+
+        if (match.teams.length) {
+          tx.insert(matchTeamsTable)
+            .values(
+              match.teams.map((team) => ({
+                matchId: match.matchId,
+                teamId: team.teamId,
+                win: team.win ?? null,
+                bansJson: JSON.stringify([]),
+                objectivesJson: JSON.stringify(team.objectives),
+                rawPayload: team.rawPayload,
+              })),
+            )
+            .run();
+        }
       }
     });
-
-    transaction(matches);
   }
 
   existingMatchIds(matchIds: string[]) {
@@ -236,10 +209,13 @@ export class MatchRepository {
 
     const output = new Set<string>();
     for (const chunk of chunkValues(matchIds, SQLITE_PARAM_LIMIT)) {
-      const placeholders = chunk.map(() => "?").join(", ");
-      const rows = db.prepare(`SELECT match_id FROM matches WHERE match_id IN (${placeholders})`).all(...chunk) as Array<{ match_id: string }>;
+      const rows = db.select({ matchId: matchesTable.matchId })
+        .from(matchesTable)
+        .where(inArray(matchesTable.matchId, chunk))
+        .all();
+
       for (const row of rows) {
-        output.add(row.match_id);
+        output.add(row.matchId);
       }
     }
 
@@ -248,22 +224,21 @@ export class MatchRepository {
 
   listMatches(page: number, pageSize: number) {
     const offset = (page - 1) * pageSize;
-    const rows = db.prepare(`
-      SELECT *
-      FROM matches
-      ORDER BY COALESCE(game_creation, retrieved_at) DESC
-      LIMIT ? OFFSET ?
-    `).all(pageSize, offset) as Array<Record<string, unknown>>;
+    const rows = db.select(matchSelection)
+      .from(matchesTable)
+      .orderBy(desc(matchesTable.gameCreation), desc(matchesTable.retrievedAt))
+      .limit(pageSize)
+      .offset(offset)
+      .all() as MatchRow[];
 
     return this.hydrateListItems(rows);
   }
 
   listAllMatches() {
-    const rows = db.prepare(`
-      SELECT *
-      FROM matches
-      ORDER BY COALESCE(game_creation, retrieved_at) DESC
-    `).all() as Array<Record<string, unknown>>;
+    const rows = db.select(matchSelection)
+      .from(matchesTable)
+      .orderBy(desc(matchesTable.gameCreation), desc(matchesTable.retrievedAt))
+      .all() as MatchRow[];
 
     return this.hydrateListItems(rows);
   }
@@ -273,11 +248,13 @@ export class MatchRepository {
       return [] as MatchListItemDto[];
     }
 
-    const rows = [] as Array<Record<string, unknown>>;
+    const rows = [] as MatchRow[];
     for (const chunk of chunkValues(matchIds, SQLITE_PARAM_LIMIT)) {
-      const placeholders = chunk.map(() => "?").join(", ");
       rows.push(
-        ...(db.prepare(`SELECT * FROM matches WHERE match_id IN (${placeholders})`).all(...chunk) as Array<Record<string, unknown>>),
+        ...(db.select(matchSelection)
+          .from(matchesTable)
+          .where(inArray(matchesTable.matchId, chunk))
+          .all() as MatchRow[]),
       );
     }
 
@@ -286,30 +263,34 @@ export class MatchRepository {
   }
 
   listRecentTrackedMatches(trackedPuuid: string, limit: number) {
-    const rows = db.prepare(`
-      SELECT DISTINCT m.*
-      FROM matches m
-      JOIN match_participants mp ON mp.match_id = m.match_id
-      WHERE mp.puuid = ?
-      ORDER BY COALESCE(m.game_creation, m.retrieved_at) DESC
-      LIMIT ?
-    `).all(trackedPuuid, limit) as Array<Record<string, unknown>>;
+    const rows = db.select(matchSelection)
+      .from(matchesTable)
+      .innerJoin(matchParticipantsTable, eq(matchParticipantsTable.matchId, matchesTable.matchId))
+      .where(eq(matchParticipantsTable.puuid, trackedPuuid))
+      .orderBy(desc(matchesTable.gameCreation), desc(matchesTable.retrievedAt))
+      .limit(limit)
+      .all() as MatchRow[];
 
     return this.hydrateListItems(rows);
   }
 
   getTrackedPlayer() {
-    const row = db.prepare(`
-      SELECT
-        puuid,
-        COALESCE(MAX(NULLIF(summoner_name, '')), MAX(NULLIF(riot_id_game_name, '')), 'Unknown summoner') AS summoner_name,
-        COUNT(*) AS matches
-      FROM match_participants
-      WHERE puuid IS NOT NULL
-      GROUP BY puuid
-      ORDER BY matches DESC
-      LIMIT 1
-    `).get() as { puuid?: string; summoner_name?: string; matches?: number } | undefined;
+    const matchesCount = count().as("matches");
+    const bestSummonerName = max(matchParticipantsTable.summonerName).as("summonerName");
+    const bestRiotName = max(matchParticipantsTable.riotIdGameName).as("riotIdGameName");
+
+    const row = db.select({
+      puuid: matchParticipantsTable.puuid,
+      summonerName: bestSummonerName,
+      riotIdGameName: bestRiotName,
+      matches: matchesCount,
+    })
+      .from(matchParticipantsTable)
+      .where(isNotNull(matchParticipantsTable.puuid))
+      .groupBy(matchParticipantsTable.puuid)
+      .orderBy(desc(matchesCount))
+      .limit(1)
+      .get();
 
     if (!row?.puuid) {
       return undefined;
@@ -317,73 +298,63 @@ export class MatchRepository {
 
     return {
       puuid: row.puuid,
-      summonerName: row.summoner_name ?? "Unknown summoner",
+      summonerName: row.summonerName ?? row.riotIdGameName ?? "Unknown summoner",
       matches: row.matches ?? 0,
     };
   }
 
   countMatches() {
-    const result = db.prepare(`SELECT COUNT(*) as total FROM matches`).get() as { total: number };
-    return result.total;
+    const result = db.select({ total: count() })
+      .from(matchesTable)
+      .get();
+    return result?.total ?? 0;
   }
 
   getMatchById(matchId: string): MatchDetailDto | undefined {
-    const match = db.prepare(`SELECT * FROM matches WHERE match_id = ?`).get(matchId) as
-      | Record<string, unknown>
-      | undefined;
+    const match = db.select()
+      .from(matchesTable)
+      .where(eq(matchesTable.matchId, matchId))
+      .get();
 
     if (!match) {
       return undefined;
     }
 
     const base = this.hydrateListItems([match])[0];
-    const teams = db.prepare(`SELECT * FROM match_teams WHERE match_id = ? ORDER BY team_id ASC`).all(matchId) as Array<Record<string, unknown>>;
+    const teams = db.select()
+      .from(matchTeamsTable)
+      .where(eq(matchTeamsTable.matchId, matchId))
+      .orderBy(asc(matchTeamsTable.teamId))
+      .all();
 
     return {
       ...base,
-      gameStartTimestamp: (match.game_start_timestamp as number | null) ?? undefined,
-      gameEndTimestamp: (match.game_end_timestamp as number | null) ?? undefined,
-      mapId: (match.map_id as number | null) ?? undefined,
-      teams: teams.map((team) => ({
-        teamId: team.team_id as number,
-        win: Boolean(team.win),
-        objectives: parseJson<Record<string, unknown>>(team.objectives_json as string),
-        rawPayload: team.raw_payload as string,
-      })),
-      rawPayload: parseJson<unknown>(match.raw_payload as string),
+      gameStartTimestamp: match.gameStartTimestamp ?? undefined,
+      gameEndTimestamp: match.gameEndTimestamp ?? undefined,
+      mapId: match.mapId ?? undefined,
+      teams: teams.map(mapTeamRow),
+      rawPayload: parseJson<unknown>(match.rawPayload),
     };
   }
 
   clearMatches() {
-    const transaction = db.transaction(() => {
-      db.prepare(`DELETE FROM match_participants`).run();
-      db.prepare(`DELETE FROM match_teams`).run();
-      db.prepare(`DELETE FROM matches`).run();
-      db.prepare(`DELETE FROM sync_runs`).run();
+    db.transaction((tx) => {
+      tx.delete(syncRunsTable).run();
+      tx.delete(matchesTable).run();
     });
-
-    transaction();
   }
 
-  private hydrateListItems(matchRows: Array<Record<string, unknown>>) {
+  private hydrateListItems(matchRows: MatchRow[]) {
     if (!matchRows.length) {
       return [] as MatchListItemDto[];
     }
 
-    const matchIds = matchRows.map((match) => String(match.match_id));
+    const matchIds = matchRows.map((match) => match.matchId);
     const participantsByMatchId = this.getParticipantsByMatchIds(matchIds);
 
     return matchRows.map((match) => ({
-      matchId: match.match_id as string,
-      queueId: (match.queue_id as number | null) ?? undefined,
-      gameMode: (match.game_mode as string | null) ?? undefined,
-      gameVersion: (match.game_version as string | null) ?? undefined,
-      gameModeMutators: parseJson<string[]>(match.game_mode_mutators_json as string),
-      gameCreation: (match.game_creation as number | null) ?? undefined,
-      gameDuration: (match.game_duration as number | null) ?? undefined,
-      retrievedAt: match.retrieved_at as number,
-      summary: match.summary as string,
-      participants: participantsByMatchId.get(String(match.match_id)) ?? [],
+      ...mapMatchRow(match),
+      participants: participantsByMatchId.get(match.matchId) ?? [],
     }));
   }
 
@@ -391,43 +362,16 @@ export class MatchRepository {
     const map = new Map<string, MatchListItemDto["participants"]>();
 
     for (const chunk of chunkValues(matchIds, SQLITE_PARAM_LIMIT)) {
-      const placeholders = chunk.map(() => "?").join(", ");
-      const rows = db.prepare(`
-        SELECT *
-        FROM match_participants
-        WHERE match_id IN (${placeholders})
-        ORDER BY match_id ASC, participant_index ASC
-      `).all(...chunk) as Array<Record<string, unknown>>;
+      const rows = db.select()
+        .from(matchParticipantsTable)
+        .where(inArray(matchParticipantsTable.matchId, chunk))
+        .orderBy(asc(matchParticipantsTable.matchId), asc(matchParticipantsTable.participantIndex))
+        .all();
 
       for (const participant of rows) {
-        const matchId = String(participant.match_id);
-        const current = map.get(matchId) ?? [];
-        current.push({
-          participantId: (participant.participant_id as number | null) ?? undefined,
-          puuid: (participant.puuid as string | null) ?? undefined,
-          summonerName: (participant.summoner_name as string | null) ?? undefined,
-          riotIdGameName: (participant.riot_id_game_name as string | null) ?? undefined,
-          riotIdTagline: (participant.riot_id_tagline as string | null) ?? undefined,
-          teamId: (participant.team_id as number | null) ?? undefined,
-          championId: (participant.champion_id as number | null) ?? undefined,
-          championName: (participant.champion_name as string | null) ?? undefined,
-          spell1Id: (participant.spell1_id as number | null) ?? undefined,
-          spell2Id: (participant.spell2_id as number | null) ?? undefined,
-          kills: (participant.kills as number | null) ?? undefined,
-          deaths: (participant.deaths as number | null) ?? undefined,
-          assists: (participant.assists as number | null) ?? undefined,
-          pentaKills: (participant.penta_kills as number | null) ?? undefined,
-          totalDamageDealt: (participant.total_damage_dealt as number | null) ?? undefined,
-          totalDamageTaken: (participant.total_damage_taken as number | null) ?? undefined,
-          goldEarned: (participant.gold_earned as number | null) ?? undefined,
-          totalHeal: (participant.total_heal as number | null) ?? undefined,
-          totalCs: (participant.total_cs as number | null) ?? undefined,
-          championLevel: (participant.champion_level as number | null) ?? undefined,
-          win: Boolean(participant.win),
-          items: parseJson<string[]>(participant.items_json as string),
-          augments: parseJson<string[]>(participant.augments_json as string),
-        });
-        map.set(matchId, current);
+        const current = map.get(participant.matchId) ?? [];
+        current.push(mapParticipantRow(participant));
+        map.set(participant.matchId, current);
       }
     }
 

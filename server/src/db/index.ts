@@ -1,13 +1,21 @@
 import Database from "better-sqlite3";
+import { drizzle } from "drizzle-orm/better-sqlite3";
 import { ensureRuntimeDirectories, paths } from "../config/paths.js";
+import { schema } from "./schema.js";
 
 ensureRuntimeDirectories();
 
-const database = new Database(paths.dbFile);
-database.pragma("journal_mode = WAL");
-database.pragma("foreign_keys = ON");
-database.pragma("busy_timeout = 5000");
+const sqlite = new Database(paths.dbFile);
+sqlite.pragma("journal_mode = WAL");
+sqlite.pragma("foreign_keys = ON");
+sqlite.pragma("busy_timeout = 5000");
+
+export const db = drizzle(sqlite, { schema });
 
 export function getDb() {
-  return database;
+  return db;
+}
+
+export function getSqlite() {
+  return sqlite;
 }

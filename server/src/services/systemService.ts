@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawn } from "node:child_process";
 import { paths } from "../config/paths.js";
-import { getDb } from "../db/index.js";
+import { getSqlite } from "../db/index.js";
 import { syncRepository } from "../repositories/syncRepository.js";
 import { leagueService } from "./leagueService.js";
 
@@ -85,8 +85,7 @@ export class SystemService {
   }
 
   async getRuntimeDiagnostics() {
-    const db = getDb();
-    const journalModeRow = db.prepare(`PRAGMA journal_mode`).get() as { journal_mode?: string };
+    const journalMode = getSqlite().pragma("journal_mode", { simple: true }) as string | undefined;
     const league = await leagueService.getConnectionStatus();
     const iconCache = collectDirectoryStats(paths.iconCacheRoot);
 
@@ -95,7 +94,7 @@ export class SystemService {
       db: {
         path: paths.dbFile,
         exists: fs.existsSync(paths.dbFile),
-        journalMode: journalModeRow.journal_mode ?? "unknown",
+        journalMode: journalMode ?? "unknown",
       },
       sync: syncRepository.getSyncStatus(),
       league,

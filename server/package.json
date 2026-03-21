@@ -8,12 +8,17 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
     "test": "tsx --test src/**/*.test.ts",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx src/scripts/migrate-db.ts",
     "db:reset": "tsx src/scripts/reset-db.ts",
-    "db:merge-legacy": "tsx src/scripts/merge-legacy-db.ts ../matches.db"
+    "db:import-legacy": "tsx src/scripts/import-legacy-db.ts",
+    "db:rebuild": "pnpm run db:reset && pnpm run db:migrate && pnpm run db:import-legacy",
+    "db:merge-legacy": "tsx src/scripts/import-legacy-db.ts ../matches.db"
   },
   "dependencies": {
     "better-sqlite3": "^12.8.0",
     "cors": "^2.8.6",
+    "drizzle-orm": "^0.45.1",
     "express": "^5.2.1",
     "league-connect": "^6.0.0-rc13",
     "zod": "^4.3.6"
@@ -23,6 +28,7 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/node": "^25.5.0",
+    "drizzle-kit": "^0.31.10",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }

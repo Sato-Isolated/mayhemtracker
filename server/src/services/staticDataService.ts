@@ -40,6 +40,32 @@ interface DataDragonItemResponse {
   >;
 }
 
+function toStaticEntryDto<T extends {
+  id: string;
+  name: string;
+  version: string;
+  iconPath: string;
+  iconUrl?: string | null;
+  description?: string | null;
+  rarity?: string | null;
+  numericId?: number;
+  key?: string;
+  title?: string | null;
+}>(entry: T) {
+  return {
+    id: entry.id,
+    name: entry.name,
+    description: entry.description ?? undefined,
+    rarity: entry.rarity ?? undefined,
+    icon_path: entry.iconPath,
+    icon_url: entry.iconUrl ?? undefined,
+    version: entry.version,
+    numeric_id: entry.numericId,
+    key: entry.key,
+    title: entry.title ?? undefined,
+  };
+}
+
 function asArray<T>(value: unknown): T[] {
   if (Array.isArray(value)) {
     return value as T[];
@@ -99,15 +125,15 @@ export class StaticDataService {
   }
 
   listChampions() {
-    return staticDataRepository.listChampions();
+    return staticDataRepository.listChampions().map(toStaticEntryDto);
   }
 
   listItems() {
-    return staticDataRepository.listItems();
+    return staticDataRepository.listItems().map(toStaticEntryDto);
   }
 
   listAugments() {
-    return staticDataRepository.listAugments();
+    return staticDataRepository.listAugments().map(toStaticEntryDto);
   }
 
   private async getCurrentDataDragonVersion() {

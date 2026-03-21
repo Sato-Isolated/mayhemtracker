@@ -1,7 +1,7 @@
-import { getDb } from "../db/index.js";
+import { asc, desc, eq } from "drizzle-orm";
+import { db } from "../db/index.js";
+import { appSettings, playerRatings } from "../db/schema.js";
 import type { AppSettingDto, PlayerRatingDto } from "../types/analytics.js";
-
-const db = getDb();
 
 const defaultSettings = {
   theme: "ember",
@@ -17,11 +17,10 @@ const defaultSettings = {
 
 export class SettingsService {
   listSettings(): AppSettingDto[] {
-    const rows = db.prepare(`SELECT key, value, updated_at FROM app_settings ORDER BY key ASC`).all() as Array<{
-      key: string;
-      value: string;
-      updated_at: number;
-    }>;
+    const rows = db.select()
+      .from(appSettings)
+      .orderBy(asc(appSettings.key))
+      .all();
 
     const stored = new Map(rows.map((row) => [row.key, row]));
 
@@ -30,49 +29,80 @@ export class SettingsService {
       return {
         key,
         value: row?.value ?? fallback,
-        updatedAt: row?.updated_at ?? 0,
+        updatedAt: row?.updatedAt ?? 0,
       };
     });
   }
 
   setSetting(key: string, value: string) {
     const updatedAt = Date.now();
-    db.prepare(
-      `
-        INSERT INTO app_settings (key, value, updated_at)
-        VALUES (?, ?, ?)
-        ON CONFLICT(key) DO UPDATE SET
-          value = excluded.value,
-          updated_at = excluded.updated_at
-      `,
-    ).run(key, value, updatedAt);
+    db.insert(appSettings)
+      .values({ key, value, updatedAt })
+      .onConflictDoUpdate({
+        target: appSettings.key,
+        set: {
+          value,
+          updatedAt,
+        },
+      })
+      .run();
 
     return { key, value, updatedAt } satisfies AppSettingDto;
   }
 
   listPlayerRatings(): PlayerRatingDto[] {
-    return db.prepare(`SELECT * FROM player_ratings ORDER BY updated_at DESC`).all() as PlayerRatingDto[];
+    return db.select()
+      .from(playerRatings)
+      .orderBy(desc(playerRatings.updatedAt))
+      .all()
+      .map((row) => ({
+        targetPuuid: row.targetPuuid,
+        summonerName: row.summonerName ?? undefined,
+        rating: row.rating ?? undefined,
+        note: row.note ?? undefined,
+        updatedAt: row.updatedAt,
+      }));
   }
 
   getPlayerRating(targetPuuid: string) {
-    return db.prepare(`SELECT * FROM player_ratings WHERE target_puuid = ?`).get(targetPuuid) as
-      | { target_puuid: string; summoner_name?: string; rating?: number; note?: string; updated_at: number }
-      | undefined;
+    const row = db.select()
+      .from(playerRatings)
+      .where(eq(playerRatings.targetPuuid, targetPuuid))
+      .get();
+
+    if (!row) {
+      return undefined;
+    }
+
+    return {
+      targetPuuid: row.targetPuuid,
+      summonerName: row.summonerName ?? undefined,
+      rating: row.rating ?? undefined,
+      note: row.note ?? undefined,
+      updatedAt: row.updatedAt,
+    };
   }
 
   upsertPlayerRating(targetPuuid: string, summonerName: string | undefined, rating: number | undefined, note: string | undefined) {
     const updatedAt = Date.now();
-    db.prepare(
-      `
-        INSERT INTO player_ratings (target_puuid, summoner_name, rating, note, updated_at)
-        VALUES (?, ?, ?, ?, ?)
-        ON CONFLICT(target_puuid) DO UPDATE SET
-          summoner_name = excluded.summoner_name,
-          rating = excluded.rating,
-          note = excluded.note,
-          updated_at = excluded.updated_at
-      `,
-    ).run(targetPuuid, summonerName ?? null, rating ?? null, note ?? null, updatedAt);
+    db.insert(playerRatings)
+      .values({
+        targetPuuid,
+        summonerName: summonerName ?? null,
+        rating: rating ?? null,
+        note: note ?? null,
+        updatedAt,
+      })
+      .onConflictDoUpdate({
+        target: playerRatings.targetPuuid,
+        set: {
+          summonerName: summonerName ?? null,
+          rating: rating ?? null,
+          note: note ?? null,
+          updatedAt,
+        },
+      })
+      .run();
 
     return {
       targetPuuid,
