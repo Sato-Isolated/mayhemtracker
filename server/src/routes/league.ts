@@ -4,12 +4,7 @@ import { leagueService } from "../services/leagueService.js";
 export const leagueRouter = Router();
 
 leagueRouter.get("/league/connection", async (_request, response) => {
-  try {
-    await leagueService.getAuth();
-    response.json({ ok: true, connected: true });
-  } catch {
-    response.json({ ok: true, connected: false });
-  }
+  response.json({ ok: true, ...(await leagueService.getConnectionStatus()) });
 });
 
 leagueRouter.get("/league/auth", async (_request, response, next) => {

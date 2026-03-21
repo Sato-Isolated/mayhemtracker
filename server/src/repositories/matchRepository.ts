@@ -2,9 +2,18 @@ import { getDb } from "../db/index.js";
 import type { MatchDetailDto, MatchEntity, MatchListItemDto } from "../types/match.js";
 
 const db = getDb();
+const SQLITE_PARAM_LIMIT = 900;
 
 function parseJson<T>(value: string): T {
   return JSON.parse(value) as T;
+}
+
+function chunkValues<T>(items: T[], size: number) {
+  const output = [] as T[][];
+  for (let index = 0; index < items.length; index += size) {
+    output.push(items.slice(index, index + size));
+  }
+  return output;
 }
 
 export class MatchRepository {
@@ -220,26 +229,97 @@ export class MatchRepository {
     transaction(matches);
   }
 
+  existingMatchIds(matchIds: string[]) {
+    if (!matchIds.length) {
+      return new Set<string>();
+    }
+
+    const output = new Set<string>();
+    for (const chunk of chunkValues(matchIds, SQLITE_PARAM_LIMIT)) {
+      const placeholders = chunk.map(() => "?").join(", ");
+      const rows = db.prepare(`SELECT match_id FROM matches WHERE match_id IN (${placeholders})`).all(...chunk) as Array<{ match_id: string }>;
+      for (const row of rows) {
+        output.add(row.match_id);
+      }
+    }
+
+    return output;
+  }
+
   listMatches(page: number, pageSize: number) {
     const offset = (page - 1) * pageSize;
-    const matches = db.prepare(`
+    const rows = db.prepare(`
       SELECT *
       FROM matches
       ORDER BY COALESCE(game_creation, retrieved_at) DESC
       LIMIT ? OFFSET ?
     `).all(pageSize, offset) as Array<Record<string, unknown>>;
 
-    return matches.map((match) => this.hydrateListItem(match));
+    return this.hydrateListItems(rows);
   }
 
   listAllMatches() {
-    const matches = db.prepare(`
+    const rows = db.prepare(`
       SELECT *
       FROM matches
       ORDER BY COALESCE(game_creation, retrieved_at) DESC
     `).all() as Array<Record<string, unknown>>;
 
-    return matches.map((match) => this.hydrateListItem(match));
+    return this.hydrateListItems(rows);
+  }
+
+  listMatchesByIds(matchIds: string[]) {
+    if (!matchIds.length) {
+      return [] as MatchListItemDto[];
+    }
+
+    const rows = [] as Array<Record<string, unknown>>;
+    for (const chunk of chunkValues(matchIds, SQLITE_PARAM_LIMIT)) {
+      const placeholders = chunk.map(() => "?").join(", ");
+      rows.push(
+        ...(db.prepare(`SELECT * FROM matches WHERE match_id IN (${placeholders})`).all(...chunk) as Array<Record<string, unknown>>),
+      );
+    }
+
+    const byId = new Map(this.hydrateListItems(rows).map((match) => [match.matchId, match]));
+    return matchIds.map((matchId) => byId.get(matchId)).filter((match): match is MatchListItemDto => Boolean(match));
+  }
+
+  listRecentTrackedMatches(trackedPuuid: string, limit: number) {
+    const rows = db.prepare(`
+      SELECT DISTINCT m.*
+      FROM matches m
+      JOIN match_participants mp ON mp.match_id = m.match_id
+      WHERE mp.puuid = ?
+      ORDER BY COALESCE(m.game_creation, m.retrieved_at) DESC
+      LIMIT ?
+    `).all(trackedPuuid, limit) as Array<Record<string, unknown>>;
+
+    return this.hydrateListItems(rows);
+  }
+
+  getTrackedPlayer() {
+    const row = db.prepare(`
+      SELECT
+        puuid,
+        COALESCE(MAX(NULLIF(summoner_name, '')), MAX(NULLIF(riot_id_game_name, '')), 'Unknown summoner') AS summoner_name,
+        COUNT(*) AS matches
+      FROM match_participants
+      WHERE puuid IS NOT NULL
+      GROUP BY puuid
+      ORDER BY matches DESC
+      LIMIT 1
+    `).get() as { puuid?: string; summoner_name?: string; matches?: number } | undefined;
+
+    if (!row?.puuid) {
+      return undefined;
+    }
+
+    return {
+      puuid: row.puuid,
+      summonerName: row.summoner_name ?? "Unknown summoner",
+      matches: row.matches ?? 0,
+    };
   }
 
   countMatches() {
@@ -256,10 +336,8 @@ export class MatchRepository {
       return undefined;
     }
 
-    const base = this.hydrateListItem(match);
-    const teams = db.prepare(`SELECT * FROM match_teams WHERE match_id = ? ORDER BY team_id ASC`).all(matchId) as Array<
-      Record<string, unknown>
-    >;
+    const base = this.hydrateListItems([match])[0];
+    const teams = db.prepare(`SELECT * FROM match_teams WHERE match_id = ? ORDER BY team_id ASC`).all(matchId) as Array<Record<string, unknown>>;
 
     return {
       ...base,
@@ -281,20 +359,21 @@ export class MatchRepository {
       db.prepare(`DELETE FROM match_participants`).run();
       db.prepare(`DELETE FROM match_teams`).run();
       db.prepare(`DELETE FROM matches`).run();
+      db.prepare(`DELETE FROM sync_runs`).run();
     });
 
     transaction();
   }
 
-  private hydrateListItem(match: Record<string, unknown>): MatchListItemDto {
-    const participants = db.prepare(`
-      SELECT *
-      FROM match_participants
-      WHERE match_id = ?
-      ORDER BY participant_index ASC
-    `).all(match.match_id) as Array<Record<string, unknown>>;
+  private hydrateListItems(matchRows: Array<Record<string, unknown>>) {
+    if (!matchRows.length) {
+      return [] as MatchListItemDto[];
+    }
 
-    return {
+    const matchIds = matchRows.map((match) => String(match.match_id));
+    const participantsByMatchId = this.getParticipantsByMatchIds(matchIds);
+
+    return matchRows.map((match) => ({
       matchId: match.match_id as string,
       queueId: (match.queue_id as number | null) ?? undefined,
       gameMode: (match.game_mode as string | null) ?? undefined,
@@ -304,32 +383,55 @@ export class MatchRepository {
       gameDuration: (match.game_duration as number | null) ?? undefined,
       retrievedAt: match.retrieved_at as number,
       summary: match.summary as string,
-      participants: participants.map((participant) => ({
-        participantId: (participant.participant_id as number | null) ?? undefined,
-        puuid: (participant.puuid as string | null) ?? undefined,
-        summonerName: (participant.summoner_name as string | null) ?? undefined,
-        riotIdGameName: (participant.riot_id_game_name as string | null) ?? undefined,
-        riotIdTagline: (participant.riot_id_tagline as string | null) ?? undefined,
-        teamId: (participant.team_id as number | null) ?? undefined,
-        championId: (participant.champion_id as number | null) ?? undefined,
-        championName: (participant.champion_name as string | null) ?? undefined,
-        spell1Id: (participant.spell1_id as number | null) ?? undefined,
-        spell2Id: (participant.spell2_id as number | null) ?? undefined,
-        kills: (participant.kills as number | null) ?? undefined,
-        deaths: (participant.deaths as number | null) ?? undefined,
-        assists: (participant.assists as number | null) ?? undefined,
-        pentaKills: (participant.penta_kills as number | null) ?? undefined,
-        totalDamageDealt: (participant.total_damage_dealt as number | null) ?? undefined,
-        totalDamageTaken: (participant.total_damage_taken as number | null) ?? undefined,
-        goldEarned: (participant.gold_earned as number | null) ?? undefined,
-        totalHeal: (participant.total_heal as number | null) ?? undefined,
-        totalCs: (participant.total_cs as number | null) ?? undefined,
-        championLevel: (participant.champion_level as number | null) ?? undefined,
-        win: Boolean(participant.win),
-        items: parseJson<string[]>(participant.items_json as string),
-        augments: parseJson<string[]>(participant.augments_json as string),
-      })),
-    };
+      participants: participantsByMatchId.get(String(match.match_id)) ?? [],
+    }));
+  }
+
+  private getParticipantsByMatchIds(matchIds: string[]) {
+    const map = new Map<string, MatchListItemDto["participants"]>();
+
+    for (const chunk of chunkValues(matchIds, SQLITE_PARAM_LIMIT)) {
+      const placeholders = chunk.map(() => "?").join(", ");
+      const rows = db.prepare(`
+        SELECT *
+        FROM match_participants
+        WHERE match_id IN (${placeholders})
+        ORDER BY match_id ASC, participant_index ASC
+      `).all(...chunk) as Array<Record<string, unknown>>;
+
+      for (const participant of rows) {
+        const matchId = String(participant.match_id);
+        const current = map.get(matchId) ?? [];
+        current.push({
+          participantId: (participant.participant_id as number | null) ?? undefined,
+          puuid: (participant.puuid as string | null) ?? undefined,
+          summonerName: (participant.summoner_name as string | null) ?? undefined,
+          riotIdGameName: (participant.riot_id_game_name as string | null) ?? undefined,
+          riotIdTagline: (participant.riot_id_tagline as string | null) ?? undefined,
+          teamId: (participant.team_id as number | null) ?? undefined,
+          championId: (participant.champion_id as number | null) ?? undefined,
+          championName: (participant.champion_name as string | null) ?? undefined,
+          spell1Id: (participant.spell1_id as number | null) ?? undefined,
+          spell2Id: (participant.spell2_id as number | null) ?? undefined,
+          kills: (participant.kills as number | null) ?? undefined,
+          deaths: (participant.deaths as number | null) ?? undefined,
+          assists: (participant.assists as number | null) ?? undefined,
+          pentaKills: (participant.penta_kills as number | null) ?? undefined,
+          totalDamageDealt: (participant.total_damage_dealt as number | null) ?? undefined,
+          totalDamageTaken: (participant.total_damage_taken as number | null) ?? undefined,
+          goldEarned: (participant.gold_earned as number | null) ?? undefined,
+          totalHeal: (participant.total_heal as number | null) ?? undefined,
+          totalCs: (participant.total_cs as number | null) ?? undefined,
+          championLevel: (participant.champion_level as number | null) ?? undefined,
+          win: Boolean(participant.win),
+          items: parseJson<string[]>(participant.items_json as string),
+          augments: parseJson<string[]>(participant.augments_json as string),
+        });
+        map.set(matchId, current);
+      }
+    }
+
+    return map;
   }
 }
 

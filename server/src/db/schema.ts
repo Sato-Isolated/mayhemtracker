@@ -130,6 +130,19 @@ export const schemaStatements = [
     )
   `,
   `
+    CREATE TABLE IF NOT EXISTS sync_runs (
+      id TEXT PRIMARY KEY,
+      status TEXT NOT NULL,
+      started_at INTEGER NOT NULL,
+      finished_at INTEGER,
+      stored INTEGER NOT NULL DEFAULT 0,
+      updated INTEGER NOT NULL DEFAULT 0,
+      skipped INTEGER NOT NULL DEFAULT 0,
+      error_code TEXT,
+      error_message TEXT
+    )
+  `,
+  `
     CREATE INDEX IF NOT EXISTS idx_matches_retrieved_at ON matches(retrieved_at DESC)
   `,
   `
@@ -143,5 +156,8 @@ export const schemaStatements = [
   `,
   `
     CREATE INDEX IF NOT EXISTS idx_match_teams_match_id ON match_teams(match_id)
+  `,
+  `
+    CREATE INDEX IF NOT EXISTS idx_sync_runs_started_at ON sync_runs(started_at DESC)
   `,
 ];

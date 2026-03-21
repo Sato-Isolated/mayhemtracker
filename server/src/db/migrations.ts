@@ -39,6 +39,12 @@ export function runMigrations() {
 
     addColumnIfMissing("match_teams", "bans_json", "TEXT NOT NULL DEFAULT '[]'");
 
+    addColumnIfMissing("sync_runs", "stored", "INTEGER NOT NULL DEFAULT 0");
+    addColumnIfMissing("sync_runs", "updated", "INTEGER NOT NULL DEFAULT 0");
+    addColumnIfMissing("sync_runs", "skipped", "INTEGER NOT NULL DEFAULT 0");
+    addColumnIfMissing("sync_runs", "error_code", "TEXT");
+    addColumnIfMissing("sync_runs", "error_message", "TEXT");
+
     db.prepare(
       `
         INSERT INTO app_metadata (key, value, updated_at)
@@ -49,7 +55,7 @@ export function runMigrations() {
       `,
     ).run({
       key: "schema_version",
-      value: "3",
+      value: "4",
       updated_at: Date.now(),
     });
   });

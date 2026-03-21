@@ -11,3 +11,11 @@ systemRouter.get("/system/powershell-test", async (_request, response, next) => 
     next(error);
   }
 });
+
+systemRouter.get("/system/runtime", async (_request, response, next) => {
+  try {
+    response.json({ ok: true, runtime: await systemService.getRuntimeDiagnostics() });
+  } catch (error) {
+    next(error);
+  }
+});

@@ -1,7 +1,12 @@
 import crypto from "node:crypto";
+import { runtimeConfig } from "../config/runtime.js";
+import { LcuConnectionError, normalizeError } from "../errors/app-error.js";
 import { matchRepository } from "../repositories/matchRepository.js";
+import { syncRepository } from "../repositories/syncRepository.js";
 import { staticDataRepository } from "../repositories/staticDataRepository.js";
-import type { MatchEntity, MatchSyncResult } from "../types/match.js";
+import type { MatchEntity } from "../types/match.js";
+import type { MatchSyncResultDto } from "../types/sync.js";
+import { logger } from "../utils/logger.js";
 import { leagueService } from "./leagueService.js";
 
 function readNumber(value: unknown) {
@@ -150,61 +155,44 @@ function findCurrentParticipant(game: Record<string, unknown>, puuid: string) {
   return resolved && typeof resolved === "object" ? (resolved as Record<string, unknown>) : null;
 }
 
+async function mapWithConcurrency<T, R>(items: T[], concurrency: number, worker: (item: T) => Promise<R>) {
+  const results = [] as R[];
+  let nextIndex = 0;
+
+  const runners = Array.from({ length: Math.min(concurrency, items.length) }, async () => {
+    while (nextIndex < items.length) {
+      const currentIndex = nextIndex;
+      nextIndex += 1;
+      results[currentIndex] = await worker(items[currentIndex]);
+    }
+  });
+
+  await Promise.all(runners);
+  return results;
+}
+
+let activeSync: Promise<MatchSyncResultDto> | null = null;
+
 export class MatchService {
-  async syncCurrentMatches(): Promise<MatchSyncResult> {
-    const currentSummoner = await leagueService.getCurrentSummoner();
-    if (!currentSummoner.puuid) {
-      throw new Error("No current summoner PUUID available.");
+  async syncCurrentMatches(): Promise<MatchSyncResultDto> {
+    if (activeSync) {
+      return activeSync;
     }
 
-    const history = await leagueService.getMatchHistory();
-    const rawGames = extractHistoryGames(history);
-    const fullGames: Record<string, unknown>[] = [];
+    const runId = crypto.randomUUID();
+    const startedAt = Date.now();
+    syncRepository.startRun(runId, startedAt);
 
-    for (const rawGame of rawGames) {
-      if (!rawGame || typeof rawGame !== "object") {
-        continue;
-      }
+    activeSync = this.runSync(runId)
+      .finally(() => {
+        activeSync = null;
+      });
 
-      const game = rawGame as Record<string, unknown>;
-      const queueId = readNumber(game.queueId);
-      const gameId = readNumber(game.gameId);
+    return activeSync;
+  }
 
-      if (queueId !== 2400) {
-        continue;
-      }
-
-      const fullGame = gameId ? await leagueService.safeGetGameDetails(gameId) : null;
-      const resolvedGame = fullGame ?? game;
-
-      if (!findCurrentParticipant(resolvedGame, currentSummoner.puuid)) {
-        continue;
-      }
-
-      fullGames.push(resolvedGame);
-    }
-
-    const matches: MatchEntity[] = fullGames.map((game) => this.toMatchEntity(game));
-
-    const existingIds = new Set(matchRepository.listMatches(1, 1000).map((match) => match.matchId));
-    matchRepository.upsertMatches(matches);
-
-    let stored = 0;
-    let updated = 0;
-    for (const match of matches) {
-      if (existingIds.has(match.matchId)) {
-        updated += 1;
-      } else {
-        stored += 1;
-      }
-    }
-
-    return {
-      stored,
-      updated,
-      skipped: 0,
-      matches: matchRepository.listMatches(1, Math.min(matches.length || 1, 20)),
-    };
+  getSyncStatus() {
+    return syncRepository.getSyncStatus();
   }
 
   listMatches(page: number, pageSize: number) {
@@ -222,6 +210,92 @@ export class MatchService {
 
   clearMatches() {
     matchRepository.clearMatches();
+  }
+
+  private async runSync(runId: string): Promise<MatchSyncResultDto> {
+    logger.info("matches", "sync:start", { syncRunId: runId });
+    let stored = 0;
+    let updated = 0;
+    let skipped = 0;
+
+    try {
+      const currentSummoner = await leagueService.getCurrentSummoner();
+      if (!currentSummoner.puuid) {
+        throw new LcuConnectionError("unexpected_payload", "No current summoner PUUID available.");
+      }
+      const trackedPuuid = currentSummoner.puuid;
+
+      const history = await leagueService.getMatchHistory();
+      const rawGames = extractHistoryGames(history);
+
+      const eligibleGames = rawGames
+        .filter((rawGame): rawGame is Record<string, unknown> => Boolean(rawGame && typeof rawGame === "object"))
+        .slice(0, runtimeConfig.maxSyncMatches);
+
+      skipped += Math.max(rawGames.length - eligibleGames.length, 0);
+
+      const hydratedGames = await mapWithConcurrency(
+        eligibleGames,
+        runtimeConfig.matchDetailConcurrency,
+        async (game) => {
+          const queueId = readNumber(game.queueId);
+          const gameId = readNumber(game.gameId);
+
+          if (!queueId || !runtimeConfig.supportedQueueIds.has(queueId)) {
+            skipped += 1;
+            return null;
+          }
+
+          const fullGame = gameId ? await leagueService.safeGetGameDetails(gameId) : null;
+          const resolvedGame = fullGame ?? game;
+          if (!findCurrentParticipant(resolvedGame, trackedPuuid)) {
+            skipped += 1;
+            return null;
+          }
+
+          return resolvedGame;
+        },
+      );
+
+      const matches = hydratedGames
+        .filter((game): game is Record<string, unknown> => Boolean(game))
+        .map((game) => this.toMatchEntity(game));
+
+      const existingIds = matchRepository.existingMatchIds(matches.map((match) => match.matchId));
+      matchRepository.upsertMatches(matches);
+
+      for (const match of matches) {
+        if (existingIds.has(match.matchId)) {
+          updated += 1;
+        } else {
+          stored += 1;
+        }
+      }
+
+      const recentMatches = matchRepository.listMatchesByIds(matches.map((match) => match.matchId).slice(0, 20));
+      const finishedAt = Date.now();
+      syncRepository.finishRunSuccess(runId, { finishedAt, stored, updated, skipped });
+      const run = syncRepository.getLatestRun();
+
+      if (!run) {
+        throw new Error("Sync run was not persisted.");
+      }
+
+      logger.info("matches", "sync:success", { syncRunId: runId, stored, updated, skipped });
+      return { stored, updated, skipped, run, matches: recentMatches };
+    } catch (error) {
+      const normalized = normalizeError(error);
+      syncRepository.finishRunError(runId, {
+        finishedAt: Date.now(),
+        stored,
+        updated,
+        skipped,
+        errorCode: normalized.code,
+        errorMessage: normalized.message,
+      });
+      logger.error("matches", "sync:error", { syncRunId: runId, code: normalized.code, message: normalized.message });
+      throw normalized;
+    }
   }
 
   private toMatchEntity(game: Record<string, unknown>): MatchEntity {
@@ -305,7 +379,7 @@ export class MatchService {
       };
     });
 
-    const summary = `${gameMode ?? "League"} #${matchId} · ${normalizedParticipants.length} participants${gameModeMutators.length ? ` · ${gameModeMutators.join(", ")}` : ""}`;
+    const summary = `${gameMode ?? "League"} #${matchId} - ${normalizedParticipants.length} participants${gameModeMutators.length ? ` - ${gameModeMutators.join(", ")}` : ""}`;
 
     return {
       matchId,

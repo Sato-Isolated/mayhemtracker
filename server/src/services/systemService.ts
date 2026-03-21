@@ -1,10 +1,43 @@
+import fs from "node:fs";
+import path from "node:path";
 import { spawn } from "node:child_process";
+import { paths } from "../config/paths.js";
+import { getDb } from "../db/index.js";
+import { syncRepository } from "../repositories/syncRepository.js";
+import { leagueService } from "./leagueService.js";
 
 export interface PowerShellResult {
   ok: boolean;
   stdout: string;
   stderr: string;
   exitCode: number | null;
+}
+
+function collectDirectoryStats(root: string): { files: number; directories: number; bytes: number } {
+  if (!fs.existsSync(root)) {
+    return { files: 0, directories: 0, bytes: 0 };
+  }
+
+  let files = 0;
+  let directories = 0;
+  let bytes = 0;
+  const queue = [root];
+
+  while (queue.length) {
+    const current = queue.pop()!;
+    for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
+      const target = path.join(current, entry.name);
+      if (entry.isDirectory()) {
+        directories += 1;
+        queue.push(target);
+      } else if (entry.isFile()) {
+        files += 1;
+        bytes += fs.statSync(target).size;
+      }
+    }
+  }
+
+  return { files, directories, bytes };
 }
 
 export class SystemService {
@@ -49,6 +82,28 @@ export class SystemService {
         });
       });
     });
+  }
+
+  async getRuntimeDiagnostics() {
+    const db = getDb();
+    const journalModeRow = db.prepare(`PRAGMA journal_mode`).get() as { journal_mode?: string };
+    const league = await leagueService.getConnectionStatus();
+    const iconCache = collectDirectoryStats(paths.iconCacheRoot);
+
+    return {
+      storageRoot: paths.storageRoot,
+      db: {
+        path: paths.dbFile,
+        exists: fs.existsSync(paths.dbFile),
+        journalMode: journalModeRow.journal_mode ?? "unknown",
+      },
+      sync: syncRepository.getSyncStatus(),
+      league,
+      iconCache: {
+        root: paths.iconCacheRoot,
+        ...iconCache,
+      },
+    };
   }
 }
 

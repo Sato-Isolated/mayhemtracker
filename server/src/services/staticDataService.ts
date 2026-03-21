@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { paths } from "../config/paths.js";
+import { ExternalDataError } from "../errors/app-error.js";
 import { staticDataRepository } from "../repositories/staticDataRepository.js";
 import type {
   AugmentStaticData,
@@ -111,6 +112,9 @@ export class StaticDataService {
 
   private async getCurrentDataDragonVersion() {
     const response = await fetch("https://ddragon.leagueoflegends.com/api/versions.json");
+    if (!response.ok) {
+      throw new ExternalDataError("Unable to resolve Data Dragon version.", { status: response.status });
+    }
     const versions = (await response.json()) as string[];
     const version = versions[0];
     if (!version) {
@@ -124,6 +128,9 @@ export class StaticDataService {
     const response = await fetch(
       `https://ddragon.leagueoflegends.com/cdn/${version}/data/en_US/champion.json`,
     );
+    if (!response.ok) {
+      throw new ExternalDataError("Unable to fetch champion static data.", { status: response.status, version });
+    }
     const payload = (await response.json()) as DataDragonChampionResponse;
 
     const champions = await Promise.all(
@@ -156,6 +163,9 @@ export class StaticDataService {
 
   private async fetchItems(version: string): Promise<ItemStaticData[]> {
     const response = await fetch(`https://ddragon.leagueoflegends.com/cdn/${version}/data/en_US/item.json`);
+    if (!response.ok) {
+      throw new ExternalDataError("Unable to fetch item static data.", { status: response.status, version });
+    }
     const payload = (await response.json()) as DataDragonItemResponse;
 
     const items = await Promise.all(
@@ -183,6 +193,9 @@ export class StaticDataService {
     const response = await fetch(
       "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/cherry-augments.json",
     );
+    if (!response.ok) {
+      throw new ExternalDataError("Unable to fetch augment static data.", { status: response.status, version });
+    }
     const payload = (await response.json()) as unknown;
     const rows = asArray<Record<string, unknown>>(payload);
 

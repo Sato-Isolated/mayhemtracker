@@ -21,10 +21,18 @@ matchesRouter.get("/matches", (request, response) => {
   response.json({ ok: true, ...matchService.listMatches(query.page, query.pageSize) });
 });
 
+matchesRouter.get("/matches/sync-status", (_request, response) => {
+  response.json({ ok: true, status: matchService.getSyncStatus() });
+});
+
 matchesRouter.get("/matches/:matchId", (request, response) => {
-  const match = matchService.getMatch(request.params.matchId);
+  const params = z.object({
+    matchId: z.string().min(1),
+  }).parse(request.params);
+
+  const match = matchService.getMatch(params.matchId);
   if (!match) {
-    response.status(404).json({ ok: false, error: "Match not found." });
+    response.status(404).json({ ok: false, error: "Match not found.", code: "not_found" });
     return;
   }
 
