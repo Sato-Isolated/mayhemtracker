@@ -22,7 +22,7 @@ import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatDate, formatDuration, getChampionVisual } from "@/lib/tracker-utils";
-import { useTrackerAppData, useTrackerMatchData } from "@/state/tracker-data";
+import { useDiagnostics, useMatches, useStaticData } from "@/state/tracker-data";
 
 export function DebugPage() {
   const {
@@ -30,26 +30,13 @@ export function DebugPage() {
     auth,
     summoner,
     powerShell,
-    staticSync,
-    champions,
-    items,
-    augments,
-    loadStaticLists,
     testStatus,
     loadLeagueAuth,
     loadCurrentSummoner,
     runPowerShellTest,
-    syncStaticData,
-  } = useTrackerAppData();
-  const {
-    matches,
-    matchDetail,
-    selectedMatchId,
-    loadMatches,
-    loadMatchDetail,
-    syncMatches,
-    clearMatches,
-  } = useTrackerMatchData();
+  } = useDiagnostics();
+  const { staticSync, champions, items, augments, loadStaticLists, syncStaticData } = useStaticData();
+  const { matches, matchDetail, selectedMatchId, loadMatches, loadMatchDetail, syncMatches, clearMatches } = useMatches();
 
   return (
     <div className="space-y-6">
@@ -237,31 +224,36 @@ export function DebugPage() {
             <div className="space-y-2">
               {matches.data?.items.length ? (
                 matches.data.items.map((match) => (
-                  <Surface asChild variant={selectedMatchId === match.matchId ? undefined : "subtle"} className={`w-full rounded-2xl px-4 py-3 text-left transition ${selectedMatchId === match.matchId ? "border border-primary bg-primary/8" : "hover:bg-accent/30"}`}>
-                  <button
+                  <Surface
                     key={match.matchId}
-                    type="button"
-                    onClick={() => void loadMatchDetail(match.matchId)}
+                    asChild
+                    variant={selectedMatchId === match.matchId ? undefined : "subtle"}
+                    className={`w-full rounded-2xl px-4 py-3 text-left transition ${selectedMatchId === match.matchId ? "border border-primary bg-primary/8" : "hover:bg-accent/30"}`}
                   >
-                    <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <div className="font-medium">{match.summary}</div>
-                        <div className="text-xs text-muted-foreground">{formatDate(match.gameCreation ?? match.retrievedAt)} · {formatDuration(match.gameDuration)}{match.gameModeMutators.length ? ` · ${match.gameModeMutators.join(", ")}` : ""}</div>
+                    <button
+                      type="button"
+                      className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      onClick={() => void loadMatchDetail(match.matchId)}
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <div className="font-medium">{match.summary}</div>
+                          <div className="text-xs text-muted-foreground">{formatDate(match.gameCreation ?? match.retrievedAt)} · {formatDuration(match.gameDuration)}{match.gameModeMutators.length ? ` · ${match.gameModeMutators.join(", ")}` : ""}</div>
+                        </div>
+                        <Badge variant="outline">{match.gameMode ?? "League"}</Badge>
                       </div>
-                      <Badge variant="outline">{match.gameMode ?? "League"}</Badge>
-                    </div>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {match.participants.slice(0, 5).map((participant, index) => {
-                        const visual = getChampionVisual(participant, champions);
-                        return (
-                          <div key={`${match.matchId}-${participant.puuid ?? index}`} className="flex items-center gap-2 rounded-full bg-secondary/70 px-2 py-1 text-xs">
-                            {visual.icon ? <img src={visual.icon} alt={visual.name} className="h-6 w-6 rounded-full object-cover" /> : null}
-                            <span>{visual.name}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </button>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {match.participants.slice(0, 5).map((participant, index) => {
+                          const visual = getChampionVisual(participant, champions);
+                          return (
+                            <div key={`${match.matchId}-${participant.puuid ?? index}`} className="flex items-center gap-2 rounded-full bg-secondary/70 px-2 py-1 text-xs">
+                              {visual.icon ? <img src={visual.icon} alt={visual.name} className="h-6 w-6 rounded-full object-cover" /> : null}
+                              <span>{visual.name}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </button>
                   </Surface>
                 ))
               ) : (

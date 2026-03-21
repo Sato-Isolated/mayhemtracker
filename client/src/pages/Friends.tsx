@@ -1,15 +1,21 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MetricTile } from "@/components/features/metric-tile";
 import { PageIntro } from "@/components/features/page-intro";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useTrackerAppData } from "@/state/tracker-data";
+import { useAnalytics } from "@/state/tracker-data";
 
 export function FriendsPage() {
-  const { teammates, updatePlayerRating } = useTrackerAppData();
+  const { teammates, updatePlayerRating, loadTeammates } = useAnalytics();
   const [notes, setNotes] = useState<Record<string, string>>({});
   const sorted = [...(teammates.data ?? [])].sort((left, right) => (right.rating ?? 0) - (left.rating ?? 0) || right.matches - left.matches);
+
+  useEffect(() => {
+    if (!teammates.data && !teammates.loading) {
+      void loadTeammates();
+    }
+  }, [loadTeammates, teammates.data, teammates.loading]);
 
   return (
     <div className="space-y-6">
@@ -37,11 +43,13 @@ export function FriendsPage() {
                   <Button key={value} size="sm" variant={entry.rating === value ? "default" : "outline"} onClick={() => void updatePlayerRating(entry.puuid, entry.summonerName, value, notes[entry.puuid] ?? entry.note)}>{value}</Button>
                 ))}
               </div>
+              <label htmlFor={`note-${entry.puuid}`} className="text-xs font-medium text-muted-foreground">Note locale</label>
               <textarea
+                id={`note-${entry.puuid}`}
                 value={notes[entry.puuid] ?? entry.note ?? ""}
                 onChange={(event) => setNotes((current) => ({ ...current, [entry.puuid]: event.target.value }))}
                 placeholder="Note locale sur ce coéquipier"
-                className="bg-[color-mix(in_oklch,var(--card)_78%,var(--surface-2))] text-foreground placeholder:text-muted-foreground min-h-24 w-full rounded-2xl border border-border px-4 py-3 text-sm outline-none focus:border-primary"
+                className="min-h-24 w-full rounded-2xl border border-border bg-[color-mix(in_oklch,var(--card)_78%,var(--surface-2))] px-4 py-3 text-sm text-foreground outline-none ring-offset-2 placeholder:text-muted-foreground focus:border-primary focus-visible:ring-2 focus-visible:ring-ring"
               />
               <Button variant="secondary" onClick={() => void updatePlayerRating(entry.puuid, entry.summonerName, entry.rating, notes[entry.puuid] ?? entry.note)}>Enregistrer la note</Button>
             </CardContent>

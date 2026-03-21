@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { ActivityDay } from "@/lib/types";
+import "./activity-heatmap.css";
 
 const weekdayLabels = [
   { short: "Lun", row: 0 },

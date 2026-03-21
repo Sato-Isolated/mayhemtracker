@@ -8,7 +8,10 @@
     "dev:client": "pnpm --filter client dev",
     "dev:server": "pnpm --filter server dev",
     "build": "pnpm --filter client build && pnpm --filter server build",
-    "db:reset": "pnpm --filter server db:reset"
+    "db:reset": "pnpm --filter server db:reset",
+    "test": "pnpm --filter client test",
+    "test:client": "pnpm --filter client test",
+    "verify": "pnpm test:client && pnpm build"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

@@ -1,0 +1,93 @@
+.app-nav-link,
+.app-sidebar,
+.app-topbar {
+  transition:
+    background-color 220ms ease,
+    border-color 220ms ease,
+    color 220ms ease,
+    box-shadow 220ms ease,
+    background 220ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-nav-link,
+  .app-sidebar,
+  .app-topbar {
+    transition: none;
+  }
+}
+
+.app-sidebar {
+  border: 1px solid var(--border-ui);
+  background:
+    linear-gradient(180deg, color-mix(in oklch, var(--sidebar) 92%, var(--card)), color-mix(in oklch, var(--surface-2) 88%, var(--background)));
+  box-shadow: 0 28px 70px -42px color-mix(in oklch, var(--foreground) 20%, transparent);
+}
+
+.app-sidebar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at top center, color-mix(in oklch, var(--accent) 16%, transparent), transparent 38%),
+    linear-gradient(180deg, color-mix(in oklch, white 10%, transparent), transparent 24%);
+  pointer-events: none;
+}
+
+.app-topbar {
+  border: 1px solid var(--border-ui);
+  background: color-mix(in oklch, var(--topbar) 84%, var(--card));
+  box-shadow: 0 16px 36px -32px color-mix(in oklch, var(--foreground) 14%, transparent);
+  backdrop-filter: blur(18px);
+}
+
+.app-nav-link {
+  border: 1px solid transparent;
+  color: var(--foreground);
+  transition: background-color 140ms ease, border-color 140ms ease, transform 140ms ease;
+}
+
+.app-nav-link:hover {
+  background: var(--hover-overlay);
+  border-color: color-mix(in oklch, var(--border) 80%, var(--primary));
+  transform: translateY(-1px);
+}
+
+.app-nav-link::after {
+  content: "";
+  position: absolute;
+  inset: auto auto 0.6rem 0.7rem;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--accent) 14%, transparent);
+  filter: blur(10px);
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+
+.app-nav-link:hover::after,
+.app-nav-link-active::after {
+  opacity: 1;
+}
+
+.app-nav-link-active {
+  background: linear-gradient(135deg, color-mix(in oklch, var(--accent) 80%, var(--card)), color-mix(in oklch, var(--card) 76%, var(--primary)));
+  border-color: color-mix(in oklch, var(--primary) 32%, var(--border));
+  box-shadow: 0 18px 38px -34px color-mix(in oklch, var(--primary) 36%, transparent);
+}
+
+@media (max-width: 640px) {
+  .app-sidebar,
+  .app-topbar {
+    border-radius: 1.4rem;
+  }
+
+  .app-nav-link {
+    padding: 0.8rem 0.85rem;
+  }
+}
+
+html[data-compact-sidebar="true"] .sidebar-copy {
+  display: none;
+}

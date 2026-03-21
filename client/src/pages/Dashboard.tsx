@@ -1,13 +1,21 @@
+import { useEffect } from "react";
 import { ActivityHeatmap } from "@/components/features/activity-heatmap";
 import { PageIntro } from "@/components/features/page-intro";
 import { RecentMatchFeed } from "@/components/features/recent-match-feed";
 import { StatsOverview } from "@/components/features/stats-overview";
 import { Button } from "@/components/ui/button";
-import { useTrackerAppData, useTrackerMatchData } from "@/state/tracker-data";
+import { useAnalytics, useMatches, useStaticData } from "@/state/tracker-data";
 
 export function DashboardPage() {
-  const { dashboard, champions, items, augments, loadDashboard } = useTrackerAppData();
-  const { syncMatches } = useTrackerMatchData();
+  const { dashboard, loadDashboard } = useAnalytics();
+  const { champions, items, augments } = useStaticData();
+  const { syncMatches } = useMatches();
+
+  useEffect(() => {
+    if (!dashboard.data && !dashboard.loading) {
+      void loadDashboard();
+    }
+  }, [dashboard.data, dashboard.loading, loadDashboard]);
 
   if (!dashboard.data) {
     return (

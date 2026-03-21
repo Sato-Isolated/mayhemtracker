@@ -1,5 +1,5 @@
 import { Bell, MonitorCog, Palette, PanelsTopLeft, SlidersHorizontal } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { getNotificationPermission, requestNotificationPermission } from "@/lib/notifications";
 import { MetricTile } from "@/components/features/metric-tile";
 import { PageIntro } from "@/components/features/page-intro";
@@ -15,7 +15,7 @@ import { Surface } from "@/components/ui/surface";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ToggleGroup } from "@/components/ui/toggle-group";
-import { useTrackerAppData } from "@/state/tracker-data";
+import { useShellSettings } from "@/state/tracker-data";
 
 const themeOptions = [
   {
@@ -49,8 +49,7 @@ const themeOptions = [
 ] as const;
 
 export function SettingsPage() {
-  const { settings, updateSetting } = useTrackerAppData();
-  const settingMap = useMemo(() => Object.fromEntries((settings.data ?? []).map((entry) => [entry.key, entry.value])), [settings.data]);
+  const { settingMap, updateSetting } = useShellSettings();
   const activeTheme = themeOptions.find((option) => option.value === (settingMap.theme ?? "ember")) ?? themeOptions[0];
   const [notifPermission, setNotifPermission] = useState<NotificationPermission | "unsupported">(getNotificationPermission);
   const notifEnabled = settingMap.nativeNotifications === "true";

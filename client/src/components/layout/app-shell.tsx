@@ -1,42 +1,43 @@
 import { BarChart3, Bug, Cog, Home, LayoutGrid, Sparkles, Swords, Users } from "lucide-react";
-import { useEffect, useMemo, type ReactNode } from "react";
+import { useMemo, type ReactNode } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Surface } from "@/components/ui/surface";
 import { cn } from "@/lib/utils";
-import { useTrackerAppData, useTrackerMatchData } from "@/state/tracker-data";
+import { useLeagueConnection, useMatches, useStaticData } from "@/state/tracker-data";
+import "./app-shell.css";
 
 const navigation = [
   { to: "/", label: "Dashboard", description: "Vue centrale", icon: Home },
-  { to: "/profile", label: "Profile", description: "Identite locale", icon: LayoutGrid },
+  { to: "/profile", label: "Profile", description: "Identité locale", icon: LayoutGrid },
   { to: "/history", label: "History", description: "Liste et analyse", icon: Swords },
   { to: "/champions", label: "Champions", description: "Perf par pick", icon: BarChart3 },
   { to: "/augments", label: "Augments", description: "Synergies et taux", icon: Sparkles },
-  { to: "/friends", label: "Friends", description: "Coequipiers", icon: Users },
-  { to: "/settings", label: "Settings", description: "Preferences locales", icon: Cog },
+  { to: "/friends", label: "Friends", description: "Coéquipiers", icon: Users },
+  { to: "/settings", label: "Settings", description: "Préférences locales", icon: Cog },
   { to: "/debug", label: "Debug", description: "Outils internes", icon: Bug },
 ];
 
 const routeCopy: Record<string, { title: string; description: string }> = {
   "/": { title: "Operational dashboard", description: "Pilotage des performances, du sync local et des signaux de session." },
-  "/profile": { title: "Player profile", description: "Resume du compte suivi, records et dynamique recente." },
+  "/profile": { title: "Player profile", description: "Résumé du compte suivi, records et dynamique récente." },
   "/history": { title: "Match history", description: "Navigation dans l’historique local et accès aux analyses de partie." },
   "/champions": { title: "Champion insights", description: "Lecture des performances par champion et distribution du pool." },
-  "/augments": { title: "Augment insights", description: "Lecture des augments les plus utilises et les plus rentables." },
+  "/augments": { title: "Augment insights", description: "Lecture des augments les plus utilisés et les plus rentables." },
   "/friends": { title: "Teammates", description: "Suivi des partenaires fréquents avec rating local persistant." },
-  "/settings": { title: "Interface settings", description: "Preferences locales pour le shell et la densite d’affichage." },
-  "/debug": { title: "Debug console", description: "Outils de verification technique et contrats backend." },
+  "/settings": { title: "Interface settings", description: "Préférences locales pour le shell et la densité d’affichage." },
+  "/debug": { title: "Debug console", description: "Outils de vérification technique et contrats backend." },
 };
 
 export function AppShell({ children }: { children: ReactNode }) {
   const location = useLocation();
-  const { dashboard, leagueConnected, champions, items, augments, settings, syncStaticData } = useTrackerAppData();
-  const { matches, syncMatches } = useTrackerMatchData();
+  const { leagueConnected } = useLeagueConnection();
+  const { champions, items, augments, syncStaticData } = useStaticData();
+  const { matches, syncMatches } = useMatches();
 
   const routeKey = location.pathname.startsWith("/history/") ? "/history" : location.pathname;
   const currentRoute = routeCopy[routeKey] ?? routeCopy["/"];
-  const settingMap = useMemo(() => Object.fromEntries((settings.data ?? []).map((entry) => [entry.key, entry.value])), [settings.data]);
   const shellBadges = useMemo(
     () => [
       { label: `${matches.data?.total ?? 0} matches` },
@@ -46,14 +47,6 @@ export function AppShell({ children }: { children: ReactNode }) {
     ],
     [augments.length, champions.length, items.length, matches.data?.total],
   );
-
-  useEffect(() => {
-    const root = document.documentElement;
-    root.dataset.theme = settingMap.theme ?? "ember";
-    root.dataset.density = settingMap.density ?? "comfortable";
-    root.dataset.accentMode = settingMap.accentMode ?? "warm";
-    root.dataset.compactSidebar = settingMap.compactSidebar ?? "false";
-  }, [settingMap]);
 
   return (
     <div className="grid min-h-screen grid-cols-[290px_minmax(0,1fr)] gap-5 p-5 max-[1100px]:grid-cols-1 max-sm:p-[0.85rem]">
@@ -94,7 +87,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             )} />
             <div className="min-w-0">
               <div className="text-sm font-medium text-foreground">League client</div>
-              <div className="text-xs text-muted-foreground">{leagueConnected ? "Connecte — auto-sync actif" : "Deconnecte"}</div>
+              <div className="text-xs text-muted-foreground">{leagueConnected ? "Connecté · auto-sync actif" : "Déconnecté"}</div>
             </div>
           </div>
         </Surface>

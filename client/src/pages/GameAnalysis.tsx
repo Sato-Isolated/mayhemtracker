@@ -8,19 +8,23 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Surface } from "@/components/ui/surface";
 import { formatCompactStat } from "@/lib/stats-utils";
 import { formatDate, formatDuration } from "@/lib/tracker-utils";
-import { useTrackerAppData, useTrackerMatchData } from "@/state/tracker-data";
+import { useAnalytics, useMatches, useStaticData } from "@/state/tracker-data";
 
 export function GameAnalysisPage() {
   const { matchId } = useParams();
-  const { champions, items, augments, dashboard } = useTrackerAppData();
+  const { champions, items, augments } = useStaticData();
+  const { dashboard, loadDashboard } = useAnalytics();
   const trackedPuuid = dashboard.data?.overview.trackedPlayerPuuid;
-  const { matchDetail, loadMatchDetail } = useTrackerMatchData();
+  const { matchDetail, loadMatchDetail } = useMatches();
 
   useEffect(() => {
     if (matchId && matchDetail.data?.matchId !== matchId && !matchDetail.loading) {
       void loadMatchDetail(matchId);
     }
-  }, [loadMatchDetail, matchDetail.data?.matchId, matchDetail.loading, matchId]);
+    if (!dashboard.data && !dashboard.loading) {
+      void loadDashboard();
+    }
+  }, [dashboard.data, dashboard.loading, loadDashboard, loadMatchDetail, matchDetail.data?.matchId, matchDetail.loading, matchId]);
 
   const match = matchDetail.data;
   const trackedParticipant = trackedPuuid

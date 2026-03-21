@@ -1,13 +1,36 @@
+import { useEffect } from "react";
 import { Trophy, User2 } from "lucide-react";
 import { MetricTile } from "@/components/features/metric-tile";
 import { PageIntro } from "@/components/features/page-intro";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Surface } from "@/components/ui/surface";
 import { formatDate } from "@/lib/tracker-utils";
-import { useTrackerAppData } from "@/state/tracker-data";
+import { useAnalytics } from "@/state/tracker-data";
 
 export function ProfilePage() {
-  const { profile, dashboard, championStats } = useTrackerAppData();
+  const { profile, dashboard, championStats, loadProfile, loadDashboard, loadChampionStats } = useAnalytics();
+
+  useEffect(() => {
+    if (!profile.data && !profile.loading) {
+      void loadProfile();
+    }
+    if (!dashboard.data && !dashboard.loading) {
+      void loadDashboard();
+    }
+    if (!championStats.data && !championStats.loading) {
+      void loadChampionStats();
+    }
+  }, [
+    championStats.data,
+    championStats.loading,
+    dashboard.data,
+    dashboard.loading,
+    loadChampionStats,
+    loadDashboard,
+    loadProfile,
+    profile.data,
+    profile.loading,
+  ]);
 
   if (!profile.data) {
     return <PageIntro eyebrow="Player identity" title="Profile loading" description="Les agrégations de profil se remplissent à partir des matchs locaux synchronisés." />;

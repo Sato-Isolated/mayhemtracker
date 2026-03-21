@@ -1,5 +1,5 @@
 import { Swords } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MatchHistoryRow } from "@/components/features/match-history-row";
 import { MetricTile } from "@/components/features/metric-tile";
 import { PageIntro } from "@/components/features/page-intro";
@@ -7,21 +7,21 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Surface } from "@/components/ui/surface";
-import { useTrackerAppData, useTrackerMatchData } from "@/state/tracker-data";
+import { useAnalytics, useMatches, useStaticData } from "@/state/tracker-data";
 
 export function MatchHistoryPage() {
-  const { champions, items, augments, dashboard } = useTrackerAppData();
+  const { champions, items, augments } = useStaticData();
+  const { dashboard, loadDashboard } = useAnalytics();
   const trackedPuuid = dashboard.data?.overview.trackedPlayerPuuid;
-  const {
-    matches,
-    matchPage,
-    matchPageSize,
-    setMatchPage,
-    selectedMatchId,
-    matchDetail,
-    loadMatchDetail,
-  } = useTrackerMatchData();
+  const { matches, matchPage, matchPageSize, setMatchPage, selectedMatchId, matchDetail, loadMatchDetail } = useMatches();
   const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!dashboard.data && !dashboard.loading) {
+      void loadDashboard();
+    }
+  }, [dashboard.data, dashboard.loading, loadDashboard]);
+
   const totalPages = Math.max(Math.ceil((matches.data?.total ?? 0) / matchPageSize), 1);
   const totalMatches = matches.data?.total ?? 0;
   const pageItems = matches.data?.items ?? [];
