@@ -1,4 +1,4 @@
-import { Bell, MonitorCog, Palette, PanelsTopLeft, SlidersHorizontal } from "lucide-react";
+import { Bell, Clock3, MonitorCog, Palette, PanelsTopLeft, RefreshCcw, SlidersHorizontal } from "lucide-react";
 import { useState } from "react";
 import { getNotificationPermission, requestNotificationPermission } from "@/lib/notifications";
 import { MetricTile } from "@/components/features/metric-tile";
@@ -57,6 +57,8 @@ export function SettingsPage() {
   const showPageDescriptions = settingMap.showPageDescriptions ?? "true";
   const stickyToolbars = settingMap.stickyToolbars ?? "true";
   const defaultHistoryView = settingMap.defaultHistoryView ?? "split";
+  const autoSyncEnabled = settingMap.autoSyncEnabled !== "false";
+  const autoSyncIntervalSeconds = settingMap.autoSyncIntervalSeconds ?? "10";
 
   async function toggleNotifications() {
     if (notifEnabled) {
@@ -86,6 +88,8 @@ export function SettingsPage() {
       updateSetting("showPageDescriptions", "true"),
       updateSetting("stickyToolbars", "true"),
       updateSetting("defaultHistoryView", "split"),
+      updateSetting("autoSyncEnabled", "true"),
+      updateSetting("autoSyncIntervalSeconds", "10"),
     ]);
   }
 
@@ -107,6 +111,8 @@ export function SettingsPage() {
         <MetricTile label="Descriptions" value={showPageDescriptions === "true" ? "Visible" : "Hidden"} icon={<PanelsTopLeft className="h-4 w-4" />} />
         <MetricTile label="Toolbars" value={stickyToolbars === "true" ? "Sticky" : "Inline"} icon={<PanelsTopLeft className="h-4 w-4" />} />
         <MetricTile label="History view" value={<span className="capitalize">{defaultHistoryView}</span>} icon={<MonitorCog className="h-4 w-4" />} />
+        <MetricTile label="Auto-sync" value={autoSyncEnabled ? "On" : "Off"} icon={<RefreshCcw className="h-4 w-4" />} />
+        <MetricTile label="Sync interval" value={`${autoSyncIntervalSeconds}s`} icon={<Clock3 className="h-4 w-4" />} />
         <MetricTile label="Notifications" value={notifEnabled ? "On" : "Off"} icon={<Bell className="h-4 w-4" />} />
         <MetricTile label="Scope" value="Stored locally" icon={<MonitorCog className="h-4 w-4" />} />
       </div>
@@ -215,6 +221,32 @@ export function SettingsPage() {
             value={defaultHistoryView as "split" | "inline"}
             onValueChange={(value) => void updateSetting("defaultHistoryView", value)}
           />
+        </SettingCard>
+
+        <SettingCard
+          title={<span className="flex items-center gap-2"><RefreshCcw className="h-4 w-4" /> Auto-sync</span>}
+          description="Background match sync driven by League connection state and gameflow."
+          hint="Enabled keeps stored matches and analytics fresh automatically, with a silent refresh after reconnects, match end, and heartbeat checks."
+        >
+          <div className="space-y-4">
+            <ToggleGroup
+              options={[{ value: "true", label: "Enabled" }, { value: "false", label: "Disabled" }]}
+              value={(autoSyncEnabled ? "true" : "false") as "true" | "false"}
+              onValueChange={(value) => void updateSetting("autoSyncEnabled", value)}
+            />
+            <div className="space-y-2">
+              <div className="text-sm font-medium text-foreground">Polling interval</div>
+              <ToggleGroup
+                options={[
+                  { value: "10", label: "10s", disabled: !autoSyncEnabled },
+                  { value: "30", label: "30s", disabled: !autoSyncEnabled },
+                  { value: "60", label: "60s", disabled: !autoSyncEnabled },
+                ]}
+                value={autoSyncIntervalSeconds as "10" | "30" | "60"}
+                onValueChange={(value) => void updateSetting("autoSyncIntervalSeconds", value)}
+              />
+            </div>
+          </div>
         </SettingCard>
 
         <SettingCard

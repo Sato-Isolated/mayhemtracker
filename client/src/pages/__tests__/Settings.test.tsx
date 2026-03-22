@@ -1,23 +1,26 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { SettingsPage } from "@/pages/Settings";
 
 const updateSetting = vi.fn<(...args: string[]) => Promise<void>>().mockResolvedValue(undefined);
+const settingMap = {
+  theme: "ember",
+  accentMode: "warm",
+  density: "comfortable",
+  dataDensity: "comfortable",
+  compactSidebar: "false",
+  showPageDescriptions: "true",
+  stickyToolbars: "true",
+  defaultHistoryView: "split",
+  nativeNotifications: "false",
+  autoSyncEnabled: "true",
+  autoSyncIntervalSeconds: "10",
+};
 
 vi.mock("@/state/tracker-data", () => ({
   useShellSettings: () => ({
-    settingMap: {
-      theme: "ember",
-      accentMode: "warm",
-      density: "comfortable",
-      dataDensity: "comfortable",
-      compactSidebar: "false",
-      showPageDescriptions: "true",
-      stickyToolbars: "true",
-      defaultHistoryView: "split",
-      nativeNotifications: "false",
-    },
+    settingMap,
     updateSetting,
   }),
 }));
@@ -30,6 +33,8 @@ vi.mock("@/lib/notifications", () => ({
 describe("SettingsPage", () => {
   beforeEach(() => {
     updateSetting.mockClear();
+    settingMap.autoSyncEnabled = "true";
+    settingMap.autoSyncIntervalSeconds = "10";
   });
 
   it("resets local shell defaults from the reset action", async () => {
@@ -39,7 +44,7 @@ describe("SettingsPage", () => {
 
     await user.click(screen.getByRole("button", { name: /reset defaults/i }));
 
-    await waitFor(() => expect(updateSetting).toHaveBeenCalledTimes(8));
+    await waitFor(() => expect(updateSetting).toHaveBeenCalledTimes(10));
     expect(updateSetting).toHaveBeenCalledWith("theme", "ember");
     expect(updateSetting).toHaveBeenCalledWith("accentMode", "warm");
     expect(updateSetting).toHaveBeenCalledWith("density", "comfortable");
@@ -48,5 +53,22 @@ describe("SettingsPage", () => {
     expect(updateSetting).toHaveBeenCalledWith("showPageDescriptions", "true");
     expect(updateSetting).toHaveBeenCalledWith("stickyToolbars", "true");
     expect(updateSetting).toHaveBeenCalledWith("defaultHistoryView", "split");
+    expect(updateSetting).toHaveBeenCalledWith("autoSyncEnabled", "true");
+    expect(updateSetting).toHaveBeenCalledWith("autoSyncIntervalSeconds", "10");
+  });
+
+  it("updates auto-sync preferences from the settings card", async () => {
+    const user = userEvent.setup();
+
+    render(<SettingsPage />);
+
+    const autoSyncCard = screen.getByRole("heading", { name: /auto-sync/i }).closest(".card-shell");
+    expect(autoSyncCard).not.toBeNull();
+
+    await user.click(within(autoSyncCard as HTMLElement).getByRole("button", { name: "30s" }));
+    await user.click(within(autoSyncCard as HTMLElement).getByRole("button", { name: "Disabled" }));
+
+    expect(updateSetting).toHaveBeenCalledWith("autoSyncIntervalSeconds", "30");
+    expect(updateSetting).toHaveBeenCalledWith("autoSyncEnabled", "false");
   });
 });

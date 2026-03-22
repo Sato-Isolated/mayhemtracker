@@ -15,8 +15,12 @@ type MatchesState = {
   pageSize: number;
 };
 
+type MatchSyncReason = "manual" | "reconnect" | "heartbeat" | "match-ended";
+
 interface MatchSyncOptions {
   origin?: "manual" | "auto";
+  reason?: MatchSyncReason;
+  silent?: boolean;
 }
 
 interface MatchesContextValue {
@@ -108,25 +112,39 @@ export function MatchesProvider({ children }: { children: ReactNode }) {
 
   async function syncMatches(options: MatchSyncOptions = {}) {
     const origin = options.origin ?? "manual";
+    const reason = options.reason ?? (origin === "auto" ? "heartbeat" : "manual");
+    const silent = options.silent ?? origin === "auto";
     const payload = await api.syncMatches();
-    const syncMessage =
-      origin === "auto"
-        ? `Auto-sync: ${payload.result.stored} nouveaux, ${payload.result.updated} mis à jour`
-        : `Synchronisation: ${payload.result.stored} nouveaux, ${payload.result.updated} mis à jour`;
+    const hasStoredMatches = payload.result.stored > 0;
+    const syncLabel = reason === "manual" ? "Synchronisation" : "Auto-sync";
+    const syncMessage = `${syncLabel}: ${payload.result.stored} nouveaux, ${payload.result.updated} mis a jour`;
 
-    toast.success(syncMessage);
+    if (!silent) {
+      toast.success(syncMessage);
+    }
 
-    if (payload.result.stored > 0 && notificationsEnabled) {
+    if (hasStoredMatches && notificationsEnabled) {
       sendNotification("Mayhem Tracker", { body: syncMessage });
     }
 
+    const activeMatchId = selectedMatchIdRef.current;
+    const shouldRefreshDetail = Boolean(
+      activeMatchId &&
+      (matchPageRef.current === 1 || payload.result.matches.some((match) => match.matchId === activeMatchId)),
+    );
+
     await Promise.all([loadMatches(), refreshAnalytics()]);
+
+    if (shouldRefreshDetail && activeMatchId) {
+      await loadMatchDetail(activeMatchId);
+    }
+
     return payload;
   }
 
   async function clearMatches() {
     await api.clearMatches();
-    toast.success("Matchs locaux supprimés");
+    toast.success("Matchs locaux supprimes");
     setMatches({ loading: false, data: { items: [], total: 0, page: 1, pageSize: matchPageSize } });
     setSelectedMatchId(null);
     setMatchDetail(initialAsyncState<MatchDetail>());

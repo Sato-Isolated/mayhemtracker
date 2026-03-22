@@ -13,6 +13,8 @@ const defaultSettings = {
   stickyToolbars: "true",
   defaultHistoryView: "split",
   nativeNotifications: "false",
+  autoSyncEnabled: "true",
+  autoSyncIntervalSeconds: "10",
 };
 
 export class SettingsService {

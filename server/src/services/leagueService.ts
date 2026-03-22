@@ -1,7 +1,7 @@
 import { authenticate, createHttp1Request, type Credentials, type HttpRequestOptions } from "league-connect";
 import { runtimeConfig } from "../config/runtime.js";
 import { LcuConnectionError } from "../errors/app-error.js";
-import type { CurrentSummonerDto, LeagueCredentialsDto } from "../types/league.js";
+import type { CurrentSummonerDto, LeagueCredentialsDto, LeagueGameflowDto } from "../types/league.js";
 import { logger } from "../utils/logger.js";
 
 let credentials: Credentials | null = null;
@@ -53,6 +53,47 @@ function requireRecord(payload: unknown, message: string) {
   }
 
   return payload as Record<string, unknown>;
+}
+
+function readString(value: unknown) {
+  return typeof value === "string" ? value : undefined;
+}
+
+function readNumber(value: unknown) {
+  return typeof value === "number" ? value : undefined;
+}
+
+function readRecord(value: unknown) {
+  return value && typeof value === "object" ? (value as Record<string, unknown>) : undefined;
+}
+
+function isInGamePhase(phase: string | undefined) {
+  if (!phase) {
+    return false;
+  }
+
+  const normalized = phase.trim().toLowerCase();
+  return normalized === "gamestart" || normalized === "inprogress" || normalized === "reconnect";
+}
+
+function extractGameflowDetails(payload: unknown) {
+  const session = readRecord(payload);
+  const gameData = readRecord(session?.gameData);
+  const queue = readRecord(gameData?.queue);
+  const gameDodge = readRecord(gameData?.gameDodge);
+
+  return {
+    gameId:
+      readNumber(session?.gameId) ??
+      readNumber(gameData?.gameId) ??
+      readNumber(gameData?.id),
+    queueId:
+      readNumber(session?.queueId) ??
+      readNumber(gameData?.queueId) ??
+      readNumber(queue?.id) ??
+      readNumber(queue?.queueId) ??
+      readNumber(gameDodge?.queueId),
+  };
 }
 
 async function connect(forceRefresh = false) {
@@ -161,6 +202,69 @@ export class LeagueService {
     };
   }
 
+  async getGameflowState(): Promise<LeagueGameflowDto> {
+    try {
+      await connect(true);
+    } catch (error) {
+      const classified = classifyLeagueError(error);
+      return {
+        connected: false,
+        isInGame: false,
+        errorCode: classified.code,
+        errorMessage: classified.message,
+      };
+    }
+
+    let phase: string | undefined;
+
+    try {
+      const phasePayload = await leagueRequest<unknown>("/lol-gameflow/v1/gameflow-phase");
+      phase = readString(phasePayload) ?? readString(readRecord(phasePayload)?.phase);
+    } catch (error) {
+      const classified = classifyLeagueError(error);
+      return {
+        connected: classified.code === "endpoint_unavailable",
+        phase,
+        isInGame: false,
+        errorCode: classified.code,
+        errorMessage: classified.message,
+      };
+    }
+
+    try {
+      const sessionPayload = await leagueRequest<unknown>("/lol-gameflow/v1/session");
+      const details = extractGameflowDetails(sessionPayload);
+
+      return {
+        connected: true,
+        phase,
+        isInGame: isInGamePhase(phase),
+        gameId: details.gameId,
+        queueId: details.queueId,
+      };
+    } catch (error) {
+      const classified = classifyLeagueError(error);
+
+      if (classified.code !== "endpoint_unavailable") {
+        return {
+          connected: false,
+          phase,
+          isInGame: isInGamePhase(phase),
+          errorCode: classified.code,
+          errorMessage: classified.message,
+        };
+      }
+
+      return {
+        connected: true,
+        phase,
+        isInGame: isInGamePhase(phase),
+        errorCode: classified.code,
+        errorMessage: classified.message,
+      };
+    }
+  }
+
   async getMatchHistory() {
     const currentSummoner = await this.getCurrentSummoner();
     if (!currentSummoner.puuid) {
@@ -209,4 +313,4 @@ export class LeagueService {
 }
 
 export const leagueService = new LeagueService();
-export { classifyLeagueError };
+export { classifyLeagueError, isInGamePhase };

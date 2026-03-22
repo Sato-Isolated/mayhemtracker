@@ -22,3 +22,13 @@ export interface CurrentSummonerDto {
   summonerLevel?: number;
   raw: unknown;
 }
+
+export interface LeagueGameflowDto {
+  connected: boolean;
+  phase?: string;
+  isInGame: boolean;
+  gameId?: number;
+  queueId?: number;
+  errorCode?: string;
+  errorMessage?: string;
+}

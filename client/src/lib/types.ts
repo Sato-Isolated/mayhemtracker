@@ -8,6 +8,17 @@ export interface LeagueConnectionResponse {
   connected: boolean;
 }
 
+export interface LeagueGameflowResponse {
+  ok: boolean;
+  connected: boolean;
+  phase?: string;
+  isInGame: boolean;
+  gameId?: number;
+  queueId?: number;
+  errorCode?: string;
+  errorMessage?: string;
+}
+
 export interface LeagueAuthResponse {
   ok: boolean;
   credentials?: {

@@ -10,6 +10,7 @@ const storageRoot = fs.mkdtempSync(path.join(os.tmpdir(), "mayhemtracker-server-
 process.env.MAYHEMTRACKER_STORAGE_DIR = storageRoot;
 
 const { createApp } = await import("./app.js");
+const { leagueService } = await import("./services/leagueService.js");
 
 async function withServer(run: (baseUrl: string) => Promise<void>) {
   const app = createApp();
@@ -83,4 +84,105 @@ test("invalid rating payload returns a validation error", async () => {
     assert.equal(payload.code, "validation_error");
     assert.ok(payload.details);
   });
+});
+
+test("league gameflow route exposes connected gameflow state", async () => {
+  const original = leagueService.getGameflowState;
+  leagueService.getGameflowState = async () => ({
+    connected: true,
+    phase: "InProgress",
+    isInGame: true,
+    gameId: 12345,
+    queueId: 450,
+  });
+
+  try {
+    await withServer(async (baseUrl) => {
+      const response = await fetch(`${baseUrl}/league/gameflow`);
+      assert.equal(response.status, 200);
+
+      const payload = await response.json() as {
+        ok: boolean;
+        connected: boolean;
+        phase?: string;
+        isInGame: boolean;
+        gameId?: number;
+        queueId?: number;
+      };
+
+      assert.equal(payload.ok, true);
+      assert.equal(payload.connected, true);
+      assert.equal(payload.phase, "InProgress");
+      assert.equal(payload.isInGame, true);
+      assert.equal(payload.gameId, 12345);
+      assert.equal(payload.queueId, 450);
+    });
+  } finally {
+    leagueService.getGameflowState = original;
+  }
+});
+
+test("league gameflow route exposes disconnected state", async () => {
+  const original = leagueService.getGameflowState;
+  leagueService.getGameflowState = async () => ({
+    connected: false,
+    isInGame: false,
+    errorCode: "client_not_running",
+    errorMessage: "League client is not running.",
+  });
+
+  try {
+    await withServer(async (baseUrl) => {
+      const response = await fetch(`${baseUrl}/league/gameflow`);
+      assert.equal(response.status, 200);
+
+      const payload = await response.json() as {
+        ok: boolean;
+        connected: boolean;
+        isInGame: boolean;
+        errorCode?: string;
+      };
+
+      assert.equal(payload.ok, true);
+      assert.equal(payload.connected, false);
+      assert.equal(payload.isInGame, false);
+      assert.equal(payload.errorCode, "client_not_running");
+    });
+  } finally {
+    leagueService.getGameflowState = original;
+  }
+});
+
+test("league gameflow route preserves endpoint_unavailable while connected", async () => {
+  const original = leagueService.getGameflowState;
+  leagueService.getGameflowState = async () => ({
+    connected: true,
+    phase: "Lobby",
+    isInGame: false,
+    errorCode: "endpoint_unavailable",
+    errorMessage: "League endpoint is unavailable.",
+  });
+
+  try {
+    await withServer(async (baseUrl) => {
+      const response = await fetch(`${baseUrl}/league/gameflow`);
+      assert.equal(response.status, 200);
+
+      const payload = await response.json() as {
+        ok: boolean;
+        connected: boolean;
+        phase?: string;
+        isInGame: boolean;
+        errorCode?: string;
+      };
+
+      assert.equal(payload.ok, true);
+      assert.equal(payload.connected, true);
+      assert.equal(payload.phase, "Lobby");
+      assert.equal(payload.isInGame, false);
+      assert.equal(payload.errorCode, "endpoint_unavailable");
+    });
+  } finally {
+    leagueService.getGameflowState = original;
+  }
 });

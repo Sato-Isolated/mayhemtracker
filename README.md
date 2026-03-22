@@ -92,6 +92,7 @@ Tu peux surcharger ce dossier avec la variable d'environnement `MAYHEMTRACKER_ST
 - `GET /api/league/connection`
 - `GET /api/league/auth`
 - `GET /api/league/summoner`
+- `GET /api/league/gameflow`
 - `GET /api/system/powershell-test`
 - `POST /api/static-data/sync`
 - `GET /api/static-data/champions`

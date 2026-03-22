@@ -22,3 +22,7 @@ leagueRouter.get("/league/summoner", async (_request, response, next) => {
     next(error);
   }
 });
+
+leagueRouter.get("/league/gameflow", async (_request, response) => {
+  response.json({ ok: true, ...(await leagueService.getGameflowState()) });
+});

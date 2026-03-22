@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, type Dispatch, type SetStateAction } from "react";
 import { toast } from "sonner";
 import { debugLog } from "@/lib/debug-log";
 
@@ -18,12 +18,16 @@ type RunActionOptions = {
 export function useAsyncAction(scope: string) {
   const runAction = useCallback(
     async function runAction<T>(
-      setState: (value: AsyncState<T>) => void,
+      setState: Dispatch<SetStateAction<AsyncState<T>>>,
       action: () => Promise<T>,
       options: RunActionOptions,
     ) {
       debugLog.info(scope, `${options.actionName}:start`);
-      setState({ loading: true });
+      setState((current) => ({
+        loading: true,
+        data: current.data,
+        error: undefined,
+      }));
 
       try {
         const data = await action();
@@ -38,7 +42,11 @@ export function useAsyncAction(scope: string) {
       } catch (error) {
         const message = error instanceof Error ? error.message : "Unknown error";
         debugLog.error(scope, `${options.actionName}:error`, { message, error });
-        setState({ loading: false, error: message });
+        setState((current) => ({
+          loading: false,
+          data: current.data,
+          error: message,
+        }));
         toast.error(message);
         return undefined;
       }
