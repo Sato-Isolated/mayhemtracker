@@ -177,7 +177,6 @@ function buildActivity(trackedMatches: TrackedMatchSnapshot[], days = 365): Acti
     counts.set(key, (counts.get(key) ?? 0) + 1);
   }
 
-  const max = Math.max(...counts.values(), 0);
   const today = new Date();
   const output: ActivityDay[] = [];
 
@@ -191,7 +190,7 @@ function buildActivity(trackedMatches: TrackedMatchSnapshot[], days = 365): Acti
       key,
       label: date.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" }),
       matches,
-      intensity: max ? Math.max(1, Math.round((matches / max) * 4)) : 0,
+      intensity: Math.min(matches, 7),
     });
   }
 

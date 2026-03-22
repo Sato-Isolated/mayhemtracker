@@ -48,6 +48,8 @@ const themeOptions = [
   },
 ] as const;
 
+const heatmapPreviewLevels = [0, 1, 2, 3, 4, 5, 6, 7] as const;
+
 export function SettingsPage() {
   const { settingMap, updateSetting } = useShellSettings();
   const activeTheme = themeOptions.find((option) => option.value === (settingMap.theme ?? "ember")) ?? themeOptions[0];
@@ -295,6 +297,24 @@ export function SettingsPage() {
                   <span className="inline-flex items-center gap-[0.55rem] rounded-full border border-border/60 bg-[color-mix(in_oklch,var(--card)_68%,var(--primary))] px-[0.72rem] py-[0.42rem] text-[0.76rem] text-primary-foreground shadow-[inset_0_1px_0_color-mix(in_oklch,white_45%,transparent)]">Primary</span>
                   <span className="inline-flex items-center gap-[0.55rem] rounded-full border border-border/60 bg-[color-mix(in_oklch,var(--card)_76%,var(--secondary))] px-[0.72rem] py-[0.42rem] text-[0.76rem] text-muted-foreground shadow-[inset_0_1px_0_color-mix(in_oklch,white_45%,transparent)]">Muted</span>
                   <span className="inline-flex items-center gap-[0.55rem] rounded-full border border-border/60 bg-[color-mix(in_oklch,var(--card)_76%,var(--secondary))] px-[0.72rem] py-[0.42rem] text-[0.76rem] text-muted-foreground shadow-[inset_0_1px_0_color-mix(in_oklch,white_45%,transparent)]">Surface</span>
+                </div>
+                <div className="mt-4 space-y-2">
+                  <SectionLabel>Heatmap ramp</SectionLabel>
+                  <div className="flex items-start gap-2" data-testid="heatmap-diagnostics-strip">
+                    {heatmapPreviewLevels.map((level) => (
+                      <div key={level} className="grid justify-items-center gap-1">
+                        <div
+                          className="h-4 w-4 rounded-[0.28rem] border shadow-[inset_0_1px_0_color-mix(in_oklch,white_26%,transparent)]"
+                          data-testid={`heatmap-diagnostics-cell-${level}`}
+                          style={{
+                            backgroundColor: `var(--heatmap-cell-${level})`,
+                            borderColor: "var(--heatmap-cell-border)",
+                          }}
+                        />
+                        <span className="text-[0.62rem] font-medium text-muted-foreground">{level}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
 

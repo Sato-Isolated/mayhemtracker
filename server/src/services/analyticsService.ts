@@ -204,7 +204,6 @@ function buildActivity(trackedMatches: TrackedMatch[], days = 365) {
     counts.set(key, (counts.get(key) ?? 0) + 1);
   }
 
-  const maxMatches = Math.max(...counts.values(), 0);
   const today = new Date();
   const output = [] as DashboardAnalyticsDto["activity"];
 
@@ -218,7 +217,7 @@ function buildActivity(trackedMatches: TrackedMatch[], days = 365) {
       key,
       label: date.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" }),
       matches,
-      intensity: maxMatches ? Math.max(1, Math.round((matches / maxMatches) * 4)) : 0,
+      intensity: Math.min(matches, 7),
     });
   }
 

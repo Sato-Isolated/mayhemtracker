@@ -71,4 +71,15 @@ describe("SettingsPage", () => {
     expect(updateSetting).toHaveBeenCalledWith("autoSyncIntervalSeconds", "30");
     expect(updateSetting).toHaveBeenCalledWith("autoSyncEnabled", "false");
   });
+
+  it("renders the heatmap diagnostics strip in the preview board", () => {
+    render(<SettingsPage />);
+
+    const strip = screen.getByTestId("heatmap-diagnostics-strip");
+    expect(strip).toBeInTheDocument();
+
+    for (const level of ["0", "1", "2", "3", "4", "5", "6", "7"]) {
+      expect(within(strip).getByTestId(`heatmap-diagnostics-cell-${level}`)).toBeInTheDocument();
+    }
+  });
 });
