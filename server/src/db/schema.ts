@@ -20,9 +20,9 @@ export const matches = sqliteTable("matches", {
   retrievedAt: integer("retrieved_at").notNull(),
   summary: text("summary").notNull(),
   rawPayload: text("raw_payload").notNull(),
-}, (table) => ({
-  retrievedAtIdx: index("idx_matches_retrieved_at").on(table.retrievedAt),
-}));
+}, (table) => [
+  index("idx_matches_retrieved_at").on(table.retrievedAt),
+]);
 
 export const matchParticipants = sqliteTable("match_participants", {
   matchId: text("match_id").notNull().references(() => matches.matchId, { onDelete: "cascade" }),
@@ -61,12 +61,12 @@ export const matchParticipants = sqliteTable("match_participants", {
   perksJson: text("perks_json").notNull(),
   statsJson: text("stats_json").notNull(),
   rawPayload: text("raw_payload").notNull(),
-}, (table) => ({
-  pk: primaryKey({ columns: [table.matchId, table.participantIndex] }),
-  matchIdIdx: index("idx_match_participants_match_id").on(table.matchId),
-  championIdIdx: index("idx_match_participants_champion_id").on(table.championId),
-  puuidIdx: index("idx_match_participants_puuid").on(table.puuid),
-}));
+}, (table) => [
+  primaryKey({ columns: [table.matchId, table.participantIndex] }),
+  index("idx_match_participants_match_id").on(table.matchId),
+  index("idx_match_participants_champion_id").on(table.championId),
+  index("idx_match_participants_puuid").on(table.puuid),
+]);
 
 export const matchTeams = sqliteTable("match_teams", {
   matchId: text("match_id").notNull().references(() => matches.matchId, { onDelete: "cascade" }),
@@ -75,10 +75,10 @@ export const matchTeams = sqliteTable("match_teams", {
   bansJson: text("bans_json").notNull().default("[]"),
   objectivesJson: text("objectives_json").notNull(),
   rawPayload: text("raw_payload").notNull(),
-}, (table) => ({
-  pk: primaryKey({ columns: [table.matchId, table.teamId] }),
-  matchIdIdx: index("idx_match_teams_match_id").on(table.matchId),
-}));
+}, (table) => [
+  primaryKey({ columns: [table.matchId, table.teamId] }),
+  index("idx_match_teams_match_id").on(table.matchId),
+]);
 
 export const staticChampions = sqliteTable("static_champions", {
   id: text("id").primaryKey(),
@@ -137,9 +137,9 @@ export const syncRuns = sqliteTable("sync_runs", {
   skipped: integer("skipped").notNull().default(0),
   errorCode: text("error_code"),
   errorMessage: text("error_message"),
-}, (table) => ({
-  startedAtIdx: index("idx_sync_runs_started_at").on(table.startedAt),
-}));
+}, (table) => [
+  index("idx_sync_runs_started_at").on(table.startedAt),
+]);
 
 export const schema = {
   appMetadata,
