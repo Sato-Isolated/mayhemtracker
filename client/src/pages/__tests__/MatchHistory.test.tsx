@@ -165,6 +165,9 @@ describe("MatchHistoryPage", () => {
       </MemoryRouter>,
     );
 
+    expect(screen.getByText(/matchs stockes/i)).toBeInTheDocument();
+    expect(screen.getByText(/liste des matchs/i)).toBeInTheDocument();
+
     await user.click(screen.getByRole("button", { name: /aatrox/i }));
 
     const detailPanel = screen.getByTestId("match-history-detail-panel");
