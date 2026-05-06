@@ -75,7 +75,7 @@ export function AugmentsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3.5">
       <PageIntro eyebrow="Augment analytics" title="Augment board" description="Compact meta board for rarity filtering, ranking, and fast inspection." />
 
       <div className="grid gap-3 md:grid-cols-3">
@@ -122,12 +122,12 @@ export function AugmentsPage() {
         )}
       />
 
-      <Card>
-        <CardHeader>
+      <Card className="border-[color-mix(in_oklch,var(--border)_86%,var(--primary))]">
+        <CardHeader className="pb-3">
           <CardTitle>Augment board</CardTitle>
           <CardDescription>Dense table view tuned for filtering rarity and spotting value quickly.</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-0">
           <Table>
             <TableHeader>
               <TableRow>

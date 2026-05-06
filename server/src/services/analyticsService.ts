@@ -349,6 +349,7 @@ function buildAugmentStats(trackedMatches: TrackedMatch[]): AugmentStatsDto[] {
 }
 
 function buildTeammates(trackedMatches: TrackedMatch[], trackedPuuid: string): TeammateStatsDto[] {
+  const recentThreshold = Date.now() - 30 * 24 * 60 * 60 * 1000;
   const teammates = new Map<string, {
     puuid: string;
     summonerName: string;
@@ -356,6 +357,8 @@ function buildTeammates(trackedMatches: TrackedMatch[], trackedPuuid: string): T
     winsTogether: number;
     lossesTogether: number;
     lastSeenAt?: number;
+    recentMatchesTogether: number;
+    totalKdaTogether: number;
   }>();
 
   for (const entry of trackedMatches) {
@@ -371,6 +374,8 @@ function buildTeammates(trackedMatches: TrackedMatch[], trackedPuuid: string): T
         winsTogether: 0,
         lossesTogether: 0,
         lastSeenAt: undefined,
+        recentMatchesTogether: 0,
+        totalKdaTogether: 0,
       };
 
       current.matches += 1;
@@ -379,6 +384,13 @@ function buildTeammates(trackedMatches: TrackedMatch[], trackedPuuid: string): T
       } else {
         current.lossesTogether += 1;
       }
+      if (entry.playedAt >= recentThreshold) {
+        current.recentMatchesTogether += 1;
+      }
+      const kills = entry.participant.kills ?? 0;
+      const assists = entry.participant.assists ?? 0;
+      const deaths = entry.participant.deaths ?? 0;
+      current.totalKdaTogether += (kills + assists) / Math.max(deaths, 1);
       current.lastSeenAt = Math.max(current.lastSeenAt ?? 0, entry.playedAt);
       if (!current.summonerName || current.summonerName === "Unknown player") {
         current.summonerName = ally.summonerName ?? ally.riotIdGameName ?? current.summonerName;
@@ -392,6 +404,7 @@ function buildTeammates(trackedMatches: TrackedMatch[], trackedPuuid: string): T
     .map((row) => ({
       ...row,
       winRateTogether: row.matches ? Math.round((row.winsTogether / row.matches) * 100) : 0,
+      averageKdaTogether: row.matches ? round(row.totalKdaTogether / row.matches, 2) : 0,
     }));
 }
 

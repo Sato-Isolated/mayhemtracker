@@ -52,10 +52,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   );
 
   return (
-    <div className="grid min-h-screen grid-cols-[260px_minmax(0,1fr)] gap-6 p-6 max-[1100px]:grid-cols-1 max-sm:p-3">
+    <div className="mx-auto grid min-h-screen w-full max-w-[1660px] grid-cols-[250px_minmax(0,1fr)] gap-5 px-5 py-4 max-[1300px]:grid-cols-[234px_minmax(0,1fr)] max-[1100px]:grid-cols-1 max-sm:px-3 max-sm:py-3">
       <aside
         className={cn(
-          "relative sticky top-6 flex max-h-[calc(100vh-3rem)] flex-col justify-between gap-5 overflow-y-auto border border-[var(--border-ui)]",
+          "relative sticky top-4 flex max-h-[calc(100vh-2rem)] flex-col justify-between gap-4 overflow-y-auto border border-[var(--border-ui)]",
           "bg-[var(--sidebar)] p-4 shadow-[0_2px_14px_-10px_color-mix(in_oklch,var(--foreground)_30%,transparent)] transition-[background,border-color,color,box-shadow,background-color] duration-220 motion-reduce:transition-none",
           "max-[1100px]:static max-[1100px]:min-h-auto",
         )}
@@ -119,29 +119,29 @@ export function AppShell({ children }: { children: ReactNode }) {
         </Surface>
       </aside>
 
-      <div className="min-w-0 flex flex-col gap-4">
+      <div className="min-w-0 flex flex-col gap-3.5 pb-2">
         <header
           className={cn(
-            "sticky top-6 z-10 flex flex-wrap items-center justify-between gap-3 border border-[var(--border-ui)]",
-            "bg-[color-mix(in_oklch,var(--topbar)_94%,var(--card))] px-4 shadow-[0_2px_14px_-10px_color-mix(in_oklch,var(--foreground)_30%,transparent)] backdrop-blur-[6px]",
+            "sticky top-4 z-10 flex flex-wrap items-center justify-between gap-3 border border-[var(--border-ui)]",
+            "bg-[color-mix(in_oklch,var(--topbar)_95%,var(--card))] px-4 shadow-[0_2px_14px_-10px_color-mix(in_oklch,var(--foreground)_30%,transparent)] backdrop-blur-[6px]",
             "transition-[background,border-color,color,box-shadow,background-color] duration-220 motion-reduce:transition-none max-[1100px]:static",
-            dense ? "py-[0.7rem]" : "py-3",
+            dense ? "py-[0.65rem]" : "py-2.5",
           )}
         >
           <div className="min-w-0">
             <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">Current workspace</div>
             <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
               <h2 className="text-lg font-semibold tracking-tight text-foreground">{currentRoute.title}</h2>
-              {showPageDescriptions ? <p className="text-sm text-muted-foreground">{currentRoute.description}</p> : null}
+              {showPageDescriptions ? <p className="text-[13px] text-muted-foreground">{currentRoute.description}</p> : null}
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center justify-end gap-2 max-[1100px]:w-full max-[1100px]:justify-start">
+          <div className="flex flex-wrap items-center justify-end gap-1.5 max-[1100px]:w-full max-[1100px]:justify-start">
             <Badge variant={leagueConnected ? "success" : "outline"}>{leagueConnected ? "League en ligne" : "League hors ligne"}</Badge>
             {shellBadges.map((entry) => (
               <Badge key={entry.label} variant={entry.variant}>{entry.label}</Badge>
             ))}
-            <Button size="sm" onClick={() => void syncMatches()}>Synchroniser les matchs</Button>
+            <Button size="sm" variant="outline" onClick={() => void syncMatches()}>Synchroniser les matchs</Button>
             <Button size="sm" variant="outline" onClick={() => void syncStaticData()}>Synchroniser les donnees statiques</Button>
           </div>
         </header>

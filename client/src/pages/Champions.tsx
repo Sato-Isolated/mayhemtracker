@@ -60,7 +60,7 @@ export function ChampionsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3.5">
       <PageIntro eyebrow="Champion analytics" title="Champion pool" description="Fast champion board focused on ranking, comparison, and quick inspection." />
 
       <div className="grid gap-3 lg:grid-cols-[0.78fr_1.22fr]">
@@ -103,12 +103,12 @@ export function ChampionsPage() {
         )}
       />
 
-      <Card>
-        <CardHeader>
+      <Card className="border-[color-mix(in_oklch,var(--border)_86%,var(--primary))]">
+        <CardHeader className="pb-3">
           <CardTitle>Champion board</CardTitle>
           <CardDescription>Dense ranking table with quick dialog access for a focused read on one pick.</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-0">
           <Table>
             <TableHeader>
               <TableRow>

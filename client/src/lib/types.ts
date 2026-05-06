@@ -261,6 +261,8 @@ export interface TeammateStats {
   lossesTogether: number;
   winRateTogether: number;
   lastSeenAt?: number;
+  recentMatchesTogether: number;
+  averageKdaTogether: number;
   rating?: number;
   note?: string;
 }

@@ -2,6 +2,8 @@ import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { MatchPlayerScoreboard, type ScoreboardTeam } from "@/components/features/match-player-scoreboard";
 import { PageIntro } from "@/components/features/page-intro";
+import { PageSection } from "@/components/features/page-section";
+import { PageToolbar } from "@/components/features/page-toolbar";
 import { TeamSnapshotCard } from "@/components/features/team-snapshot-card";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -60,41 +62,54 @@ export function GameAnalysisPage() {
   })) ?? [];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3.5">
       <PageIntro
         eyebrow="Game analysis"
         title={match ? match.summary : "Match analysis"}
         description={match ? `${formatDate(match.gameCreation ?? match.retrievedAt)} · ${formatDuration(match.gameDuration)} · ${match.gameVersion ?? "version inconnue"}` : "Chargement du détail de match."}
+        actions={match ? (
+          <>
+            <Badge variant="default">{match.gameMode ?? "League"}</Badge>
+            <Badge variant="outline">Queue {match.queueId ?? "-"}</Badge>
+          </>
+        ) : undefined}
       />
 
       {match ? (
-        <div className="space-y-6">
-          <div className="grid gap-4 lg:grid-cols-2">
-            {teamSnapshots?.map((team) => (
-              <TeamSnapshotCard
-                key={team.teamId}
-                teamId={team.teamId}
-                win={team.win}
-                isPlayerTeam={team.isPlayerTeam}
-                totalKills={team.totalKills}
-                totalDamage={team.totalDamage}
-                totalGold={team.totalGold}
-              />
-            ))}
-          </div>
-
-          <Card data-testid="game-analysis-scoreboard-card">
-            <CardHeader>
-              <CardTitle>Scoreboard</CardTitle>
-              <CardDescription>Version produit de l'analyse de match, avec le même langage visuel que l'inline scoreboard.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="mb-4 flex flex-wrap gap-2">
-                <Badge variant="default">{match.gameMode ?? "League"}</Badge>
-                <Badge variant="outline">Queue {match.queueId ?? "-"}</Badge>
+        <div className="space-y-3.5">
+          <PageToolbar
+            testId="game-analysis-toolbar"
+            meta={(
+              <>
                 <Badge variant="outline">Map {match.mapId ?? "-"}</Badge>
+                <Badge variant="outline">{formatDuration(match.gameDuration)}</Badge>
                 {match.gameModeMutators.map((mutator) => <Badge key={mutator} variant="secondary">{mutator}</Badge>)}
-              </div>
+              </>
+            )}
+          />
+
+          <PageSection title="Team snapshots" description="Comparatif rapide des deux equipes avant la lecture detaillee du scoreboard.">
+            <div className="grid gap-3 lg:grid-cols-2">
+              {teamSnapshots?.map((team) => (
+                <TeamSnapshotCard
+                  key={team.teamId}
+                  teamId={team.teamId}
+                  win={team.win}
+                  isPlayerTeam={team.isPlayerTeam}
+                  totalKills={team.totalKills}
+                  totalDamage={team.totalDamage}
+                  totalGold={team.totalGold}
+                />
+              ))}
+            </div>
+          </PageSection>
+
+          <Card data-testid="game-analysis-scoreboard-card" className="border-[color-mix(in_oklch,var(--border)_86%,var(--primary))]">
+            <CardHeader className="pb-3">
+              <CardTitle>Scoreboard</CardTitle>
+              <CardDescription>Lecture detaillee avec resume d'equipe aligne sur la densite des pages analytics.</CardDescription>
+            </CardHeader>
+            <CardContent className="pt-0">
               <MatchPlayerScoreboard
                 teams={scoreboardTeams}
                 trackedIdentifier={{ puuid: trackedPuuid, teamId: playerTeamId }}
@@ -105,22 +120,22 @@ export function GameAnalysisPage() {
                   const snapshot = teamSnapshots?.find((t) => t.teamId === team.teamId);
                   if (!snapshot) return null;
                   return (
-                    <div className="grid gap-3 border-b border-border/60 px-4 py-4 md:grid-cols-4">
-                      <Surface className="rounded-[1rem] p-4">
+                    <div className="grid gap-2.5 border-b border-border/60 px-4 py-3.5 md:grid-cols-4">
+                      <Surface className="rounded-[1rem] p-3.5">
                         <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Kills</div>
-                        <div className="mt-2 text-2xl font-semibold text-foreground">{snapshot.totalKills}</div>
+                        <div className="mt-1.5 text-xl font-semibold text-foreground">{snapshot.totalKills}</div>
                       </Surface>
-                      <Surface className="rounded-[1rem] p-4">
+                      <Surface className="rounded-[1rem] p-3.5">
                         <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Damage</div>
-                        <div className="mt-2 text-2xl font-semibold text-foreground">{formatCompactStat(snapshot.totalDamage)}</div>
+                        <div className="mt-1.5 text-xl font-semibold text-foreground">{formatCompactStat(snapshot.totalDamage)}</div>
                       </Surface>
-                      <Surface className="rounded-[1rem] p-4">
+                      <Surface className="rounded-[1rem] p-3.5">
                         <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Gold</div>
-                        <div className="mt-2 text-2xl font-semibold text-foreground">{formatCompactStat(snapshot.totalGold)}</div>
+                        <div className="mt-1.5 text-xl font-semibold text-foreground">{formatCompactStat(snapshot.totalGold)}</div>
                       </Surface>
-                      <Surface className="rounded-[1rem] p-4">
+                      <Surface className="rounded-[1rem] p-3.5">
                         <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Heal</div>
-                        <div className="mt-2 text-2xl font-semibold text-foreground">{formatCompactStat(snapshot.totalHeal)}</div>
+                        <div className="mt-1.5 text-xl font-semibold text-foreground">{formatCompactStat(snapshot.totalHeal)}</div>
                       </Surface>
                     </div>
                   );
