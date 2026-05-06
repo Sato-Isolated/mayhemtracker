@@ -52,24 +52,21 @@ export function AppShell({ children }: { children: ReactNode }) {
   );
 
   return (
-    <div className="grid min-h-screen grid-cols-[254px_minmax(0,1fr)] gap-4 p-4 max-[1100px]:grid-cols-1 max-sm:p-3">
+    <div className="grid min-h-screen grid-cols-[260px_minmax(0,1fr)] gap-6 p-6 max-[1100px]:grid-cols-1 max-sm:p-3">
       <aside
         className={cn(
-          "relative sticky top-4 flex max-h-[calc(100vh-2rem)] flex-col justify-between gap-4 overflow-y-auto rounded-[1.45rem] border border-[var(--border-ui)]",
-          "bg-[linear-gradient(180deg,color-mix(in_oklch,var(--sidebar)_94%,var(--card)),color-mix(in_oklch,var(--surface-2)_92%,var(--background)))]",
-          "p-3.5 shadow-[0_24px_54px_-42px_color-mix(in_oklch,var(--foreground)_18%,transparent)] transition-[background,border-color,color,box-shadow,background-color] duration-220 motion-reduce:transition-none",
+          "relative sticky top-6 flex max-h-[calc(100vh-3rem)] flex-col justify-between gap-5 overflow-y-auto border border-[var(--border-ui)]",
+          "bg-[var(--sidebar)] p-4 shadow-[0_2px_14px_-10px_color-mix(in_oklch,var(--foreground)_30%,transparent)] transition-[background,border-color,color,box-shadow,background-color] duration-220 motion-reduce:transition-none",
           "max-[1100px]:static max-[1100px]:min-h-auto",
         )}
       >
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_center,color-mix(in_oklch,var(--accent)_11%,transparent),transparent_34%),linear-gradient(180deg,color-mix(in_oklch,white_8%,transparent),transparent_22%)]" />
-
         <div className="relative space-y-3">
-          <div className="px-1">
+          <div className="border-b border-border/70 px-1 pb-3">
             <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">Mayhem Tracker</div>
-            <div className="mt-1 text-sm font-semibold text-foreground">Utilitaire desktop local</div>
+            <div className="mt-1 text-sm font-semibold text-foreground">Desktop intelligence panel</div>
           </div>
 
-          <nav className="space-y-1.5 max-[1100px]:grid max-[1100px]:grid-cols-2 max-[1100px]:gap-[0.65rem] max-sm:grid-cols-1" aria-label="Navigation principale">
+          <nav className="space-y-2 max-[1100px]:grid max-[1100px]:grid-cols-2 max-[1100px]:gap-[0.65rem] max-sm:grid-cols-1" aria-label="Navigation principale">
             {navigation.map((item) => {
               const Icon = item.icon;
               return (
@@ -78,24 +75,17 @@ export function AppShell({ children }: { children: ReactNode }) {
                   to={item.to}
                   className={({ isActive }) =>
                     cn(
-                      "group relative flex items-center gap-3 overflow-hidden rounded-[0.95rem] border border-transparent text-foreground no-underline",
-                      "transition-[background-color,border-color,transform] duration-140 motion-reduce:transition-none",
-                      "hover:-translate-y-px hover:border-[color-mix(in_oklch,var(--border)_80%,var(--primary))] hover:bg-[var(--hover-overlay)]",
+                      "group relative flex items-center gap-3 overflow-hidden border border-transparent text-foreground no-underline",
+                      "transition-[background-color,border-color] duration-140 motion-reduce:transition-none",
+                      "hover:border-[color-mix(in_oklch,var(--border)_80%,var(--primary))] hover:bg-[var(--hover-overlay)]",
                       dense ? "px-3 py-[0.55rem]" : "px-3 py-2.5 max-sm:px-[0.85rem] max-sm:py-[0.8rem]",
                       isActive &&
-                        "border-[color-mix(in_oklch,var(--primary)_32%,var(--border))] bg-[linear-gradient(135deg,color-mix(in_oklch,var(--accent)_76%,var(--card)),color-mix(in_oklch,var(--card)_82%,var(--primary)))] shadow-[0_14px_28px_-28px_color-mix(in_oklch,var(--primary)_30%,transparent)]",
+                        "border-[color-mix(in_oklch,var(--primary)_42%,var(--border))] bg-[color-mix(in_oklch,var(--primary)_12%,var(--card))]",
                     )
                   }
                 >
                   {({ isActive }) => (
                     <>
-                      <span
-                        aria-hidden="true"
-                        className={cn(
-                          "pointer-events-none absolute bottom-[0.55rem] left-[0.55rem] h-8 w-8 rounded-full bg-[color-mix(in_oklch,var(--accent)_10%,transparent)] blur-[8px] transition-opacity duration-160 motion-reduce:transition-none",
-                          isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100",
-                        )}
-                      />
                       <Icon className="relative h-4 w-4 shrink-0" />
                       <div className="relative min-w-0 flex-1">
                         <div className="truncate text-sm font-medium">{item.label}</div>
@@ -111,7 +101,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </nav>
         </div>
 
-        <Surface className="relative rounded-[1rem] px-3 py-3">
+        <Surface className="relative px-3 py-3">
           <div className="flex items-center gap-2.5">
             <span
               className={cn(
@@ -132,14 +122,14 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="min-w-0 flex flex-col gap-4">
         <header
           className={cn(
-            "sticky top-4 z-10 flex flex-wrap items-center justify-between gap-3 rounded-[1rem] border border-[var(--border-ui)]",
-            "bg-[color-mix(in_oklch,var(--topbar)_88%,var(--card))] px-4 shadow-[0_14px_28px_-30px_color-mix(in_oklch,var(--foreground)_14%,transparent)] backdrop-blur-[14px]",
+            "sticky top-6 z-10 flex flex-wrap items-center justify-between gap-3 border border-[var(--border-ui)]",
+            "bg-[color-mix(in_oklch,var(--topbar)_94%,var(--card))] px-4 shadow-[0_2px_14px_-10px_color-mix(in_oklch,var(--foreground)_30%,transparent)] backdrop-blur-[6px]",
             "transition-[background,border-color,color,box-shadow,background-color] duration-220 motion-reduce:transition-none max-[1100px]:static",
             dense ? "py-[0.7rem]" : "py-3",
           )}
         >
           <div className="min-w-0">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">Surface active</div>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">Current workspace</div>
             <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
               <h2 className="text-lg font-semibold tracking-tight text-foreground">{currentRoute.title}</h2>
               {showPageDescriptions ? <p className="text-sm text-muted-foreground">{currentRoute.description}</p> : null}

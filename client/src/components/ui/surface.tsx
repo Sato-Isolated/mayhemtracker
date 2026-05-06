@@ -10,7 +10,7 @@ const surfaceVariants = cva("", {
       subtle:
         "border border-[var(--border-ui)] bg-[color-mix(in_oklch,var(--card)_66%,var(--surface-2))]",
       elevated:
-        "border border-[var(--border-ui)] bg-[color-mix(in_oklch,var(--card)_84%,var(--surface-1))]",
+        "border border-[var(--border-ui)] bg-[color-mix(in_oklch,var(--card)_84%,var(--surface-1))] shadow-[0_1px_10px_-8px_color-mix(in_oklch,var(--foreground)_35%,transparent)]",
     },
   },
   defaultVariants: {

@@ -5,8 +5,8 @@ import { SettingsPage } from "@/pages/Settings";
 
 const updateSetting = vi.fn<(...args: string[]) => Promise<void>>().mockResolvedValue(undefined);
 const settingMap = {
-  theme: "ember",
-  accentMode: "warm",
+  theme: "darkPremium",
+  accentMode: "electricBlue",
   density: "comfortable",
   dataDensity: "comfortable",
   compactSidebar: "false",
@@ -45,8 +45,8 @@ describe("SettingsPage", () => {
     await user.click(screen.getByRole("button", { name: /reset defaults/i }));
 
     await waitFor(() => expect(updateSetting).toHaveBeenCalledTimes(10));
-    expect(updateSetting).toHaveBeenCalledWith("theme", "ember");
-    expect(updateSetting).toHaveBeenCalledWith("accentMode", "warm");
+    expect(updateSetting).toHaveBeenCalledWith("theme", "darkPremium");
+    expect(updateSetting).toHaveBeenCalledWith("accentMode", "electricBlue");
     expect(updateSetting).toHaveBeenCalledWith("density", "comfortable");
     expect(updateSetting).toHaveBeenCalledWith("dataDensity", "comfortable");
     expect(updateSetting).toHaveBeenCalledWith("compactSidebar", "false");

@@ -18,9 +18,9 @@ function ThemeOptionCard({ option, isActive, onSelect }: ThemeOptionCardProps) {
   return (
     <Button
       variant="outline"
-      className={`rounded-[1rem] h-auto justify-start px-0 py-0 text-left transition-all ${
+      className={`h-auto justify-start px-0 py-0 text-left transition-all ${
         isActive
-          ? "bg-[var(--selected-bg)] border-[var(--selected-border)] shadow-[0_20px_45px_-32px_color-mix(in_oklch,var(--primary)_45%,transparent),inset_0_1px_0_color-mix(in_oklch,white_30%,transparent)] ring-2 ring-[color-mix(in_oklch,var(--primary)_18%,transparent)]"
+          ? "bg-[var(--selected-bg)] border-[var(--selected-border)] ring-2 ring-[color-mix(in_oklch,var(--primary)_18%,transparent)]"
           : "hover:bg-[var(--hover-overlay)] hover:border-[color-mix(in_oklch,var(--primary)_28%,var(--border))]"
       }`}
       data-testid={`theme-option-${option.value}`}
@@ -32,7 +32,7 @@ function ThemeOptionCard({ option, isActive, onSelect }: ThemeOptionCardProps) {
             <div className="text-sm font-semibold text-foreground">{option.label}</div>
             <div className="mt-1 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">{option.tone}</div>
           </div>
-          <span className={`rounded-full border px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] ${
+          <span className={`border px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] ${
             isActive
               ? "bg-[color-mix(in_oklch,var(--primary)_18%,var(--card))] text-[color-mix(in_oklch,var(--primary)_85%,var(--foreground))] border-[var(--selected-border)]"
               : "border-border/70 text-muted-foreground"
@@ -41,9 +41,9 @@ function ThemeOptionCard({ option, isActive, onSelect }: ThemeOptionCardProps) {
           </span>
         </div>
         <div className="mt-4 grid grid-cols-[1.1fr_0.95fr] gap-[0.7rem] items-end">
-          <div className="h-[4.25rem] rounded-[0.9rem] shadow-[inset_0_0_0_1px_color-mix(in_oklch,black_10%,transparent)]" style={{ backgroundColor: option.swatches[0] }} />
-          <div className="h-[3.1rem] rounded-[0.9rem] shadow-[inset_0_0_0_1px_color-mix(in_oklch,black_10%,transparent)]" style={{ backgroundColor: option.swatches[1] }} />
-          <div className="col-span-full h-[0.7rem] rounded-full shadow-[inset_0_0_0_1px_color-mix(in_oklch,black_10%,transparent)]" style={{ backgroundColor: option.swatches[2] }} />
+          <div className="h-[4.25rem] border border-border/70" style={{ backgroundColor: option.swatches[0] }} />
+          <div className="h-[3.1rem] border border-border/70" style={{ backgroundColor: option.swatches[1] }} />
+          <div className="col-span-full h-[0.7rem] border border-border/70" style={{ backgroundColor: option.swatches[2] }} />
         </div>
         <div className="mt-4 text-xs leading-5 text-muted-foreground">{option.description}</div>
       </div>

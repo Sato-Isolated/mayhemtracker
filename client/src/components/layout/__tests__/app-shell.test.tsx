@@ -52,7 +52,7 @@ describe("AppShell", () => {
 
     expect(screen.getByLabelText("Navigation principale")).toBeInTheDocument();
     expect(screen.getAllByText("Historique")).toHaveLength(2);
-    expect(screen.getByText(/surface active/i)).toBeInTheDocument();
+    expect(screen.getByText(/current workspace/i)).toBeInTheDocument();
     expect(screen.getByText(/file dense pour parcourir et revoir les matchs stockes/i)).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: /synchroniser les matchs/i }));

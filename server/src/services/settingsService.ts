@@ -4,8 +4,8 @@ import { appSettings, playerRatings } from "../db/schema.js";
 import type { AppSettingDto, PlayerRatingDto } from "../types/analytics.js";
 
 const defaultSettings = {
-  theme: "ember",
-  accentMode: "warm",
+  theme: "darkPremium",
+  accentMode: "electricBlue",
   density: "comfortable",
   dataDensity: "comfortable",
   compactSidebar: "false",

@@ -4,20 +4,20 @@ import { Slot } from "@radix-ui/react-slot";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 rounded-xl border border-transparent text-sm font-semibold transition-[transform,background-color,border-color,color,box-shadow] duration-200 disabled:pointer-events-none disabled:opacity-50 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 active:translate-y-px",
+  "inline-flex items-center justify-center gap-2 border border-transparent text-sm font-semibold transition-[background-color,border-color,color,box-shadow] duration-160 disabled:pointer-events-none disabled:opacity-50 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
   {
     variants: {
       variant: {
-        default: "bg-[linear-gradient(135deg,color-mix(in_oklch,var(--primary)_88%,white),color-mix(in_oklch,var(--primary)_72%,var(--accent)))] text-primary-foreground shadow-[0_16px_30px_-18px_color-mix(in_oklch,var(--primary)_48%,transparent)] hover:shadow-[0_20px_34px_-18px_color-mix(in_oklch,var(--primary)_56%,transparent)] hover:saturate-110",
-        secondary: "border-border/70 bg-[color-mix(in_oklch,var(--secondary)_82%,var(--card))] text-secondary-foreground shadow-[inset_0_1px_0_color-mix(in_oklch,white_58%,transparent)] hover:bg-[color-mix(in_oklch,var(--secondary)_72%,var(--accent))]",
-        outline: "border-border/80 bg-[var(--surface-card)] text-foreground shadow-[inset_0_1px_0_color-mix(in_oklch,white_55%,transparent)] hover:border-primary/25 hover:bg-[color-mix(in_oklch,var(--accent)_22%,var(--card))]",
-        ghost: "text-foreground hover:bg-[color-mix(in_oklch,var(--accent)_20%,transparent)]",
-        destructive: "bg-[linear-gradient(135deg,color-mix(in_oklch,var(--destructive)_88%,white),color-mix(in_oklch,var(--destructive)_76%,var(--accent)))] text-destructive-foreground shadow-[0_16px_30px_-18px_color-mix(in_oklch,var(--destructive)_45%,transparent)] hover:saturate-110",
+        default: "bg-primary text-primary-foreground hover:bg-[color-mix(in_oklch,var(--primary)_88%,black)]",
+        secondary: "border-border/80 bg-secondary text-secondary-foreground hover:border-[color-mix(in_oklch,var(--primary)_36%,var(--border))] hover:bg-[color-mix(in_oklch,var(--secondary)_84%,var(--accent))]",
+        outline: "border-border/80 bg-card text-foreground hover:border-[color-mix(in_oklch,var(--primary)_36%,var(--border))] hover:bg-[var(--hover-overlay)]",
+        ghost: "border-transparent text-foreground hover:border-border/70 hover:bg-[var(--hover-overlay)]",
+        destructive: "bg-destructive text-destructive-foreground hover:bg-[color-mix(in_oklch,var(--destructive)_88%,black)]",
       },
       size: {
         default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-lg px-3",
-        lg: "h-11 rounded-xl px-6",
+        sm: "h-9 px-3",
+        lg: "h-11 px-6",
         icon: "h-10 w-10",
       },
     },

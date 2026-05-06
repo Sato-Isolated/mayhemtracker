@@ -53,10 +53,10 @@ export function ShellSettingsProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const root = document.documentElement;
-    root.dataset.theme = settingMap.theme ?? "ember";
+    root.dataset.theme = "darkPremium";
     root.dataset.density = settingMap.density ?? "comfortable";
     root.dataset.dataDensity = settingMap.dataDensity ?? settingMap.density ?? "comfortable";
-    root.dataset.accentMode = settingMap.accentMode ?? "warm";
+    root.dataset.accentMode = settingMap.accentMode ?? "electricBlue";
     root.dataset.compactSidebar = settingMap.compactSidebar ?? "false";
     root.dataset.showPageDescriptions = settingMap.showPageDescriptions ?? "true";
     root.dataset.stickyToolbars = settingMap.stickyToolbars ?? "true";

@@ -17,34 +17,27 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ToggleGroup } from "@/components/ui/toggle-group";
 import { useShellSettings } from "@/state/tracker-data";
 
-const themeOptions = [
+const accentOptions = [
   {
-    value: "ember",
-    label: "Ember",
-    tone: "Light / warm",
-    description: "Warm sand, copper, and cream tones close to the current identity.",
-    swatches: ["oklch(0.956 0.026 78)", "oklch(0.56 0.148 32)", "oklch(0.868 0.072 74)"],
+    value: "electricBlue",
+    label: "Electric Blue",
+    tone: "Precise / vivid",
+    description: "Neutral dark surfaces with a controlled electric-blue accent.",
+    swatches: ["oklch(0.13 0 0)", "oklch(0.68 0.19 255)", "oklch(0.24 0.014 255)"],
   },
   {
-    value: "atlas",
-    label: "Atlas",
-    tone: "Light / analytic",
-    description: "Cooler mineral palette built for dense analytical views.",
-    swatches: ["oklch(0.952 0.028 228)", "oklch(0.52 0.162 247)", "oklch(0.856 0.070 216)"],
+    value: "coldViolet",
+    label: "Cold Violet",
+    tone: "Editorial / cool",
+    description: "Sharper hierarchy for critical actions with a restrained violet cue.",
+    swatches: ["oklch(0.13 0 0)", "oklch(0.7 0.17 295)", "oklch(0.24 0.018 295)"],
   },
   {
-    value: "midnight",
-    label: "Midnight",
-    tone: "Dark / dashboard",
-    description: "Deep slate base with bright text and warm accents.",
-    swatches: ["oklch(0.182 0.032 264)", "oklch(0.74 0.165 72)", "oklch(0.465 0.100 226)"],
-  },
-  {
-    value: "tide",
-    label: "Tide",
-    tone: "Dark / cool",
-    description: "Petrol blue palette with cooler technical accents.",
-    swatches: ["oklch(0.172 0.036 208)", "oklch(0.76 0.148 186)", "oklch(0.462 0.110 194)"],
+    value: "icyCyan",
+    label: "Icy Cyan",
+    tone: "Technical / calm",
+    description: "High-clarity cyan accents designed for dense analytics reading.",
+    swatches: ["oklch(0.13 0 0)", "oklch(0.74 0.14 205)", "oklch(0.24 0.016 205)"],
   },
 ] as const;
 
@@ -52,7 +45,7 @@ const heatmapPreviewLevels = [0, 1, 2, 3, 4, 5, 6, 7] as const;
 
 export function SettingsPage() {
   const { settingMap, updateSetting } = useShellSettings();
-  const activeTheme = themeOptions.find((option) => option.value === (settingMap.theme ?? "ember")) ?? themeOptions[0];
+  const activeAccent = accentOptions.find((option) => option.value === (settingMap.accentMode ?? "electricBlue")) ?? accentOptions[0];
   const [notifPermission, setNotifPermission] = useState<NotificationPermission | "unsupported">(getNotificationPermission);
   const notifEnabled = settingMap.nativeNotifications === "true";
   const dataDensity = settingMap.dataDensity ?? "comfortable";
@@ -82,8 +75,8 @@ export function SettingsPage() {
 
   async function resetDefaults() {
     await Promise.all([
-      updateSetting("theme", "ember"),
-      updateSetting("accentMode", "warm"),
+      updateSetting("theme", "darkPremium"),
+      updateSetting("accentMode", "electricBlue"),
       updateSetting("density", "comfortable"),
       updateSetting("dataDensity", "comfortable"),
       updateSetting("compactSidebar", "false"),
@@ -99,14 +92,14 @@ export function SettingsPage() {
     <div className="space-y-6">
       <PageIntro
         eyebrow="Settings"
-        title="Local interface preferences"
-        description="Persistent desktop-first preferences for shell density, toolbars, reading flow, and local visual polish."
+        title="Dark premium controls"
+        description="Single dark visual identity with controlled accents and local desktop behavior preferences."
         actions={<Button variant="outline" onClick={() => void resetDefaults()}>Reset defaults</Button>}
       />
 
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-        <MetricTile label="Theme" value={<span className="capitalize">{settingMap.theme ?? "ember"}</span>} icon={<Palette className="h-4 w-4" />} />
-        <MetricTile label="Accent" value={<span className="capitalize">{settingMap.accentMode ?? "warm"}</span>} icon={<Palette className="h-4 w-4" />} />
+        <MetricTile label="Theme" value={<span>darkPremium</span>} icon={<Palette className="h-4 w-4" />} />
+        <MetricTile label="Accent" value={<span className="capitalize">{settingMap.accentMode ?? "electricBlue"}</span>} icon={<Palette className="h-4 w-4" />} />
         <MetricTile label="Density" value={<span className="capitalize">{settingMap.density ?? "comfortable"}</span>} icon={<SlidersHorizontal className="h-4 w-4" />} />
         <MetricTile label="Data density" value={<span className="capitalize">{dataDensity}</span>} icon={<SlidersHorizontal className="h-4 w-4" />} />
         <MetricTile label="Sidebar" value={settingMap.compactSidebar === "true" ? "Compact" : "Expanded"} icon={<PanelsTopLeft className="h-4 w-4" />} />
@@ -122,31 +115,29 @@ export function SettingsPage() {
       <div className="grid grid-cols-2 gap-4 max-[1100px]:grid-cols-1">
         <SettingCard
           title="Theme"
-          description="Four complete palettes with reliable hierarchy in both light and dark surfaces."
-          hint="Each theme redefines background, text, surfaces, borders, and states so the app stays readable in dense analytical views."
+          description="Dark premium is fixed for the full application shell."
+          hint="The visual base does not switch anymore: deep blacks, anthracite surfaces, crisp borders, and modern typography."
         >
-          <div className="grid gap-3 md:grid-cols-2">
-            {themeOptions.map((option) => (
-              <ThemeOptionCard
-                key={option.value}
-                option={option}
-                isActive={settingMap.theme === option.value}
-                onSelect={() => void updateSetting("theme", option.value)}
-              />
-            ))}
+          <div className="border border-border/80 bg-card px-4 py-3 text-sm text-muted-foreground">
+            Dark mode is always enabled to keep a strict, premium, minimal interface language.
           </div>
         </SettingCard>
 
         <SettingCard
           title="Accent mode"
-          description="Balance warmth versus strict product contrast."
-          hint="Warm keeps the current tone. Contrast increases the gap between primary and accent for a firmer hierarchy."
+          description="Select one subtle accent family."
+          hint="Accent only influences highlights, interactive states, and emphasis colors. Core surfaces remain monochrome dark."
         >
-          <ToggleGroup
-            options={[{ value: "warm", label: "Warm" }, { value: "contrast", label: "Contrast" }]}
-            value={(settingMap.accentMode as "warm" | "contrast") ?? "warm"}
-            onValueChange={(value) => void updateSetting("accentMode", value)}
-          />
+          <div className="grid gap-3 md:grid-cols-3">
+            {accentOptions.map((option) => (
+              <ThemeOptionCard
+                key={option.value}
+                option={option}
+                isActive={settingMap.accentMode === option.value}
+                onSelect={() => void updateSetting("accentMode", option.value)}
+              />
+            ))}
+          </div>
         </SettingCard>
 
         <SettingCard
@@ -282,21 +273,20 @@ export function SettingsPage() {
           <CardDescription>Quick read of the current interface state driven by local desktop preferences.</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
-          <div className="relative min-h-[220px] overflow-hidden rounded-[1rem] border border-[color-mix(in_oklch,var(--border)_80%,transparent)] bg-[linear-gradient(160deg,color-mix(in_oklch,var(--topbar)_84%,var(--card)),color-mix(in_oklch,var(--page-end)_86%,var(--background)))] p-4" data-testid="theme-preview-board">
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,color-mix(in_oklch,var(--accent)_18%,transparent),transparent_42%),radial-gradient(circle_at_bottom_right,color-mix(in_oklch,var(--primary)_16%,transparent),transparent_44%)]" />
+          <div className="relative min-h-[220px] overflow-hidden border border-[color-mix(in_oklch,var(--border)_80%,transparent)] bg-[var(--background)] p-4" data-testid="theme-preview-board">
             <div className="relative z-10 grid h-full gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-              <div className="flex flex-col justify-between rounded-[0.9rem] border border-border/70 bg-card/78 p-4 shadow-[0_16px_40px_-30px_color-mix(in_oklch,var(--foreground)_18%,transparent)]">
+              <div className="flex flex-col justify-between border border-border/70 bg-card p-4">
                 <div>
                   <SectionLabel>Theme stack</SectionLabel>
                   <div className="mt-3 flex items-center gap-2 text-sm text-foreground">
-                    <span className="inline-flex h-3 w-3 rounded-full bg-primary" />
-                    <span>{settingMap.theme ?? "ember"} / {settingMap.accentMode ?? "warm"}</span>
+                    <span className="inline-flex h-3 w-3 bg-primary" />
+                    <span>darkPremium / {settingMap.accentMode ?? "electricBlue"}</span>
                   </div>
                 </div>
                 <div className="mt-4 flex flex-wrap items-start gap-2">
-                  <span className="inline-flex items-center gap-[0.55rem] rounded-full border border-border/60 bg-[color-mix(in_oklch,var(--card)_68%,var(--primary))] px-[0.72rem] py-[0.42rem] text-[0.76rem] text-primary-foreground shadow-[inset_0_1px_0_color-mix(in_oklch,white_45%,transparent)]">Primary</span>
-                  <span className="inline-flex items-center gap-[0.55rem] rounded-full border border-border/60 bg-[color-mix(in_oklch,var(--card)_76%,var(--secondary))] px-[0.72rem] py-[0.42rem] text-[0.76rem] text-muted-foreground shadow-[inset_0_1px_0_color-mix(in_oklch,white_45%,transparent)]">Muted</span>
-                  <span className="inline-flex items-center gap-[0.55rem] rounded-full border border-border/60 bg-[color-mix(in_oklch,var(--card)_76%,var(--secondary))] px-[0.72rem] py-[0.42rem] text-[0.76rem] text-muted-foreground shadow-[inset_0_1px_0_color-mix(in_oklch,white_45%,transparent)]">Surface</span>
+                  <span className="inline-flex items-center gap-[0.55rem] border border-border/60 bg-[color-mix(in_oklch,var(--card)_68%,var(--primary))] px-[0.72rem] py-[0.42rem] text-[0.76rem] text-primary-foreground">Primary</span>
+                  <span className="inline-flex items-center gap-[0.55rem] border border-border/60 bg-[color-mix(in_oklch,var(--card)_76%,var(--secondary))] px-[0.72rem] py-[0.42rem] text-[0.76rem] text-muted-foreground">Muted</span>
+                  <span className="inline-flex items-center gap-[0.55rem] border border-border/60 bg-[color-mix(in_oklch,var(--card)_76%,var(--secondary))] px-[0.72rem] py-[0.42rem] text-[0.76rem] text-muted-foreground">Surface</span>
                 </div>
                 <div className="mt-4 space-y-2">
                   <SectionLabel>Heatmap ramp</SectionLabel>
@@ -304,7 +294,7 @@ export function SettingsPage() {
                     {heatmapPreviewLevels.map((level) => (
                       <div key={level} className="grid justify-items-center gap-1">
                         <div
-                          className="h-4 w-4 rounded-[0.28rem] border shadow-[inset_0_1px_0_color-mix(in_oklch,white_26%,transparent)]"
+                          className="h-4 w-4 border"
                           data-testid={`heatmap-diagnostics-cell-${level}`}
                           style={{
                             backgroundColor: `var(--heatmap-cell-${level})`,
@@ -319,28 +309,28 @@ export function SettingsPage() {
               </div>
 
               <div className="grid gap-3">
-                <Surface variant="elevated" className="rounded-[1rem] p-4">
+                <Surface variant="elevated" className="p-4">
                   <div className="flex items-center justify-between gap-3">
                     <div>
                       <SectionLabel>Preview card</SectionLabel>
                       <div className="mt-2 text-base font-semibold text-foreground">Readable by design</div>
                     </div>
-                    <span className="inline-flex h-9 w-9 rounded-full bg-primary/18 ring-1 ring-border/60" />
+                    <span className="inline-flex h-9 w-9 bg-primary/18 ring-1 ring-border/60" />
                   </div>
                   <div className="mt-3 text-sm text-muted-foreground">Primary text, surfaces, and accents stay separated even when the theme turns dark.</div>
                 </Surface>
                 <div className="grid grid-cols-3 gap-2">
-                  <div className="rounded-[0.9rem] border border-border/70 bg-background/80 p-3">
-                    <div className="h-2 rounded-full bg-primary/80" />
-                    <div className="mt-2 h-2 rounded-full bg-accent/70" />
+                  <div className="border border-border/70 bg-background/80 p-3">
+                    <div className="h-2 bg-primary/80" />
+                    <div className="mt-2 h-2 bg-accent/70" />
                   </div>
-                  <div className="rounded-[0.9rem] border border-border/70 bg-card/85 p-3">
-                    <div className="h-2 rounded-full bg-foreground/85" />
-                    <div className="mt-2 h-2 rounded-full bg-muted-foreground/70" />
+                  <div className="border border-border/70 bg-card/85 p-3">
+                    <div className="h-2 bg-foreground/85" />
+                    <div className="mt-2 h-2 bg-muted-foreground/70" />
                   </div>
-                  <div className="rounded-[0.9rem] border border-border/70 bg-secondary/70 p-3">
-                    <div className="h-2 rounded-full bg-primary/65" />
-                    <div className="mt-2 h-2 rounded-full bg-accent/65" />
+                  <div className="border border-border/70 bg-secondary/70 p-3">
+                    <div className="h-2 bg-primary/65" />
+                    <div className="mt-2 h-2 bg-accent/65" />
                   </div>
                 </div>
               </div>
@@ -358,7 +348,7 @@ export function SettingsPage() {
             </InfoBox>
             <InfoBox>
               <SectionLabel>Theme intent</SectionLabel>
-              <div className="mt-3 text-sm text-foreground">{activeTheme.description}</div>
+              <div className="mt-3 text-sm text-foreground">{activeAccent.description}</div>
             </InfoBox>
             <InfoBox>
               <SectionLabel>Reading flow</SectionLabel>
@@ -375,7 +365,7 @@ export function SettingsPage() {
         </CardHeader>
         <CardContent className="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
           <div className="space-y-4">
-            <Surface variant="elevated" className="rounded-[1rem] p-4">
+            <Surface variant="elevated" className="p-4">
               <SectionLabel>Controls</SectionLabel>
               <div className="mt-4 flex flex-wrap gap-2">
                 <Button>Primary action</Button>
@@ -440,12 +430,12 @@ export function SettingsPage() {
             </TabsContent>
             <TabsContent value="states">
               <div className="grid gap-3 sm:grid-cols-2">
-                <Surface className="rounded-[1rem] p-4">
+                <Surface className="p-4">
                   <SectionLabel>Surface</SectionLabel>
                   <div className="mt-2 text-base font-semibold text-foreground">Foreground remains clear</div>
                   <div className="mt-2 text-sm text-muted-foreground">Primary and secondary copy must keep a clear visual gap.</div>
                 </Surface>
-                <Surface variant="subtle" className="rounded-[1rem] p-4">
+                <Surface variant="subtle" className="p-4">
                   <SectionLabel>Accent</SectionLabel>
                   <div className="mt-2 text-base font-semibold text-foreground">Accent does not overpower</div>
                   <div className="mt-2 text-sm text-muted-foreground">Hover and accent surfaces should remain readable even in dark mode.</div>

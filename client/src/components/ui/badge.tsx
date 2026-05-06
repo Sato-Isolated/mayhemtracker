@@ -3,15 +3,15 @@ import type { HTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
 const badgeVariants = cva(
-  "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.16em] transition-colors",
+  "inline-flex items-center gap-1.5 border px-2.5 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.16em] transition-colors",
   {
     variants: {
       variant: {
-        default: "border-transparent bg-[color-mix(in_oklch,var(--primary)_22%,var(--card))] text-[color-mix(in_oklch,var(--primary)_80%,var(--foreground))] shadow-[inset_0_1px_0_color-mix(in_oklch,white_45%,transparent)]",
-        secondary: "border-transparent bg-secondary/85 text-secondary-foreground shadow-[inset_0_1px_0_color-mix(in_oklch,white_55%,transparent)]",
+        default: "border-[color-mix(in_oklch,var(--primary)_38%,var(--border))] bg-[color-mix(in_oklch,var(--primary)_16%,var(--card))] text-[color-mix(in_oklch,var(--primary)_78%,var(--foreground))]",
+        secondary: "border-border/80 bg-secondary text-secondary-foreground",
         outline: "border-border/80 bg-[color-mix(in_oklch,var(--card)_82%,var(--surface-2))] text-foreground",
-        success: "border-transparent bg-[color-mix(in_oklch,var(--success)_22%,var(--card))] text-[color-mix(in_oklch,var(--success)_82%,var(--foreground))] shadow-[inset_0_1px_0_color-mix(in_oklch,white_40%,transparent)]",
-        error: "border-transparent bg-[color-mix(in_oklch,var(--error)_22%,var(--card))] text-[color-mix(in_oklch,var(--error)_80%,var(--foreground))] shadow-[inset_0_1px_0_color-mix(in_oklch,white_40%,transparent)]",
+        success: "border-[color-mix(in_oklch,var(--success)_40%,var(--border))] bg-[color-mix(in_oklch,var(--success)_18%,var(--card))] text-[color-mix(in_oklch,var(--success)_78%,var(--foreground))]",
+        error: "border-[color-mix(in_oklch,var(--error)_40%,var(--border))] bg-[color-mix(in_oklch,var(--error)_18%,var(--card))] text-[color-mix(in_oklch,var(--error)_78%,var(--foreground))]",
       },
     },
     defaultVariants: {

@@ -9,7 +9,7 @@ export const DialogPortal = DialogPrimitive.Portal;
 export const DialogClose = DialogPrimitive.Close;
 
 export function DialogOverlay({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Overlay>) {
-  return <DialogPrimitive.Overlay className={cn("fixed inset-0 z-50 bg-black/45 backdrop-blur-sm", className)} {...props} />;
+  return <DialogPrimitive.Overlay className={cn("fixed inset-0 z-50 bg-black/70", className)} {...props} />;
 }
 
 export function DialogContent({ className, children, ...props }: React.ComponentProps<typeof DialogPrimitive.Content>) {
@@ -18,7 +18,7 @@ export function DialogContent({ className, children, ...props }: React.Component
       <DialogOverlay />
       <DialogPrimitive.Content
         className={cn(
-          "fixed left-1/2 top-1/2 z-50 w-[min(92vw,760px)] -translate-x-1/2 -translate-y-1/2 rounded-[1.5rem] border border-border/70 bg-card/95 p-6 shadow-[0_36px_90px_-52px_color-mix(in_oklch,var(--foreground)_34%,transparent)]",
+          "fixed left-1/2 top-1/2 z-50 w-[min(92vw,760px)] -translate-x-1/2 -translate-y-1/2 border border-border/80 bg-card p-6 shadow-[0_2px_16px_-10px_color-mix(in_oklch,var(--foreground)_30%,transparent)]",
           className,
         )}
         {...props}
@@ -26,7 +26,7 @@ export function DialogContent({ className, children, ...props }: React.Component
         {children}
         <DialogPrimitive.Close
           aria-label="Fermer la boîte de dialogue"
-          className="absolute right-4 top-4 rounded-md p-1 text-muted-foreground hover:bg-accent/50 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="absolute right-4 top-4 p-1 text-muted-foreground hover:bg-[var(--hover-overlay)] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <X className="h-4 w-4" />
         </DialogPrimitive.Close>
