@@ -15,6 +15,8 @@ Mayhem Tracker is a local Windows application for tracking statistics for League
 
 ## Naming Conventions
 
+Apply these conventions in this order: file and component naming first, then service/router/hook/type naming when introducing new symbols.
+
 - **Files**: kebab-case (`dashboard-card.tsx`, `match-service.ts`)
 - **React components**: PascalCase (`DashboardCard`, `AppShell`)
 - **Props**: `{ComponentName}Props` (`DashboardCardProps`)
@@ -41,6 +43,7 @@ lib/           → API client, types, utilities
 - **API client**: Typed native fetch in `lib/api.ts`, no axios.
 - **Routing**: React Router DOM with code splitting per page.
 - **Styles**: Tailwind utility classes, CVA for component variants, no CSS modules.
+- **Errors**: When League client access, database operations, or local sync fail, log the error and surface a user-friendly message in the UI.
 
 ### Backend (`server/src/`)
 
@@ -65,7 +68,7 @@ The user interface and comments are in **English**.
 - Local-only application, no cloud backend and no external authentication.
 - Windows target, the League of Legends client is detected through `league-connect`.
 - Data is stored locally in SQLite.
-- Use the existing shadcn/ui components in `components/ui/` before creating new ones.
+- Use the existing shadcn/ui components in `components/ui/` whenever possible. Only create a new component when no suitable existing component meets the requirements.
 - Prefer reusing existing utilities in `lib/utils.ts`, `lib/stats-utils.ts`, and `lib/tracker-utils.ts`.
 
 ## Commands
