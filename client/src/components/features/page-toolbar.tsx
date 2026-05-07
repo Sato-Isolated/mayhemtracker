@@ -14,7 +14,6 @@ interface PageToolbarProps {
 
 export function PageToolbar({ meta, search, filters, actions, className, testId }: PageToolbarProps) {
   const { settingMap } = useShellSettings();
-  const sticky = settingMap.stickyToolbars !== "false";
   const dataDensity = settingMap.dataDensity ?? settingMap.density ?? "comfortable";
 
   return (
@@ -24,7 +23,6 @@ export function PageToolbar({ meta, search, filters, actions, className, testId 
       data-density={dataDensity}
       className={cn(
         "page-toolbar rounded-[1.05rem] border-[color-mix(in_oklch,var(--border)_86%,var(--primary))] px-4 py-3",
-        sticky && "page-toolbar-sticky sticky top-[5.4rem] z-[8] max-[1100px]:static",
         dataDensity === "dense" && "px-3 py-2.5",
         className,
       )}

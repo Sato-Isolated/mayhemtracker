@@ -63,7 +63,6 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="relative space-y-3">
           <div className="border-b border-border/70 px-1 pb-3">
             <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">Mayhem Tracker</div>
-            <div className="mt-1 text-sm font-semibold text-foreground">Desktop intelligence panel</div>
           </div>
 
           <nav className="space-y-2 max-[1100px]:grid max-[1100px]:grid-cols-2 max-[1100px]:gap-[0.65rem] max-sm:grid-cols-1" aria-label="Primary navigation">
@@ -89,9 +88,6 @@ export function AppShell({ children }: { children: ReactNode }) {
                       <Icon className="relative h-4 w-4 shrink-0" />
                       <div className="relative min-w-0 flex-1">
                         <div className="truncate text-sm font-medium">{item.label}</div>
-                        {!compactSidebar && showPageDescriptions ? (
-                          <div className="truncate text-[11px] text-muted-foreground/90">{item.description}</div>
-                        ) : null}
                       </div>
                     </>
                   )}
@@ -122,7 +118,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="min-w-0 flex flex-col gap-3.5 pb-2">
         <header
           className={cn(
-            "sticky top-4 z-10 flex flex-wrap items-center justify-between gap-3 border border-[var(--border-ui)]",
+            "z-10 flex flex-wrap items-center justify-between gap-3 border border-[var(--border-ui)]",
             "bg-[color-mix(in_oklch,var(--topbar)_95%,var(--card))] px-4 shadow-[0_2px_14px_-10px_color-mix(in_oklch,var(--foreground)_30%,transparent)] backdrop-blur-[6px]",
             "transition-[background,border-color,color,box-shadow,background-color] duration-220 motion-reduce:transition-none max-[1100px]:static",
             dense ? "py-[0.65rem]" : "py-2.5",
@@ -132,7 +128,6 @@ export function AppShell({ children }: { children: ReactNode }) {
             <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">Current workspace</div>
             <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
               <h2 className="text-lg font-semibold tracking-tight text-foreground">{currentRoute.title}</h2>
-              {showPageDescriptions ? <p className="text-[13px] text-muted-foreground">{currentRoute.description}</p> : null}
             </div>
           </div>
 

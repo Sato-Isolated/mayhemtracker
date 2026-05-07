@@ -53,7 +53,6 @@ describe("AppShell", () => {
     expect(screen.getByLabelText("Primary navigation")).toBeInTheDocument();
     expect(screen.getAllByText("History")).toHaveLength(2);
     expect(screen.getByText(/current workspace/i)).toBeInTheDocument();
-    expect(screen.getByText(/dense queue for reviewing stored matches/i)).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: /sync matches/i }));
     await user.click(screen.getByRole("button", { name: /sync static data/i }));
