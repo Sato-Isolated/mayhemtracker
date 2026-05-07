@@ -47,7 +47,7 @@ export function StaticDataProvider({ children }: { children: ReactNode }) {
   async function syncStaticData() {
     const data = await runAction(setStaticSync, api.syncStaticData, {
       actionName: "syncStaticData",
-      successMessage: "Données statiques synchronisées",
+      successMessage: "Static data synced",
     });
 
     if (data) {

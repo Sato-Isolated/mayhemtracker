@@ -33,7 +33,7 @@ export function ProfilePage() {
   ]);
 
   if (!profile.data) {
-    return <PageIntro eyebrow="Player identity" title="Profile loading" description="Les agrégations de profil se remplissent à partir des matchs locaux synchronisés." />;
+    return <PageIntro eyebrow="Player identity" title="Profile loading" description="Profile aggregates are filled from synced local matches." />;
   }
 
   const { overview, currentStreak, bestLossStreak, bestWinStreak, records } = profile.data;
@@ -45,12 +45,12 @@ export function ProfilePage() {
       <PageIntro
         eyebrow="Player identity"
         title={overview.trackedPlayerName}
-        description={`Dernière activité ${formatDate(overview.latestMatchAt)} · ${overview.totalMatches} matchs analysés.`}
+        description={`Last activity ${formatDate(overview.latestMatchAt)} · ${overview.totalMatches} matches analyzed.`}
       />
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <MetricTile label="Global win rate" value={`${overview.winRate}%`} hint={`${overview.wins} wins · ${overview.losses} losses`} icon={<User2 className="h-4 w-4 text-primary" />} />
-        <MetricTile label="Average KDA" value={overview.averageKda.toFixed(2)} hint="Calculé sur le joueur suivi" />
+        <MetricTile label="Average KDA" value={overview.averageKda.toFixed(2)} hint="Calculated from the tracked player." />
         <MetricTile label="Current streak" value={currentStreak.value} hint={currentStreak.type === "neutral" ? "No active streak" : currentStreak.type} />
         <MetricTile label="Best streak" value={bestWinStreak} hint={`Worst skid ${bestLossStreak}`} icon={<Trophy className="h-4 w-4 text-primary" />} />
       </div>
@@ -58,13 +58,13 @@ export function ProfilePage() {
       <section className="space-y-3">
         <div className="px-1">
           <h2 className="text-lg font-semibold tracking-tight text-foreground">Performance records</h2>
-          <p className="text-sm text-muted-foreground">Premier socle de la future vue profil détaillée.</p>
+          <p className="text-sm text-muted-foreground">First layer of the future detailed profile view.</p>
         </div>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
           <MetricTile label="Highest kills" value={records.highestKills} />
           <MetricTile label="Highest assists" value={records.highestAssists} />
-          <MetricTile label="Highest damage" value={records.highestDamage.toLocaleString("fr-FR")} />
-          <MetricTile label="Highest gold" value={records.highestGold.toLocaleString("fr-FR")} />
+          <MetricTile label="Highest damage" value={records.highestDamage.toLocaleString("en-US")} />
+          <MetricTile label="Highest gold" value={records.highestGold.toLocaleString("en-US")} />
           <MetricTile label="Pentakills" value={records.pentakills} />
         </div>
       </section>
@@ -73,7 +73,7 @@ export function ProfilePage() {
         <Card>
           <CardHeader>
             <CardTitle>Preferred pool</CardTitle>
-            <CardDescription>Les champions qui décrivent le mieux l’identité du profil local.</CardDescription>
+            <CardDescription>The champions that best describe the local profile identity.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             {topPool.map((entry) => (
@@ -101,7 +101,7 @@ export function ProfilePage() {
         <Card>
           <CardHeader>
             <CardTitle>Recent form</CardTitle>
-            <CardDescription>Lecture courte du rendement récent sans sortir du profil.</CardDescription>
+            <CardDescription>Short read on recent output without leaving the profile page.</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-7 gap-3 lg:grid-cols-14">

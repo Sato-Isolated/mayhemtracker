@@ -18,7 +18,7 @@ function RouteLoadingFallback() {
   return (
     <div className="flex min-h-[40vh] items-center justify-center">
       <Surface className="rounded-[1.25rem] px-5 py-4 text-sm text-muted-foreground">
-        Chargement de la vue locale...
+        Loading local workspace...
       </Surface>
     </div>
   );

@@ -42,7 +42,7 @@ export function ShellSettingsProvider({ children }: { children: ReactNode }) {
       return { loading: false, data: next };
     });
 
-    toast.success("Préférence enregistrée");
+    toast.success("Preference saved");
   }
 
   useEffect(() => {

@@ -8,7 +8,7 @@ export function TrendBars({ items }: { items: TrendPoint[] }) {
     <Card>
       <CardHeader>
         <CardTitle>Win-rate trend</CardTitle>
-        <CardDescription>Vue glissante sur les derniers jours avec volume et rendement.</CardDescription>
+        <CardDescription>Rolling view of recent days with volume and output.</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-7 gap-3 lg:grid-cols-14">

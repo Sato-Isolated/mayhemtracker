@@ -215,7 +215,7 @@ function buildActivity(trackedMatches: TrackedMatch[], days = 365) {
     const matches = counts.get(key) ?? 0;
     output.push({
       key,
-      label: date.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" }),
+      label: date.toLocaleDateString("en-US", { day: "2-digit", month: "2-digit" }),
       matches,
       intensity: Math.min(matches, 7),
     });
@@ -258,7 +258,7 @@ function buildTrend(trackedMatches: TrackedMatch[], days = 14): TrendPointDto[] 
 
     output.push({
       key,
-      label: date.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" }),
+      label: date.toLocaleDateString("en-US", { day: "2-digit", month: "2-digit" }),
       matches,
       wins,
       winRate: matches ? Math.round((wins / matches) * 100) : 0,

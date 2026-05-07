@@ -1,27 +1,27 @@
 # Copilot Instructions — Mayhem Tracker
 
-## Projet
+## Project
 
-Mayhem Tracker est une application locale (Windows) de suivi de statistiques pour le mode ARAM Mayhem de League of Legends. Elle surveille le client LoL local, synchronise les données de matchs et fournit des tableaux de bord analytiques.
+Mayhem Tracker is a local Windows application for tracking statistics for League of Legends ARAM Mayhem. It watches the local LoL client, syncs match data, and provides analytical dashboards.
 
-## Stack technique
+## Technical Stack
 
-| Couche | Technologies |
+| Layer | Technologies |
 |--------|-------------|
 | Frontend | React 19, TypeScript, Vite, Tailwind CSS 4, shadcn/ui (Radix UI) |
 | Backend | Express 5, TypeScript, better-sqlite3, league-connect |
 | Monorepo | pnpm workspaces (`client/`, `server/`) |
 | Validation | Zod |
 
-## Conventions de nommage
+## Naming Conventions
 
-- **Fichiers** : kebab-case (`dashboard-card.tsx`, `match-service.ts`)
-- **Composants React** : PascalCase (`DashboardCard`, `AppShell`)
-- **Props** : `{NomComposant}Props` (`DashboardCardProps`)
-- **Services** : camelCase + suffixe `Service` (`matchService`, `analyticsService`)
-- **Routers Express** : camelCase + suffixe `Router` (`analyticsRouter`)
-- **Hooks** : `useXxx` (`useTrackerAppData`, `useTrackerMatchData`)
-- **Types backend** : PascalCase + suffixe `Entity` ou `Dto` (`MatchEntity`, `MatchListItemDto`)
+- **Files**: kebab-case (`dashboard-card.tsx`, `match-service.ts`)
+- **React components**: PascalCase (`DashboardCard`, `AppShell`)
+- **Props**: `{ComponentName}Props` (`DashboardCardProps`)
+- **Services**: camelCase with `Service` suffix (`matchService`, `analyticsService`)
+- **Express routers**: camelCase with `Router` suffix (`analyticsRouter`)
+- **Hooks**: `useXxx` (`useTrackerAppData`, `useTrackerMatchData`)
+- **Backend types**: PascalCase with `Entity` or `Dto` suffix (`MatchEntity`, `MatchListItemDto`)
 
 ## Architecture
 
@@ -29,49 +29,49 @@ Mayhem Tracker est une application locale (Windows) de suivi de statistiques pou
 
 ```
 components/
-  ui/          → Composants primitifs shadcn/ui (Button, Card, Dialog…)
-  features/    → Composants métier (DashboardCard, ActivityHeatmap…)
-  layout/      → Shell et error boundary
+  ui/          → shadcn/ui primitives (Button, Card, Dialog…)
+  features/    → Domain components (DashboardCard, ActivityHeatmap…)
+  layout/      → Shell and error boundary
 pages/         → Pages lazy-loaded via React.lazy + Suspense
 state/         → React Context (TrackerDataProvider)
-lib/           → API client, types, utilitaires
+lib/           → API client, types, utilities
 ```
 
-- **State** : React Context API uniquement (pas de Redux/Zustand). Pattern `AsyncState<T>` avec `runAction()`.
-- **API client** : Fetch natif typé dans `lib/api.ts` (pas d'axios).
-- **Routing** : React Router DOM avec code splitting par page.
-- **Styles** : Classes utilitaires Tailwind, CVA pour les variantes de composants, pas de CSS modules.
+- **State**: React Context API only, no Redux/Zustand. Use the `AsyncState<T>` pattern with `runAction()`.
+- **API client**: Typed native fetch in `lib/api.ts`, no axios.
+- **Routing**: React Router DOM with code splitting per page.
+- **Styles**: Tailwind utility classes, CVA for component variants, no CSS modules.
 
 ### Backend (`server/src/`)
 
 ```
 routes/        → Express routers
-services/      → Logique métier
-repositories/  → Accès données (SQLite)
-db/            → Schéma et migrations
-types/         → Interfaces TypeScript
-config/        → Configuration (chemins de stockage)
+services/      → Business logic
+repositories/  → Data access (SQLite)
+db/            → Schema and migrations
+types/         → TypeScript interfaces
+config/        → Configuration (storage paths)
 ```
 
-- **Pattern Repository** : Les repositories gèrent l'accès brut aux données, les services orchestrent la logique métier.
-- **Base de données** : SQLite via better-sqlite3 (synchrone). Stockage dans `%USERPROFILE%/.mayhemtracker/`.
+- **Repository Pattern**: Repositories handle raw data access, services orchestrate business logic.
+- **Database**: SQLite via better-sqlite3 (synchronous). Stored in `%USERPROFILE%/.mayhemtracker/`.
 
-## Langue
+## Language
 
-L'interface utilisateur et les commentaires sont en **français**.
+The user interface and comments are in **English**.
 
-## Contraintes
+## Constraints
 
-- Application **locale uniquement** — pas de backend cloud, pas d'authentification externe.
-- Cible **Windows** — le client League of Legends est détecté via `league-connect`.
-- Données stockées en **SQLite** localement.
-- Utiliser les composants **shadcn/ui existants** dans `components/ui/` avant d'en créer de nouveaux.
-- Privilégier la **réutilisation** des utilitaires existants (`lib/utils.ts`, `lib/stats-utils.ts`, `lib/tracker-utils.ts`).
+- Local-only application, no cloud backend and no external authentication.
+- Windows target, the League of Legends client is detected through `league-connect`.
+- Data is stored locally in SQLite.
+- Use the existing shadcn/ui components in `components/ui/` before creating new ones.
+- Prefer reusing existing utilities in `lib/utils.ts`, `lib/stats-utils.ts`, and `lib/tracker-utils.ts`.
 
-## Commandes
+## Commands
 
 ```bash
-pnpm dev          # Client + serveur en parallèle
-pnpm build        # Build production
-pnpm db:reset     # Reset la base SQLite
+pnpm dev          # Client + server in parallel
+pnpm build        # Production build
+pnpm db:reset     # Reset the SQLite database
 ```

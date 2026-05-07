@@ -66,7 +66,7 @@ export function AnalyticsProvider({ children }: { children: ReactNode }) {
 
   async function updatePlayerRating(targetPuuid: string, summonerName: string | undefined, rating: number | undefined, note?: string) {
     await api.updateRating(targetPuuid, summonerName, rating, note);
-    toast.success("Évaluation enregistrée");
+    toast.success("Rating saved");
     await loadTeammates();
   }
 

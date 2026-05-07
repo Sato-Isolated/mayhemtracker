@@ -16,7 +16,7 @@ describe("ActivityHeatmap", () => {
     render(<ActivityHeatmap items={items} />);
 
     expect(screen.getByTestId("activity-heatmap-card")).toBeInTheDocument();
-    expect(screen.getByTestId("activity-summary")).toHaveTextContent("Matchs");
+    expect(screen.getByTestId("activity-summary")).toHaveTextContent("Matches");
     expect(screen.getByTestId("activity-calendar-shell")).toBeInTheDocument();
     expect(screen.getByTitle("23/03 - 4 match(es)")).toHaveAttribute("data-intensity", "4");
   });
@@ -28,7 +28,7 @@ describe("ActivityHeatmap", () => {
 
     expect(screen.getByTestId("activity-heatmap-card")).toBeInTheDocument();
     expect(screen.queryByTestId("activity-summary")).not.toBeInTheDocument();
-    expect(screen.getByTestId("activity-debug-panel")).toHaveTextContent("semaines");
+    expect(screen.getByTestId("activity-debug-panel")).toHaveTextContent("weeks");
     expect(screen.getByTestId("activity-grid")).toBeInTheDocument();
   });
 });

@@ -32,7 +32,7 @@ export function FriendsList({
     <Card className="border-[color-mix(in_oklch,var(--border)_86%,var(--primary))]">
       <CardHeader className="pb-3">
         <CardTitle>Teammates table</CardTitle>
-        <CardDescription>Vue pro triable pour noter rapidement la synergie et accéder à l’édition détaillée.</CardDescription>
+        <CardDescription>Sortable pro view for rating synergy quickly and opening detailed edits.</CardDescription>
       </CardHeader>
       <CardContent className="pt-0">
         <Table>

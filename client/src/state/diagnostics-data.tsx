@@ -31,25 +31,25 @@ export function DiagnosticsProvider({ children }: { children: ReactNode }) {
   const testStatus = () =>
     runAction(setStatus, api.getStatus, {
       actionName: "testStatus",
-      successMessage: "Backend joignable",
+      successMessage: "Backend reachable",
     });
 
   const loadLeagueAuth = () =>
     runAction(setAuth, api.getLeagueAuth, {
       actionName: "loadLeagueAuth",
-      successMessage: "Authentification League chargée",
+      successMessage: "League authentication loaded",
     });
 
   const loadCurrentSummoner = () =>
     runAction(setSummoner, api.getCurrentSummoner, {
       actionName: "loadCurrentSummoner",
-      successMessage: "Summoner chargé",
+      successMessage: "Summoner loaded",
     });
 
   const runPowerShellTest = () =>
     runAction(setPowerShell, api.getPowerShellTest, {
       actionName: "runPowerShellTest",
-      successMessage: "Test PowerShell exécuté",
+      successMessage: "PowerShell test executed",
     });
 
   const value = useMemo(

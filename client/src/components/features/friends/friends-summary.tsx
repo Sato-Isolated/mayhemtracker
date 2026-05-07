@@ -18,27 +18,27 @@ export function FriendsSummary({ teammates }: FriendsSummaryProps) {
       <MetricTile
         label="Tracked teammates"
         value={teammates.length}
-        hint="Coequipiers detectes dans l'historique local."
+        hint="Teammates detected in local match history."
       />
       <MetricTile
         label="Rated players"
         value={ratedCount}
-        hint="Joueurs ayant deja une evaluation enregistree."
+        hint="Players who already have a saved rating."
       />
       <MetricTile
         label="Most played ally"
         value={mostPlayed?.summonerName ?? "-"}
-        hint={`${mostPlayed?.matches ?? 0} games ensemble`}
+        hint={`${mostPlayed?.matches ?? 0} games together`}
       />
       <MetricTile
         label="Active in 30d"
         value={activeLast30d}
-        hint="Allies vus au moins une fois sur les 30 derniers jours."
+        hint="Allies seen at least once over the last 30 days."
       />
       <MetricTile
         label="Best duo WR (min 3)"
         value={bestWinRate?.summonerName ?? "-"}
-        hint={bestWinRate ? `${bestWinRate.winRateTogether}% WR` : "Pas assez de volume"}
+        hint={bestWinRate ? `${bestWinRate.winRateTogether}% WR` : "Not enough games"}
         className="sm:col-span-2 xl:col-span-2"
       />
     </section>

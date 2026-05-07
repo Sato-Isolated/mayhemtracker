@@ -39,24 +39,24 @@ describe("AppShell", () => {
     syncStaticData.mockClear();
   });
 
-  it("renders the french shell copy and sync actions", async () => {
+  it("renders the shell copy and sync actions", async () => {
     const user = userEvent.setup();
 
     render(
       <MemoryRouter initialEntries={["/history"]}>
         <AppShell>
-          <div>Contenu</div>
+          <div>Content</div>
         </AppShell>
       </MemoryRouter>,
     );
 
-    expect(screen.getByLabelText("Navigation principale")).toBeInTheDocument();
-    expect(screen.getAllByText("Historique")).toHaveLength(2);
+    expect(screen.getByLabelText("Primary navigation")).toBeInTheDocument();
+    expect(screen.getAllByText("History")).toHaveLength(2);
     expect(screen.getByText(/current workspace/i)).toBeInTheDocument();
-    expect(screen.getByText(/file dense pour parcourir et revoir les matchs stockes/i)).toBeInTheDocument();
+    expect(screen.getByText(/dense queue for reviewing stored matches/i)).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: /synchroniser les matchs/i }));
-    await user.click(screen.getByRole("button", { name: /synchroniser les donnees statiques/i }));
+    await user.click(screen.getByRole("button", { name: /sync matches/i }));
+    await user.click(screen.getByRole("button", { name: /sync static data/i }));
 
     expect(syncMatches).toHaveBeenCalledTimes(1);
     expect(syncStaticData).toHaveBeenCalledTimes(1);
@@ -69,12 +69,12 @@ describe("AppShell", () => {
     render(
       <MemoryRouter initialEntries={["/profile"]}>
         <AppShell>
-          <div>Contenu</div>
+          <div>Content</div>
         </AppShell>
       </MemoryRouter>,
     );
 
-    expect(screen.queryByText("Identite locale")).not.toBeInTheDocument();
-    expect(screen.queryByText(/resume du compte suivi/i)).not.toBeInTheDocument();
+    expect(screen.queryByText("Local identity")).not.toBeInTheDocument();
+    expect(screen.queryByText(/tracked account snapshot/i)).not.toBeInTheDocument();
   });
 });

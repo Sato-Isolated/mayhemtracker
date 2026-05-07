@@ -25,7 +25,7 @@ export function DialogContent({ className, children, ...props }: React.Component
       >
         {children}
         <DialogPrimitive.Close
-          aria-label="Fermer la boîte de dialogue"
+          aria-label="Close dialog"
           className="absolute right-4 top-4 p-1 text-muted-foreground hover:bg-[var(--hover-overlay)] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <X className="h-4 w-4" />

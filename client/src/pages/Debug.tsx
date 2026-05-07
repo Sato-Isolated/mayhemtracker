@@ -44,11 +44,11 @@ export function DebugPage() {
         <div className="grid gap-5 md:grid-cols-2">
           <DashboardCard
             title="Backend Status"
-            description="Valide que le backend Express local répond via le proxy Vite."
+            description="Checks that the local Express backend responds through the Vite proxy."
             badge="GET /api/status"
             loading={status.loading}
           >
-            <Button onClick={() => void testStatus()}>Tester le backend</Button>
+            <Button onClick={() => void testStatus()}>Test backend</Button>
             {status.data ? (
               <Alert>
                 <CheckCircle2 className="result-win mb-2 h-4 w-4" />
@@ -59,7 +59,7 @@ export function DebugPage() {
             {status.error ? (
               <Alert variant="destructive">
                 <AlertCircle className="mb-2 h-4 w-4" />
-                <AlertTitle>Erreur backend</AlertTitle>
+                <AlertTitle>Backend error</AlertTitle>
                 <AlertDescription>{status.error}</AlertDescription>
               </Alert>
             ) : null}
@@ -67,12 +67,12 @@ export function DebugPage() {
 
           <DashboardCard
             title="League Auth"
-            description="Teste `authenticate()` côté Node pour récupérer les credentials LCU utiles."
+            description="Tests `authenticate()` on the Node side to fetch the required LCU credentials."
             badge="GET /api/league/auth"
             loading={auth.loading}
           >
             <Button variant="secondary" onClick={() => void loadLeagueAuth()}>
-              Récupérer l'auth League
+              Fetch League auth
             </Button>
             {auth.data?.credentials ? (
               <div className="space-y-2 rounded-2xl border bg-card/70 p-4 text-sm">
@@ -83,7 +83,7 @@ export function DebugPage() {
             ) : null}
             {auth.error ? (
               <Alert variant="destructive">
-                <AlertTitle>League client indisponible</AlertTitle>
+                <AlertTitle>League client unavailable</AlertTitle>
                 <AlertDescription>{auth.error}</AlertDescription>
               </Alert>
             ) : null}
@@ -91,12 +91,12 @@ export function DebugPage() {
 
           <DashboardCard
             title="Current Summoner"
-            description="Lit le current summoner via l'API locale du client League."
+            description="Reads the current summoner from the local League client API."
             badge="GET /api/league/summoner"
             loading={summoner.loading}
           >
             <Button variant="secondary" onClick={() => void loadCurrentSummoner()}>
-              Charger le summoner
+              Load summoner
             </Button>
             {summoner.data?.summoner ? (
               <div className="rounded-2xl border bg-card/70 p-4 text-sm">
@@ -111,7 +111,7 @@ export function DebugPage() {
             ) : null}
             {summoner.error ? (
               <Alert variant="destructive">
-                <AlertTitle>Impossible de lire le summoner</AlertTitle>
+                <AlertTitle>Unable to read the summoner</AlertTitle>
                 <AlertDescription>{summoner.error}</AlertDescription>
               </Alert>
             ) : null}
@@ -119,12 +119,12 @@ export function DebugPage() {
 
           <DashboardCard
             title="PowerShell Test"
-            description="Exécute une commande PowerShell locale pour vérifier le process LeagueClientUx."
+            description="Runs a local PowerShell command to verify the LeagueClientUx process."
             badge="GET /api/system/powershell-test"
             loading={powerShell.loading}
           >
             <Button variant="secondary" onClick={() => void runPowerShellTest()}>
-              Lancer le test PowerShell
+              Run PowerShell test
             </Button>
             {powerShell.data ? (
               <div className="grid gap-3">
@@ -141,7 +141,7 @@ export function DebugPage() {
 
         <DashboardCard
           title="Static Data"
-          description="Synchronise champions, items et augments depuis Data Dragon et CommunityDragon, puis recharge le cache local."
+          description="Syncs champions, items, and augments from Data Dragon and CommunityDragon, then reloads the local cache."
           badge="POST /api/static-data/sync"
           loading={staticSync.loading}
         >
@@ -152,7 +152,7 @@ export function DebugPage() {
             </Button>
             <Button variant="outline" onClick={() => void loadStaticLists()}>
               <RefreshCcw className="h-4 w-4" />
-              Recharger le cache UI
+              Reload UI cache
             </Button>
           </div>
           <div className="grid gap-3 md:grid-cols-3">
@@ -177,9 +177,9 @@ export function DebugPage() {
           </div>
           {staticSync.data ? (
             <Alert>
-              <AlertTitle>Sync terminée</AlertTitle>
+              <AlertTitle>Sync complete</AlertTitle>
               <AlertDescription>
-                Version {staticSync.data.result.version} · {staticSync.data.result.champions} champions · {staticSync.data.result.items} items · {staticSync.data.result.augments} augments · {staticSync.data.result.reused ? "cache réutilisé" : "mise à jour complète"}
+                Version {staticSync.data.result.version} · {staticSync.data.result.champions} champions · {staticSync.data.result.items} items · {staticSync.data.result.augments} augments · {staticSync.data.result.reused ? "cache reused" : "full refresh"}
               </AlertDescription>
             </Alert>
           ) : null}
@@ -191,7 +191,7 @@ export function DebugPage() {
       <div className="grid gap-5 xl:grid-cols-[0.95fr_1.05fr]">
         <DashboardCard
           title="Match Sync"
-          description="Récupère l'historique via le client League local, enrichit les données et persiste dans SQLite."
+          description="Fetches match history from the local League client, enriches the data, and persists it to SQLite."
           badge="POST /api/matches/sync-current"
           className="xl:col-span-2"
         >
@@ -202,17 +202,17 @@ export function DebugPage() {
             </Button>
             <Button variant="outline" onClick={() => void loadMatches()}>
               <RefreshCcw className="h-4 w-4" />
-              Recharger la liste
+              Reload list
             </Button>
             <Button variant="ghost" onClick={() => void clearMatches()}>
-              Vider le stockage local
+              Clear local storage
             </Button>
           </div>
         </DashboardCard>
 
         <DashboardCard
           title="Match List"
-          description="Liste paginée locale, triée du plus récent au plus ancien."
+          description="Local paginated list sorted from newest to oldest."
           badge="GET /api/matches"
           loading={matches.loading}
         >
@@ -258,7 +258,7 @@ export function DebugPage() {
                 ))
               ) : (
                 <div className="rounded-2xl border border-dashed p-6 text-center text-sm text-muted-foreground">
-                  Aucun match stocké localement.
+                  No matches stored locally.
                 </div>
               )}
             </div>
@@ -267,7 +267,7 @@ export function DebugPage() {
 
         <DashboardCard
           title="Match Detail"
-          description="Participants, items, augments et payload brut pour debug."
+          description="Participants, items, augments, and raw payload for debugging."
           badge="GET /api/matches/:matchId"
           loading={matchDetail.loading}
         >
@@ -364,7 +364,7 @@ export function DebugPage() {
             </Tabs>
           ) : (
             <div className="rounded-2xl border border-dashed p-8 text-center text-sm text-muted-foreground">
-              Sélectionne un match pour afficher le détail.
+              Select a match to display its details.
             </div>
           )}
         </DashboardCard>
@@ -376,7 +376,7 @@ export function DebugPage() {
         <Card>
           <CardHeader>
             <CardTitle>Backend Contract</CardTitle>
-            <CardDescription>Résumé des endpoints locaux exposés par le backend Node.</CardDescription>
+            <CardDescription>Summary of local endpoints exposed by the Node backend.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             <div className="flex items-center gap-2"><Server className="h-4 w-4" /> GET /api/status</div>
@@ -391,17 +391,17 @@ export function DebugPage() {
         <Card>
           <CardHeader>
             <CardTitle>Debug Panels</CardTitle>
-            <CardDescription>Exposition rapide des payloads pour itérer sur les intégrations locales.</CardDescription>
+            <CardDescription>Quick payload exposure for iterating on local integrations.</CardDescription>
           </CardHeader>
           <CardContent>
             <Dialog>
               <DialogTrigger asChild>
-                <Button variant="outline">Ouvrir le debug JSON</Button>
+                <Button variant="outline">Open debug JSON</Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Debug Snapshot</DialogTitle>
-                  <DialogDescription>État local courant des réponses backend affichées dans l’interface.</DialogDescription>
+                  <DialogDescription>Current local state of backend responses displayed in the UI.</DialogDescription>
                 </DialogHeader>
                 <ScrollArea className="h-[420px] rounded-2xl border p-4">
                   <pre className="text-xs text-foreground">{JSON.stringify({ status, auth, summoner, powerShell, staticSync, matches, matchDetail }, null, 2)}</pre>

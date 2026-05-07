@@ -116,8 +116,8 @@ export function MatchesProvider({ children }: { children: ReactNode }) {
     const silent = options.silent ?? origin === "auto";
     const payload = await api.syncMatches();
     const hasStoredMatches = payload.result.stored > 0;
-    const syncLabel = reason === "manual" ? "Synchronisation" : "Auto-sync";
-    const syncMessage = `${syncLabel}: ${payload.result.stored} nouveaux, ${payload.result.updated} mis a jour`;
+    const syncLabel = reason === "manual" ? "Sync" : "Auto-sync";
+    const syncMessage = `${syncLabel}: ${payload.result.stored} new, ${payload.result.updated} updated`;
 
     if (!silent) {
       toast.success(syncMessage);
@@ -144,7 +144,7 @@ export function MatchesProvider({ children }: { children: ReactNode }) {
 
   async function clearMatches() {
     await api.clearMatches();
-    toast.success("Matchs locaux supprimes");
+    toast.success("Local matches deleted");
     setMatches({ loading: false, data: { items: [], total: 0, page: 1, pageSize: matchPageSize } });
     setSelectedMatchId(null);
     setMatchDetail(initialAsyncState<MatchDetail>());

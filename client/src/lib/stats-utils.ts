@@ -188,7 +188,7 @@ function buildActivity(trackedMatches: TrackedMatchSnapshot[], days = 365): Acti
     const matches = counts.get(key) ?? 0;
     output.push({
       key,
-      label: date.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" }),
+      label: date.toLocaleDateString("en-US", { day: "2-digit", month: "2-digit" }),
       matches,
       intensity: Math.min(matches, 7),
     });
@@ -258,7 +258,7 @@ function buildTopAugments(trackedMatches: TrackedMatchSnapshot[], limit = 8): Au
 export function buildDashboardOverview(matches: MatchListItem[]): DashboardOverview {
   if (!matches.length) {
     return {
-      trackedPlayerName: "Invocateur inconnu",
+      trackedPlayerName: "Unknown summoner",
       trackedPlayerPuuid: undefined,
       totalMatches: 0,
       wins: 0,
@@ -273,7 +273,7 @@ export function buildDashboardOverview(matches: MatchListItem[]): DashboardOverv
   const trackedPuuid = inferTrackedPlayerPuuid(matches);
   const trackedRows = buildTrackedMatches(matches, trackedPuuid).map((entry) => entry.participant);
 
-  const playerName = trackedRows[0]?.summonerName ?? trackedRows[0]?.riotIdGameName ?? "Invocateur inconnu";
+  const playerName = trackedRows[0]?.summonerName ?? trackedRows[0]?.riotIdGameName ?? "Unknown summoner";
   const wins = trackedRows.filter((participant) => participant.win).length;
   const totalMatches = matches.length;
   const averageDurationSeconds = Math.round(
@@ -299,10 +299,10 @@ export function formatCompactStat(value?: number): string {
   }
 
   if (value >= 1000) {
-    return `${(Math.round((value / 1000) * 10) / 10).toLocaleString("fr-FR")}k`;
+    return `${(Math.round((value / 1000) * 10) / 10).toLocaleString("en-US")}k`;
   }
 
-  return value.toLocaleString("fr-FR");
+  return value.toLocaleString("en-US");
 }
 
 export function formatKdaRatio(kills?: number, deaths?: number, assists?: number): number {

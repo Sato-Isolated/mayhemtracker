@@ -103,7 +103,7 @@ export function FriendsPage() {
       <PageIntro
         eyebrow="Teammates"
         title="Friends board"
-        description="Tableau local des coequipiers frequents pour noter la synergie et garder des notes actionnables."
+        description="Local board of frequent teammates for rating synergy and keeping actionable notes."
         actions={(
           <>
             <Badge variant="outline">{filtered.length} teammates</Badge>
@@ -180,7 +180,7 @@ export function FriendsPage() {
 
       <PageSection
         title="Overview"
-        description="Vue compacte des signaux principaux avant revue detaillee."
+        description="Compact view of the main signals before a detailed review."
         className="space-y-4"
       >
         <FriendsSummary teammates={filtered} />

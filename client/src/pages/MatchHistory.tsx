@@ -47,32 +47,32 @@ export function MatchHistoryPage() {
   const activeTrackedParticipant = trackedPuuid && activeMatch
     ? activeMatch.participants.find((participant) => participant.puuid === trackedPuuid) ?? activeMatch.participants[0]
     : activeMatch?.participants[0];
-  const latestPageDate = pageItems[0] ? formatDate(pageItems[0].gameCreation ?? pageItems[0].retrievedAt) : "Aucun match local";
+  const latestPageDate = pageItems[0] ? formatDate(pageItems[0].gameCreation ?? pageItems[0].retrievedAt) : "No local matches";
 
   const heroMetrics = useMemo(
     () => [
       {
         label: "Archive",
-        value: totalMatches.toLocaleString("fr-FR"),
-        hint: "Stocke localement et pret pour la revue.",
+        value: totalMatches.toLocaleString("en-US"),
+        hint: "Stored locally and ready for review.",
         tone: "accent",
       },
       {
         label: "Page active",
         value: `${matchPage} / ${totalPages}`,
-        hint: `${pageItems.length} matchs dans cette tranche.`,
+        hint: `${pageItems.length} matches in this range.`,
         tone: "muted",
       },
       {
-        label: "Winrate page",
+        label: "Page win rate",
         value: `${pageWinRate}%`,
-        hint: `${pageWins} victoires sur la page visible.`,
+        hint: `${pageWins} wins on the visible page.`,
         tone: "success",
       },
       {
         label: "Selection",
-        value: activeTrackedParticipant?.championName ?? "Choisir un match",
-        hint: activeMatch ? `${activeMatch.gameMode ?? "League"} - ${latestPageDate}` : "Selectionnez un match pour ouvrir le detail.",
+        value: activeTrackedParticipant?.championName ?? "Choose a match",
+        hint: activeMatch ? `${activeMatch.gameMode ?? "League"} - ${latestPageDate}` : "Select a match to open the detail view.",
         tone: "muted",
       },
     ],
@@ -110,13 +110,13 @@ export function MatchHistoryPage() {
   return (
     <div className="space-y-3.5">
       <PageIntro
-        eyebrow="Historique"
-        title="Matchs stockes"
-        description="Archive locale orientee revue desktop, avec detail instantane et lecture compacte."
+        eyebrow="History"
+        title="Stored matches"
+        description="Local archive tuned for desktop review with instant details and compact scanning."
         actions={(
           <>
-            <Badge variant="outline">{totalMatches} matchs</Badge>
-            <Badge variant="secondary">{splitView ? "Revue scindee" : "Revue integree"}</Badge>
+            <Badge variant="outline">{totalMatches} matches</Badge>
+            <Badge variant="secondary">{splitView ? "Split review" : "Inline review"}</Badge>
           </>
         )}
       />
@@ -126,11 +126,11 @@ export function MatchHistoryPage() {
         meta={(
           <>
             <Badge variant="outline">Page {matchPage} / {totalPages}</Badge>
-            <Badge variant="outline">{pageItems.length} lignes visibles</Badge>
+            <Badge variant="outline">{pageItems.length} visible rows</Badge>
             <Badge variant="secondary">{latestPageDate}</Badge>
             <Badge variant="outline" className="gap-1.5">
               <LayoutPanelLeft className="h-3.5 w-3.5" />
-              {splitView ? "Scinde" : "Integre"}
+              {splitView ? "Split" : "Inline"}
             </Badge>
           </>
         )}
@@ -138,10 +138,10 @@ export function MatchHistoryPage() {
           <>
             <Button variant="outline" size="sm" onClick={() => void setMatchPage(matchPage - 1)} disabled={matchPage <= 1}>
               <ChevronLeft className="h-4 w-4" />
-              Precedent
+              Previous
             </Button>
             <Button variant="outline" size="sm" onClick={() => void setMatchPage(matchPage + 1)} disabled={matchPage >= totalPages}>
-              Suivant
+              Next
               <ChevronRight className="h-4 w-4" />
             </Button>
           </>
@@ -180,15 +180,15 @@ export function MatchHistoryPage() {
           <div className="mb-2.5 flex flex-wrap items-center justify-between gap-3 px-1">
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <div className="text-sm font-semibold text-foreground">Liste des matchs</div>
-                <Badge variant="outline">{totalMatches} stockes</Badge>
-                <Badge variant="outline">{matchPageSize} par page</Badge>
+                <div className="text-sm font-semibold text-foreground">Match list</div>
+                <Badge variant="outline">{totalMatches} stored</Badge>
+                <Badge variant="outline">{matchPageSize} per page</Badge>
               </div>
               <div className="mt-1 text-xs text-muted-foreground">
-                Page {matchPage} sur {totalPages}.
+                Page {matchPage} of {totalPages}.
               </div>
             </div>
-            <div className="text-xs text-muted-foreground">{activeMatch ? "Detail pret" : "Selectionnez un match"}</div>
+            <div className="text-xs text-muted-foreground">{activeMatch ? "Detail ready" : "Select a match"}</div>
           </div>
 
           <div data-testid="match-history-scroll" className="space-y-2.5 pr-1">
@@ -209,9 +209,9 @@ export function MatchHistoryPage() {
             )) : (
               <div className="flex min-h-[18rem] flex-col items-center justify-center rounded-[1rem] border border-dashed border-[color-mix(in_oklch,var(--border)_90%,var(--primary))] bg-[color-mix(in_oklch,var(--card)_94%,var(--surface-2))] px-6 text-center text-sm text-muted-foreground">
                 <Swords className="mb-3 h-5 w-5" />
-                <div className="text-base font-medium text-foreground">Aucun match local</div>
+                <div className="text-base font-medium text-foreground">No local matches</div>
                 <div className="mt-2 max-w-sm leading-6">
-                  L'archive est encore vide. Lancez une synchronisation pour remplir l'historique.
+                  The archive is still empty. Run a sync to populate match history.
                 </div>
               </div>
             )}
@@ -235,7 +235,7 @@ export function MatchHistoryPage() {
               />
             ) : (
               <div className="flex min-h-[18rem] flex-1 items-center justify-center rounded-[1rem] border border-dashed border-[color-mix(in_oklch,var(--border)_90%,var(--primary))] bg-[color-mix(in_oklch,var(--card)_94%,var(--surface-2))] px-6 text-center text-sm text-muted-foreground">
-                Selectionnez un match pour afficher son detail.
+                Select a match to display its details.
               </div>
             )}
           </Surface>

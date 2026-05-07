@@ -1,20 +1,20 @@
 # Mayhem Tracker
 
-Application web locale Windows pour suivre des parties League of Legends via l'API locale du client League. Le frontend tourne dans le navigateur, le backend Node.js reste local, et les données sont stockées dans SQLite sur la machine.
+A local Windows web app for tracking League of Legends matches through the League client's local API. The frontend runs in the browser, the Node.js backend stays local, and data is stored in SQLite on the machine.
 
 ## Stack
 
 - Frontend: React 19, TypeScript, Vite, Tailwind CSS v4, shadcn/ui
 - Backend: Node.js, Express, TypeScript, `league-connect`
-- Stockage: SQLite avec `better-sqlite3`
+- Storage: SQLite with `better-sqlite3`
 - Monorepo: pnpm workspaces
 
-## Pré-requis
+## Prerequisites
 
 - Windows
 - Node.js
 - pnpm
-- Client League of Legends installé
+- League of Legends client installed
 
 ## Installation
 
@@ -22,9 +22,9 @@ Application web locale Windows pour suivre des parties League of Legends via l'A
 pnpm install
 ```
 
-## Lancement
+## Run
 
-En développement:
+In development:
 
 ```bash
 pnpm dev
@@ -36,14 +36,14 @@ Ou via le script Windows fourni:
 start-mayhemtracker.bat
 ```
 
-Cela lance:
+This starts:
 
-- le frontend Vite sur `http://localhost:5173`
-- le backend Express sur `http://localhost:3001`
+- the Vite frontend on `http://localhost:5173`
+- the Express backend on `http://localhost:3001`
 
-Le proxy Vite route automatiquement `/api/*` et `/assets-cache/*` vers le backend local.
+The Vite proxy automatically routes `/api/*` and `/assets-cache/*` to the local backend.
 
-## Scripts utiles
+## Useful scripts
 
 ```bash
 pnpm dev
@@ -56,37 +56,37 @@ pnpm verify
 pnpm db:reset
 ```
 
-## Tests frontend
+## Frontend tests
 
-Les tests utilisent Vitest + Testing Library côté client.
+Tests use Vitest + Testing Library on the client side.
 
 ```bash
 pnpm test:client
 ```
 
-Les scénarios couverts actuellement valident:
+The currently covered scenarios validate:
 
-- la réinitialisation des préférences dans `Settings`
-- l'ouverture d'un détail depuis une table interactive
-- l'expansion du flux `history/detail`
+- resetting preferences in `Settings`
+- opening a detail view from an interactive table
+- expanding the `history/detail` flow
 
-## Stockage local
+## Local storage
 
-Par défaut, les données locales sont écrites dans:
+By default, local data is written to:
 
 ```text
 %USERPROFILE%/.mayhemtracker
 ```
 
-Contenu principal:
+Main contents:
 
-- `db/mayhemtracker.sqlite`: base SQLite persistante
-- `cache/icons/`: cache disque des icônes champions, items et augments
-- `static-data/`: fichiers de sync et métadonnées Riot
+- `db/mayhemtracker.sqlite`: persistent SQLite database
+- `cache/icons/`: disk cache for champion, item, and augment icons
+- `static-data/`: sync files and Riot metadata
 
-Tu peux surcharger ce dossier avec la variable d'environnement `MAYHEMTRACKER_STORAGE_DIR`.
+You can override this folder with the `MAYHEMTRACKER_STORAGE_DIR` environment variable.
 
-## Endpoints backend locaux
+## Local backend endpoints
 
 - `GET /api/status`
 - `GET /api/league/connection`
@@ -103,10 +103,10 @@ Tu peux surcharger ce dossier avec la variable d'environnement `MAYHEMTRACKER_ST
 - `GET /api/matches/:matchId`
 - `DELETE /api/matches/clear`
 
-## Notes d'intégration
+## Integration notes
 
-- L'application est pensée pour un usage local uniquement.
-- `league-connect` n'est utilisé que côté backend.
-- Le frontend appelle uniquement des routes HTTP locales `/api/...`.
-- Le backend sert aussi le cache local des icônes via `/assets-cache/...`.
-- Si le client League n'est pas ouvert, les routes League renvoient une erreur JSON propre.
+- The application is designed for local-only usage.
+- `league-connect` is only used on the backend side.
+- The frontend only calls local HTTP routes under `/api/...`.
+- The backend also serves the local icon cache through `/assets-cache/...`.
+- If the League client is not open, League routes return a clean JSON error.

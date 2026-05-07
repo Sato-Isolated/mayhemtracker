@@ -4,9 +4,9 @@ import { cn } from "@/lib/utils";
 import type { ActivityDay } from "@/lib/types";
 
 const weekdayLabels = [
-  { short: "Lun", row: 0 },
-  { short: "Mer", row: 2 },
-  { short: "Ven", row: 4 },
+  { short: "Mon", row: 0 },
+  { short: "Wed", row: 2 },
+  { short: "Fri", row: 4 },
 ] as const;
 const weekdayColumnWidth = 28;
 const activityCellSize = 11;
@@ -83,7 +83,7 @@ export function ActivityHeatmap({ items, variant = "card", showStats = true }: A
       const inRange = cursor >= rangeStart && cursor <= rangeEnd;
       days.push({
         key,
-        label: item?.label ?? cursor.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" }),
+        label: item?.label ?? cursor.toLocaleDateString("en-US", { day: "2-digit", month: "2-digit" }),
         matches: item?.matches ?? 0,
         intensity: item?.intensity ?? 0,
         inRange,
@@ -110,7 +110,7 @@ export function ActivityHeatmap({ items, variant = "card", showStats = true }: A
 
       accumulator.push({
         key,
-        label: firstInRangeDay.date.toLocaleDateString("fr-FR", { month: "short" }),
+        label: firstInRangeDay.date.toLocaleDateString("en-US", { month: "short" }),
         startColumn: weekIndex + 2,
       });
       return accumulator;
@@ -127,7 +127,7 @@ export function ActivityHeatmap({ items, variant = "card", showStats = true }: A
       inRange: false,
       date: rangeStart,
     });
-    const visibleRangeLabel = `${rangeStart.toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" })} au ${rangeEnd.toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" })}`;
+    const visibleRangeLabel = `${rangeStart.toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric" })} to ${rangeEnd.toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric" })}`;
 
     const weekCount = weeks.length;
 
@@ -161,28 +161,28 @@ export function ActivityHeatmap({ items, variant = "card", showStats = true }: A
         )}
       >
         <div className={cn(variant === "embedded" && "max-w-[24rem]")}>
-          <div className="text-[0.64rem] font-bold uppercase tracking-[0.14em] text-muted-foreground">12 derniers mois</div>
-          <div className="mt-[0.16rem] text-[1.02rem] font-semibold leading-[1.1] text-foreground max-sm:text-[0.95rem]">Rythme d'activite</div>
-          <div className="mt-[0.28rem] text-[0.84rem] text-muted-foreground max-sm:text-[0.78rem]">Vue annuelle continue, alignee par semaines comme un graphe de contribution.</div>
+          <div className="text-[0.64rem] font-bold uppercase tracking-[0.14em] text-muted-foreground">Last 12 months</div>
+          <div className="mt-[0.16rem] text-[1.02rem] font-semibold leading-[1.1] text-foreground max-sm:text-[0.95rem]">Activity pace</div>
+          <div className="mt-[0.28rem] text-[0.84rem] text-muted-foreground max-sm:text-[0.78rem]">Continuous yearly view aligned by week like a contribution graph.</div>
         </div>
 
         {showStats ? (
           <div className="grid grid-cols-2 gap-[0.55rem] max-sm:w-full" data-testid="activity-summary">
-            <div className="col-span-full text-[0.72rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground">12 derniers mois</div>
+            <div className="col-span-full text-[0.72rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Last 12 months</div>
             <div className="grid gap-[0.18rem] rounded-[0.9rem] border border-[var(--border-ui)] bg-[color-mix(in_oklch,var(--card)_86%,var(--surface-2))] px-[0.72rem] py-[0.65rem]">
-              <span className="text-[0.64rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Matchs</span>
+              <span className="text-[0.64rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Matches</span>
               <strong className="text-[0.96rem] font-semibold leading-[1.1] text-foreground">{calendar.totalMatches}</strong>
             </div>
             <div className="grid gap-[0.18rem] rounded-[0.9rem] border border-[var(--border-ui)] bg-[color-mix(in_oklch,var(--card)_86%,var(--surface-2))] px-[0.72rem] py-[0.65rem]">
-              <span className="text-[0.64rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Jours actifs</span>
+              <span className="text-[0.64rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Active days</span>
               <strong className="text-[0.96rem] font-semibold leading-[1.1] text-foreground">{calendar.activeDays}</strong>
             </div>
             <div className="grid gap-[0.18rem] rounded-[0.9rem] border border-[var(--border-ui)] bg-[color-mix(in_oklch,var(--card)_86%,var(--surface-2))] px-[0.72rem] py-[0.65rem]">
-              <span className="text-[0.64rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Jour pic</span>
+              <span className="text-[0.64rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Peak day</span>
               <strong className="text-[0.96rem] font-semibold leading-[1.1] text-foreground">{calendar.hottestDay.label}</strong>
             </div>
             <div className="grid gap-[0.18rem] rounded-[0.9rem] border border-[var(--border-ui)] bg-[color-mix(in_oklch,var(--card)_86%,var(--surface-2))] px-[0.72rem] py-[0.65rem]">
-              <span className="text-[0.64rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Volume max</span>
+              <span className="text-[0.64rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Peak volume</span>
               <strong className="text-[0.96rem] font-semibold leading-[1.1] text-foreground">{calendar.hottestDay.matches}</strong>
             </div>
           </div>
@@ -190,9 +190,9 @@ export function ActivityHeatmap({ items, variant = "card", showStats = true }: A
 
         {debugMode ? (
           <div className="flex flex-wrap gap-[0.45rem] text-[0.72rem] text-muted-foreground" data-testid="activity-debug-panel">
-            <span className="rounded-full border border-dashed border-[color-mix(in_oklch,var(--primary)_26%,var(--border))] bg-[color-mix(in_oklch,var(--primary)_8%,var(--card))] px-[0.55rem] py-[0.22rem]">{calendar.weekCount} semaines</span>
-            <span className="rounded-full border border-dashed border-[color-mix(in_oklch,var(--primary)_26%,var(--border))] bg-[color-mix(in_oklch,var(--primary)_8%,var(--card))] px-[0.55rem] py-[0.22rem]">{calendar.visibleDays.length} jours visibles</span>
-            <span className="rounded-full border border-dashed border-[color-mix(in_oklch,var(--primary)_26%,var(--border))] bg-[color-mix(in_oklch,var(--primary)_8%,var(--card))] px-[0.55rem] py-[0.22rem]">{activityCellSize}px cellules min</span>
+            <span className="rounded-full border border-dashed border-[color-mix(in_oklch,var(--primary)_26%,var(--border))] bg-[color-mix(in_oklch,var(--primary)_8%,var(--card))] px-[0.55rem] py-[0.22rem]">{calendar.weekCount} weeks</span>
+            <span className="rounded-full border border-dashed border-[color-mix(in_oklch,var(--primary)_26%,var(--border))] bg-[color-mix(in_oklch,var(--primary)_8%,var(--card))] px-[0.55rem] py-[0.22rem]">{calendar.visibleDays.length} visible days</span>
+            <span className="rounded-full border border-dashed border-[color-mix(in_oklch,var(--primary)_26%,var(--border))] bg-[color-mix(in_oklch,var(--primary)_8%,var(--card))] px-[0.55rem] py-[0.22rem]">{activityCellSize}px min cells</span>
             <span className="rounded-full border border-dashed border-[color-mix(in_oklch,var(--primary)_26%,var(--border))] bg-[color-mix(in_oklch,var(--primary)_8%,var(--card))] px-[0.55rem] py-[0.22rem]">{calendar.visibleRangeLabel}</span>
           </div>
         ) : null}
@@ -299,8 +299,8 @@ export function ActivityHeatmap({ items, variant = "card", showStats = true }: A
   return (
     <Card className="overflow-hidden" data-testid="activity-heatmap-card">
       <CardHeader className="pb-0">
-        <CardTitle className="sr-only">Rythme d'activite</CardTitle>
-        <CardDescription className="sr-only">Vue annuelle continue, alignee par semaines comme un graphe de contribution.</CardDescription>
+        <CardTitle className="sr-only">Activity pace</CardTitle>
+        <CardDescription className="sr-only">Continuous yearly view aligned by week like a contribution graph.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4 pt-6">
         {content}

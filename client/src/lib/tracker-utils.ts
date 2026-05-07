@@ -64,7 +64,7 @@ export function formatDate(value?: number) {
     return "-";
   }
 
-  return new Date(value).toLocaleString("fr-FR");
+  return new Date(value).toLocaleString("en-US");
 }
 
 export function formatDuration(value?: number) {

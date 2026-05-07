@@ -165,8 +165,8 @@ describe("MatchHistoryPage", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByText(/matchs stockes/i)).toBeInTheDocument();
-    expect(screen.getByText(/liste des matchs/i)).toBeInTheDocument();
+    expect(screen.getByText(/stored matches/i)).toBeInTheDocument();
+    expect(screen.getByText(/match list/i)).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: /aatrox/i }));
 

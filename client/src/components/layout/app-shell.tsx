@@ -8,25 +8,25 @@ import { cn } from "@/lib/utils";
 import { useLeagueConnection, useMatches, useShellSettings, useStaticData } from "@/state/tracker-data";
 
 const navigation = [
-  { to: "/", label: "Dashboard", description: "Vue d'ensemble operationnelle", icon: Home },
-  { to: "/profile", label: "Profil", description: "Identite locale", icon: LayoutGrid },
-  { to: "/history", label: "Historique", description: "File de revue dense", icon: Swords },
-  { to: "/champions", label: "Champions", description: "Performance des picks", icon: BarChart3 },
-  { to: "/augments", label: "Augments", description: "Signaux de meta", icon: Sparkles },
-  { to: "/friends", label: "Amis", description: "Notes sur les coequipiers", icon: Users },
-  { to: "/settings", label: "Reglages", description: "Preferences locales", icon: Cog },
-  { to: "/debug", label: "Debug", description: "Outils internes", icon: Bug },
+  { to: "/", label: "Dashboard", description: "Operational overview", icon: Home },
+  { to: "/profile", label: "Profile", description: "Local identity", icon: LayoutGrid },
+  { to: "/history", label: "History", description: "Dense review queue", icon: Swords },
+  { to: "/champions", label: "Champions", description: "Pick performance", icon: BarChart3 },
+  { to: "/augments", label: "Augments", description: "Meta signals", icon: Sparkles },
+  { to: "/friends", label: "Friends", description: "Teammate notes", icon: Users },
+  { to: "/settings", label: "Settings", description: "Local preferences", icon: Cog },
+  { to: "/debug", label: "Debug", description: "Internal tools", icon: Bug },
 ];
 
 const routeCopy: Record<string, { title: string; description: string }> = {
-  "/": { title: "Dashboard", description: "Performance, synchronisation et signaux de session en un coup d'oeil." },
-  "/profile": { title: "Profil", description: "Resume du compte suivi, records et tendances recentes." },
-  "/history": { title: "Historique", description: "File dense pour parcourir et revoir les matchs stockes." },
-  "/champions": { title: "Champions", description: "Lecture rapide des performances et de la forme du pool." },
-  "/augments": { title: "Augments", description: "Tableau meta compact pour la valeur et la rarete." },
-  "/friends": { title: "Amis", description: "Coequipiers frequents avec notes et evaluations locales." },
-  "/settings": { title: "Reglages", description: "Preferences desktop-first pour le shell local." },
-  "/debug": { title: "Debug", description: "Outils de verification et controles backend." },
+  "/": { title: "Dashboard", description: "Performance, sync health, and session signals at a glance." },
+  "/profile": { title: "Profile", description: "Tracked account snapshot, records, and recent trends." },
+  "/history": { title: "History", description: "Dense queue for reviewing stored matches." },
+  "/champions": { title: "Champions", description: "Quick read on champion performance and pool form." },
+  "/augments": { title: "Augments", description: "Compact meta board for value and rarity." },
+  "/friends": { title: "Friends", description: "Frequent teammates with local notes and ratings." },
+  "/settings": { title: "Settings", description: "Desktop-first preferences for the local shell." },
+  "/debug": { title: "Debug", description: "Verification tools and backend controls." },
 };
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -45,8 +45,8 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const shellBadges = useMemo(
     () => [
-      { label: `${matches.data?.total ?? 0} matchs`, variant: "outline" as const },
-      { label: `${champions.length + items.length + augments.length} statiques`, variant: "secondary" as const },
+      { label: `${matches.data?.total ?? 0} matches`, variant: "outline" as const },
+      { label: `${champions.length + items.length + augments.length} static assets`, variant: "secondary" as const },
     ],
     [augments.length, champions.length, items.length, matches.data?.total],
   );
@@ -66,7 +66,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <div className="mt-1 text-sm font-semibold text-foreground">Desktop intelligence panel</div>
           </div>
 
-          <nav className="space-y-2 max-[1100px]:grid max-[1100px]:grid-cols-2 max-[1100px]:gap-[0.65rem] max-sm:grid-cols-1" aria-label="Navigation principale">
+          <nav className="space-y-2 max-[1100px]:grid max-[1100px]:grid-cols-2 max-[1100px]:gap-[0.65rem] max-sm:grid-cols-1" aria-label="Primary navigation">
             {navigation.map((item) => {
               const Icon = item.icon;
               return (
@@ -113,7 +113,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             />
             <div className="min-w-0">
               <div className="text-sm font-medium text-foreground">Client League</div>
-              <div className="text-xs text-muted-foreground">{leagueConnected ? "En ligne - synchro auto prete" : "Hors ligne - en attente du client"}</div>
+              <div className="text-xs text-muted-foreground">{leagueConnected ? "Online - auto sync ready" : "Offline - waiting for client"}</div>
             </div>
           </div>
         </Surface>
@@ -137,12 +137,12 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
 
           <div className="flex flex-wrap items-center justify-end gap-1.5 max-[1100px]:w-full max-[1100px]:justify-start">
-            <Badge variant={leagueConnected ? "success" : "outline"}>{leagueConnected ? "League en ligne" : "League hors ligne"}</Badge>
+            <Badge variant={leagueConnected ? "success" : "outline"}>{leagueConnected ? "League online" : "League offline"}</Badge>
             {shellBadges.map((entry) => (
               <Badge key={entry.label} variant={entry.variant}>{entry.label}</Badge>
             ))}
-            <Button size="sm" variant="outline" onClick={() => void syncMatches()}>Synchroniser les matchs</Button>
-            <Button size="sm" variant="outline" onClick={() => void syncStaticData()}>Synchroniser les donnees statiques</Button>
+            <Button size="sm" variant="outline" onClick={() => void syncMatches()}>Sync matches</Button>
+            <Button size="sm" variant="outline" onClick={() => void syncStaticData()}>Sync static data</Button>
           </div>
         </header>
 

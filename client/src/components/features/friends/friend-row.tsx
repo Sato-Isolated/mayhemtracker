@@ -33,7 +33,7 @@ export function FriendRow({ entry, selected, onSelect, onRate }: FriendRowProps)
       <TableCell><Badge variant="outline">{entry.winRateTogether}%</Badge></TableCell>
       <TableCell>{entry.winsTogether}-{entry.lossesTogether}</TableCell>
       <TableCell>{entry.averageKdaTogether}</TableCell>
-      <TableCell>{entry.lastSeenAt ? new Date(entry.lastSeenAt).toLocaleDateString("fr-FR") : "-"}</TableCell>
+      <TableCell>{entry.lastSeenAt ? new Date(entry.lastSeenAt).toLocaleDateString("en-US") : "-"}</TableCell>
       <TableCell>{entry.rating ? <Badge variant="default">{entry.rating}/5</Badge> : <Badge variant="outline">-</Badge>}</TableCell>
       <TableCell>
         <div className="flex items-center gap-1">

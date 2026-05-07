@@ -37,7 +37,7 @@ export function MatchHistoryRow({
   const trackedParticipant = trackedPuuid
     ? match.participants.find((participant) => participant.puuid === trackedPuuid) ?? match.participants[0]
     : match.participants[0];
-  const visual = trackedParticipant ? getChampionVisual(trackedParticipant, champions) : { name: "Inconnu", icon: "" };
+  const visual = trackedParticipant ? getChampionVisual(trackedParticipant, champions) : { name: "Unknown", icon: "" };
   const resultTone = trackedParticipant?.win ? "win" : "loss";
   const kdaRatio = formatKdaRatio(trackedParticipant?.kills, trackedParticipant?.deaths, trackedParticipant?.assists);
   const active = isActive || isExpanded;
@@ -80,7 +80,7 @@ export function MatchHistoryRow({
               <div className="flex min-w-0 flex-1 items-start gap-3">
                 <div className="min-w-[4.5rem] shrink-0 rounded-[0.8rem] border border-[color-mix(in_oklch,var(--border)_82%,transparent)] bg-[color-mix(in_oklch,var(--surface-2)_92%,var(--card))] px-2.5 py-2 text-center">
                   <div className={`text-[10px] font-semibold uppercase tracking-[0.18em] ${trackedParticipant?.win ? "text-success" : "text-error"}`}>
-                    {trackedParticipant?.win ? "Victoire" : "Defaite"}
+                    {trackedParticipant?.win ? "Victory" : "Defeat"}
                   </div>
                   <div className="mt-1 text-[11px] text-muted-foreground">{formatDuration(match.gameDuration)}</div>
                 </div>
@@ -94,13 +94,13 @@ export function MatchHistoryRow({
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <div className="truncate text-base font-semibold tracking-[-0.03em] text-foreground">{visual.name}</div>
-                    <Badge variant={trackedParticipant?.win ? "success" : "error"}>{trackedParticipant?.win ? "Victoire" : "Defaite"}</Badge>
+                    <Badge variant={trackedParticipant?.win ? "success" : "error"}>{trackedParticipant?.win ? "Victory" : "Defeat"}</Badge>
                     <span className="text-xs text-muted-foreground">{match.gameMode ?? "League"}</span>
                   </div>
                   <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                     <span>{formatDate(match.gameCreation ?? match.retrievedAt)}</span>
-                    <span>{match.gameVersion ?? "Patch inconnu"}</span>
-                    <span>{match.participants.length} joueurs</span>
+                    <span>{match.gameVersion ?? "Unknown patch"}</span>
+                    <span>{match.participants.length} players</span>
                   </div>
                   <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2">
                     <div className="flex items-end gap-2">
@@ -111,15 +111,15 @@ export function MatchHistoryRow({
                     </div>
                     <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                       <span>DGT {formatCompactStat(trackedParticipant?.totalDamageDealt)}</span>
-                      <span>Or {formatCompactStat(trackedParticipant?.goldEarned)}</span>
-                      <span>Soin {formatCompactStat(trackedParticipant?.totalHeal)}</span>
+                      <span>Gold {formatCompactStat(trackedParticipant?.goldEarned)}</span>
+                      <span>Heal {formatCompactStat(trackedParticipant?.totalHeal)}</span>
                     </div>
                   </div>
                 </div>
               </div>
 
               <div className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
-                <span>{active ? "Selectionne" : "Ouvrir les details"}</span>
+                <span>{active ? "Selected" : "Open details"}</span>
                 <ChevronRight className={cn("h-4 w-4 transition duration-200 motion-reduce:transition-none", active ? "rotate-90" : "rotate-0")} />
               </div>
             </div>
@@ -130,16 +130,16 @@ export function MatchHistoryRow({
                 <div className="flex min-h-[1.6rem] flex-wrap items-center gap-1.5">
                   {trackedParticipant?.augments.length ? trackedParticipant.augments.slice(0, 4).map((augmentId) => (
                     <AugmentIcon key={augmentId} augmentId={augmentId} augments={augments} size={24} />
-                  )) : <span className="text-xs text-muted-foreground">Aucun augment</span>}
+                  )) : <span className="text-xs text-muted-foreground">No augment</span>}
                 </div>
               </div>
 
               <div className="rounded-[0.85rem] border border-[color-mix(in_oklch,var(--border)_84%,transparent)] bg-[color-mix(in_oklch,var(--card)_94%,var(--surface-2))] px-2.5 py-2">
-                <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Objets</div>
+                <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Items</div>
                 <div className="flex min-h-[1.6rem] flex-wrap items-center gap-1.5">
                   {trackedParticipant?.items.length ? trackedParticipant.items.slice(0, 6).map((itemId) => (
                     <ItemIcon key={itemId} itemId={itemId} items={items} size={24} />
-                  )) : <span className="text-xs text-muted-foreground">Aucun instantane d'objets</span>}
+                  )) : <span className="text-xs text-muted-foreground">No item snapshot</span>}
                 </div>
               </div>
             </div>

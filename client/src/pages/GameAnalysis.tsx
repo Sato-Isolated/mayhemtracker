@@ -66,7 +66,7 @@ export function GameAnalysisPage() {
       <PageIntro
         eyebrow="Game analysis"
         title={match ? match.summary : "Match analysis"}
-        description={match ? `${formatDate(match.gameCreation ?? match.retrievedAt)} · ${formatDuration(match.gameDuration)} · ${match.gameVersion ?? "version inconnue"}` : "Chargement du détail de match."}
+        description={match ? `${formatDate(match.gameCreation ?? match.retrievedAt)} · ${formatDuration(match.gameDuration)} · ${match.gameVersion ?? "unknown version"}` : "Loading match details."}
         actions={match ? (
           <>
             <Badge variant="default">{match.gameMode ?? "League"}</Badge>
@@ -88,7 +88,7 @@ export function GameAnalysisPage() {
             )}
           />
 
-          <PageSection title="Team snapshots" description="Comparatif rapide des deux equipes avant la lecture detaillee du scoreboard.">
+          <PageSection title="Team snapshots" description="Quick comparison of both teams before diving into the scoreboard.">
             <div className="grid gap-3 lg:grid-cols-2">
               {teamSnapshots?.map((team) => (
                 <TeamSnapshotCard
@@ -107,7 +107,7 @@ export function GameAnalysisPage() {
           <Card data-testid="game-analysis-scoreboard-card" className="border-[color-mix(in_oklch,var(--border)_86%,var(--primary))]">
             <CardHeader className="pb-3">
               <CardTitle>Scoreboard</CardTitle>
-              <CardDescription>Lecture detaillee avec resume d'equipe aligne sur la densite des pages analytics.</CardDescription>
+              <CardDescription>Detailed read with a team summary aligned to the density of the analytics pages.</CardDescription>
             </CardHeader>
             <CardContent className="pt-0">
               <MatchPlayerScoreboard
