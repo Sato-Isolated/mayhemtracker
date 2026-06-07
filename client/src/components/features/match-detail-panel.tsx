@@ -1,9 +1,6 @@
-import { ExternalLink } from "lucide-react";
-import { Link } from "react-router-dom";
 import { AugmentIcon } from "@/components/features/augment-icon";
 import { ItemIcon } from "@/components/features/item-icon";
 import { StatusBadge } from "@/components/features/status-badge";
-import { Button } from "@/components/ui/button";
 import { formatCompactStat, formatKdaRatio } from "@/lib/stats-utils";
 import { formatDate, formatDuration, getChampionVisual } from "@/lib/tracker-utils";
 import type { MatchDetail, MatchListItem, MatchParticipantSummary, StaticDataEntry } from "@/lib/types";
@@ -59,12 +56,16 @@ function CompactTeam({
   members,
   trackedPuuid,
   champions,
+  items,
+  augments,
 }: {
   label: string;
   win?: boolean;
   members: MatchParticipantSummary[];
   trackedPuuid?: string;
   champions: StaticDataEntry[];
+  items: StaticDataEntry[];
+  augments: StaticDataEntry[];
 }) {
   return (
     <section className="overflow-hidden rounded-md border border-border/65">
@@ -77,13 +78,27 @@ function CompactTeam({
       </div>
 
       <div className="divide-y divide-border/55">
+        <div className="grid grid-cols-[minmax(10rem,1fr)_4.8rem_5.4rem_5.2rem_5.2rem_minmax(8.5rem,0.9fr)_minmax(5rem,0.5fr)] items-center gap-3 px-3 py-2 text-[0.68rem] font-semibold uppercase text-muted-foreground max-lg:grid-cols-[minmax(0,1fr)_4.8rem_5.2rem_5.2rem] max-lg:[&_.score-build]:hidden max-lg:[&_.score-heal]:hidden max-sm:grid-cols-[minmax(0,1fr)_4.8rem_5.2rem] max-sm:[&_.score-gold]:hidden">
+          <span>Player</span>
+          <span className="text-right">KDA</span>
+          <span className="text-right">Damage</span>
+          <span className="score-gold text-right">Gold</span>
+          <span className="score-heal text-right">Heal</span>
+          <span className="score-build">Items</span>
+          <span className="score-build">Augments</span>
+        </div>
         {members.map((participant, index) => {
           const visual = getChampionVisual(participant, champions);
           const tracked = trackedPuuid ? participant.puuid === trackedPuuid : false;
           const key = `${participant.puuid ?? participant.summonerName ?? index}-${participant.championId ?? index}`;
 
           return (
-            <div key={key} className={tracked ? "grid grid-cols-[minmax(0,1fr)_4.8rem] gap-2 bg-[color-mix(in_oklch,var(--primary)_8%,transparent)] px-3 py-2" : "grid grid-cols-[minmax(0,1fr)_4.8rem] gap-2 px-3 py-2"}>
+            <div
+              key={key}
+              className={tracked
+                ? "grid grid-cols-[minmax(10rem,1fr)_4.8rem_5.4rem_5.2rem_5.2rem_minmax(8.5rem,0.9fr)_minmax(5rem,0.5fr)] items-center gap-3 bg-[color-mix(in_oklch,var(--primary)_8%,transparent)] px-3 py-2 max-lg:grid-cols-[minmax(0,1fr)_4.8rem_5.2rem_5.2rem] max-lg:[&_.score-build]:hidden max-lg:[&_.score-heal]:hidden max-sm:grid-cols-[minmax(0,1fr)_4.8rem_5.2rem] max-sm:[&_.score-gold]:hidden"
+                : "grid grid-cols-[minmax(10rem,1fr)_4.8rem_5.4rem_5.2rem_5.2rem_minmax(8.5rem,0.9fr)_minmax(5rem,0.5fr)] items-center gap-3 px-3 py-2 max-lg:grid-cols-[minmax(0,1fr)_4.8rem_5.2rem_5.2rem] max-lg:[&_.score-build]:hidden max-lg:[&_.score-heal]:hidden max-sm:grid-cols-[minmax(0,1fr)_4.8rem_5.2rem] max-sm:[&_.score-gold]:hidden"}
+            >
               <div className="flex min-w-0 items-center gap-2.5">
                 {visual.icon ? (
                   <img src={visual.icon} alt={visual.name} className="size-9 shrink-0 rounded-full object-cover ring-1 ring-white/10" />
@@ -98,9 +113,22 @@ function CompactTeam({
                   <div className="truncate text-xs text-muted-foreground">{visual.name} - {formatCompactStat(participant.totalDamageDealt)} damage</div>
                 </div>
               </div>
-              <div className="text-right">
+              <div className="text-right tabular-nums">
                 <div className="text-sm font-semibold text-foreground">{participant.kills ?? 0}/{participant.deaths ?? 0}/{participant.assists ?? 0}</div>
                 <div className="text-xs text-muted-foreground">{formatKdaRatio(participant.kills, participant.deaths, participant.assists).toFixed(2)}</div>
+              </div>
+              <div className="text-right text-sm font-semibold text-foreground tabular-nums">{formatCompactStat(participant.totalDamageDealt)}</div>
+              <div className="score-gold text-right text-sm text-muted-foreground tabular-nums">{formatCompactStat(participant.goldEarned)}</div>
+              <div className="score-heal text-right text-sm text-success tabular-nums">{formatCompactStat(participant.totalHeal)}</div>
+              <div className="score-build flex min-w-0 items-center gap-1">
+                {participant.items.slice(0, 6).map((itemId, itemIndex) => (
+                  <ItemIcon key={`${key}-item-${itemId}-${itemIndex}`} itemId={itemId} items={items} size={22} />
+                ))}
+              </div>
+              <div className="score-build flex min-w-0 items-center gap-1">
+                {participant.augments.length ? participant.augments.map((augmentId, augmentIndex) => (
+                  <AugmentIcon key={`${key}-augment-${augmentId}-${augmentIndex}`} augmentId={augmentId} augments={augments} size={18} />
+                )) : <span className="text-xs text-muted-foreground">-</span>}
               </div>
             </div>
           );
@@ -146,12 +174,6 @@ export function MatchDetailPanel({
             </div>
           </div>
 
-          <Button variant="outline" asChild>
-            <Link to={`/history/${match.matchId}`}>
-              <ExternalLink className="size-4" />
-              Full analysis
-            </Link>
-          </Button>
         </div>
 
         <div className="mt-4 grid gap-2 sm:grid-cols-4">
@@ -202,6 +224,8 @@ export function MatchDetailPanel({
                 members={team.members}
                 trackedPuuid={trackedParticipant?.puuid}
                 champions={champions}
+                items={items}
+                augments={augments}
               />
             ))}
           </div>

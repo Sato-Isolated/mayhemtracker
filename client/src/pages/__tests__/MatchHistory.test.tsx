@@ -188,7 +188,8 @@ describe("MatchHistoryPage", () => {
 
     expect(detailPanel).toBeInTheDocument();
     expect(within(detailPanel).getByText(/team scoreboard/i)).toBeInTheDocument();
-    expect(within(detailPanel).getByRole("link", { name: /full analysis/i })).toHaveAttribute("href", "/history/match-1");
+    expect(within(detailPanel).queryByRole("link", { name: /full analysis/i })).not.toBeInTheDocument();
+    expect(within(detailPanel).getAllByText(/damage/i).length).toBeGreaterThan(0);
   });
 
   it("renders an empty archive state and disables pagination", () => {
