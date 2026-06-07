@@ -76,6 +76,7 @@ export interface MatchListItemDto {
     summonerName?: string;
     riotIdGameName?: string;
     riotIdTagline?: string;
+    profileIconId?: number;
     teamId?: number;
     championId?: number;
     championName?: string;

@@ -108,6 +108,7 @@ export interface ProfileAnalyticsDto {
 export interface TeammateStatsDto {
   puuid: string;
   summonerName: string;
+  profileIconId?: number;
   matches: number;
   winsTogether: number;
   lossesTogether: number;

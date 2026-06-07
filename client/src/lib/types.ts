@@ -81,6 +81,7 @@ export interface MatchParticipantSummary {
   summonerName?: string;
   riotIdGameName?: string;
   riotIdTagline?: string;
+  profileIconId?: number;
   teamId?: number;
   championId?: number;
   championName?: string;
@@ -278,6 +279,7 @@ export interface ProfileAnalytics {
 export interface TeammateStats {
   puuid: string;
   summonerName: string;
+  profileIconId?: number;
   matches: number;
   winsTogether: number;
   lossesTogether: number;

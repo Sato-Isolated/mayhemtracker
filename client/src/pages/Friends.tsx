@@ -5,13 +5,15 @@ import { PageIntro } from "@/components/features/page-intro";
 import { StatusBadge } from "@/components/features/status-badge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import type { TeammateStats } from "@/lib/types";
-import { useAnalytics } from "@/state/tracker-data";
+import { api } from "@/lib/api";
+import type { MatchListItem, TeammateStats } from "@/lib/types";
+import { useAnalytics, useStaticData } from "@/state/tracker-data";
 
 type FriendSortKey = "matches" | "recentMatchesTogether" | "winRateTogether" | "averageKdaTogether" | "lastSeenAt" | "rating" | "summonerName";
 
 export function FriendsPage() {
-  const { teammates, updatePlayerRating, loadTeammates } = useAnalytics();
+  const { dashboard, teammates, updatePlayerRating, loadDashboard, loadTeammates } = useAnalytics();
+  const { champions, loadStaticLists } = useStaticData();
   const [search, setSearch] = useState("");
   const deferredSearch = useDeferredValue(search);
   const [minimumMatches, setMinimumMatches] = useState(1);
@@ -21,12 +23,21 @@ export function FriendsPage() {
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [selectedPuuid, setSelectedPuuid] = useState<string | null>(null);
   const [savingPuuid, setSavingPuuid] = useState<string | null>(null);
+  const [storedMatches, setStoredMatches] = useState<MatchListItem[]>([]);
+  const [matchesLoading, setMatchesLoading] = useState(false);
+  const [matchesError, setMatchesError] = useState<string | undefined>();
 
   useEffect(() => {
     if (!teammates.data && !teammates.loading) {
       void loadTeammates();
     }
-  }, [loadTeammates, teammates.data, teammates.loading]);
+    if (!dashboard.data && !dashboard.loading) {
+      void loadDashboard();
+    }
+    if (!champions.length) {
+      void loadStaticLists();
+    }
+  }, [champions.length, dashboard.data, dashboard.loading, loadDashboard, loadStaticLists, loadTeammates, teammates.data, teammates.loading]);
 
   const filtered = useMemo(() => {
     const query = deferredSearch.trim().toLowerCase();
@@ -89,6 +100,23 @@ export function FriendsPage() {
       await updatePlayerRating(entry.puuid, entry.summonerName, entry.rating, notes[entry.puuid] ?? entry.note);
     } finally {
       setSavingPuuid(null);
+    }
+  }
+
+  async function handleSelect(puuid: string | null) {
+    setSelectedPuuid(puuid);
+    if (!puuid || storedMatches.length || matchesLoading) {
+      return;
+    }
+
+    setMatchesLoading(true);
+    setMatchesError(undefined);
+    try {
+      setStoredMatches(await loadAllStoredMatches());
+    } catch (error) {
+      setMatchesError(error instanceof Error ? error.message : "Unable to load teammate matches.");
+    } finally {
+      setMatchesLoading(false);
     }
   }
 
@@ -172,7 +200,12 @@ export function FriendsPage() {
           selectedPuuid={selectedPuuid}
           notes={notes}
           savingPuuid={savingPuuid}
-          onSelect={setSelectedPuuid}
+          matches={storedMatches}
+          trackedPuuid={dashboard.data?.overview.trackedPlayerPuuid}
+          champions={champions}
+          matchesLoading={matchesLoading}
+          matchesError={matchesError}
+          onSelect={(puuid) => void handleSelect(puuid)}
           onNoteChange={(puuid, value) => setNotes((current) => ({ ...current, [puuid]: value }))}
           onSave={(entry) => void handleSaveNote(entry)}
           onRevert={(entry) => setNotes((current) => ({ ...current, [entry.puuid]: entry.note ?? "" }))}
@@ -181,4 +214,18 @@ export function FriendsPage() {
       </section>
     </div>
   );
+}
+
+async function loadAllStoredMatches() {
+  const pageSize = 100;
+  const firstPage = await api.getMatches(1, pageSize);
+  const totalPages = Math.max(Math.ceil(firstPage.total / pageSize), 1);
+  const rest = [];
+
+  for (let page = 2; page <= totalPages; page += 1) {
+    rest.push(api.getMatches(page, pageSize));
+  }
+
+  const pages = await Promise.all(rest);
+  return [firstPage, ...pages].flatMap((page) => page.items);
 }

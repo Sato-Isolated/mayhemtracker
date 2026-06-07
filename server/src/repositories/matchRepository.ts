@@ -56,13 +56,36 @@ function mapMatchRow(match: MatchRow): MatchListItemDto {
   };
 }
 
-function mapParticipantRow(participant: MatchParticipantRow): MatchListItemDto["participants"][number] {
+function getProfileIconMap(rawPayload: string) {
+  const match = parseJson<Record<string, unknown>>(rawPayload);
+  const identities = Array.isArray(match.participantIdentities) ? match.participantIdentities : [];
+  const icons = new Map<number, number>();
+
+  for (const identity of identities) {
+    const entry = identity as Record<string, unknown>;
+    const participantId = typeof entry.participantId === "number" ? entry.participantId : undefined;
+    const player = entry.player;
+    if (!participantId || !player || typeof player !== "object") {
+      continue;
+    }
+
+    const profileIcon = (player as Record<string, unknown>).profileIcon;
+    if (typeof profileIcon === "number") {
+      icons.set(participantId, profileIcon);
+    }
+  }
+
+  return icons;
+}
+
+function mapParticipantRow(participant: MatchParticipantRow, profileIconId?: number): MatchListItemDto["participants"][number] {
   return {
     participantId: participant.participantId ?? undefined,
     puuid: participant.puuid ?? undefined,
     summonerName: participant.summonerName ?? undefined,
     riotIdGameName: participant.riotIdGameName ?? undefined,
     riotIdTagline: participant.riotIdTagline ?? undefined,
+    profileIconId,
     teamId: participant.teamId ?? undefined,
     championId: participant.championId ?? undefined,
     championName: participant.championName ?? undefined,
@@ -360,8 +383,21 @@ export class MatchRepository {
 
   private getParticipantsByMatchIds(matchIds: string[]) {
     const map = new Map<string, MatchListItemDto["participants"]>();
+    const profileIconsByMatchId = new Map<string, Map<number, number>>();
 
     for (const chunk of chunkValues(matchIds, SQLITE_PARAM_LIMIT)) {
+      const matches = db.select({
+        matchId: matchesTable.matchId,
+        rawPayload: matchesTable.rawPayload,
+      })
+        .from(matchesTable)
+        .where(inArray(matchesTable.matchId, chunk))
+        .all();
+
+      for (const match of matches) {
+        profileIconsByMatchId.set(match.matchId, getProfileIconMap(match.rawPayload));
+      }
+
       const rows = db.select()
         .from(matchParticipantsTable)
         .where(inArray(matchParticipantsTable.matchId, chunk))
@@ -370,7 +406,10 @@ export class MatchRepository {
 
       for (const participant of rows) {
         const current = map.get(participant.matchId) ?? [];
-        current.push(mapParticipantRow(participant));
+        const profileIconId = participant.participantId
+          ? profileIconsByMatchId.get(participant.matchId)?.get(participant.participantId)
+          : undefined;
+        current.push(mapParticipantRow(participant, profileIconId));
         map.set(participant.matchId, current);
       }
     }

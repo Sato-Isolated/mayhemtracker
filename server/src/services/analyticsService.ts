@@ -361,6 +361,7 @@ function buildTeammates(trackedMatches: TrackedMatch[], trackedPuuid: string): T
   const teammates = new Map<string, {
     puuid: string;
     summonerName: string;
+    profileIconId?: number;
     matches: number;
     winsTogether: number;
     lossesTogether: number;
@@ -378,6 +379,7 @@ function buildTeammates(trackedMatches: TrackedMatch[], trackedPuuid: string): T
       const current = teammates.get(ally.puuid) ?? {
         puuid: ally.puuid,
         summonerName: ally.summonerName ?? ally.riotIdGameName ?? "Unknown player",
+        profileIconId: ally.profileIconId,
         matches: 0,
         winsTogether: 0,
         lossesTogether: 0,
@@ -403,6 +405,7 @@ function buildTeammates(trackedMatches: TrackedMatch[], trackedPuuid: string): T
       if (!current.summonerName || current.summonerName === "Unknown player") {
         current.summonerName = ally.summonerName ?? ally.riotIdGameName ?? current.summonerName;
       }
+      current.profileIconId = ally.profileIconId ?? current.profileIconId;
       teammates.set(ally.puuid, current);
     }
   }
