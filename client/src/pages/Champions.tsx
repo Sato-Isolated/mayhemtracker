@@ -6,8 +6,11 @@ import { StatusBadge } from "@/components/features/status-badge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type { ChampionStats } from "@/lib/types";
-import { useAnalytics } from "@/state/tracker-data";
+import type { ChampionStats, MatchListItem, MatchParticipantSummary, StaticDataEntry } from "@/lib/types";
+import { formatDate, formatDuration, resolveStaticIconPath } from "@/lib/tracker-utils";
+import { formatCompactStat, formatKdaRatio } from "@/lib/stats-utils";
+import { api } from "@/lib/api";
+import { useAnalytics, useStaticData } from "@/state/tracker-data";
 
 type ChampionSortKey = "matches" | "winRate" | "averageKda" | "averageDamage" | "averageGold" | "championName";
 
@@ -17,14 +20,32 @@ function formatK(value: number) {
 
 function ChampionInlineRow({
   entry,
+  champions,
+  matches,
+  trackedPuuid,
+  matchesLoading,
+  matchesError,
   expanded,
   onToggle,
 }: {
   entry: ChampionStats;
+  champions: StaticDataEntry[];
+  matches: MatchListItem[];
+  trackedPuuid?: string;
+  matchesLoading: boolean;
+  matchesError?: string;
   expanded: boolean;
   onToggle: () => void;
 }) {
-  const name = entry.championName ?? `Champion ${entry.championId ?? "-"}`;
+  const champion = champions.find((item) => item.numeric_id === entry.championId);
+  const icon = resolveStaticIconPath(champion);
+  const name = champion?.name ?? entry.championName ?? `Champion ${entry.championId ?? "-"}`;
+  const championMatches = matches
+    .map((match) => {
+      const participant = getTrackedParticipant(match, trackedPuuid);
+      return participant?.championId === entry.championId ? { match, participant } : null;
+    })
+    .filter((item): item is { match: MatchListItem; participant: MatchParticipantSummary } => Boolean(item));
 
   return (
     <div className="border-b border-border/55 last:border-b-0">
@@ -33,26 +54,32 @@ function ChampionInlineRow({
         aria-expanded={expanded}
         aria-controls={`champion-inline-${entry.championId ?? name}`}
         className={cn(
-          "grid w-full grid-cols-[minmax(9rem,1fr)_4.8rem_4.6rem_4.8rem_5.6rem_auto] items-center gap-3 px-3 py-2.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-          "max-lg:grid-cols-[minmax(0,1fr)_4.5rem_4.5rem_auto] max-lg:[&_.champion-output]:hidden",
-          "max-sm:grid-cols-[minmax(0,1fr)_4.4rem_auto] max-sm:[&_.champion-kda]:hidden",
+          "grid w-full grid-cols-[minmax(13rem,1fr)_4.8rem_4.8rem_4.8rem_7rem_1.5rem] items-center gap-3 px-3 py-2.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          "max-lg:grid-cols-[minmax(0,1fr)_4.8rem_4.8rem_1.5rem] max-lg:[&_.champion-output]:hidden",
+          "max-sm:grid-cols-[minmax(0,1fr)_4.8rem_1.5rem] max-sm:[&_.champion-kda]:hidden",
           expanded ? "bg-[color-mix(in_oklch,var(--primary)_10%,var(--card))] shadow-[inset_3px_0_0_var(--primary)]" : "hover:bg-[color-mix(in_oklch,var(--primary)_5%,transparent)]",
         )}
         onClick={onToggle}
       >
-        <div className="min-w-0">
-          <div className="truncate text-sm font-semibold text-foreground">{name}</div>
-          <div className="mt-0.5 text-[0.72rem] text-muted-foreground">{entry.wins}W - {entry.losses}L</div>
+        <div className="flex min-w-0 items-center gap-2.5">
+          {icon ? (
+            <img src={icon} alt="" className="size-9 shrink-0 rounded-full object-cover ring-1 ring-white/15" />
+          ) : (
+            <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-xs text-muted-foreground ring-1 ring-white/10">?</div>
+          )}
+          <div className="min-w-0">
+            <div className="truncate text-sm font-semibold text-foreground">{name}</div>
+            <div className="mt-0.5 text-[0.72rem] text-muted-foreground">{entry.wins}W - {entry.losses}L</div>
+          </div>
         </div>
-        <div className="text-sm text-foreground">{entry.matches}</div>
-        <div><Badge variant={entry.winRate >= 50 ? "success" : "outline"}>{entry.winRate}%</Badge></div>
-        <div className="champion-kda text-sm font-semibold text-foreground">{entry.averageKda}</div>
-        <div className="champion-output text-xs text-muted-foreground">
+        <div className="text-right text-sm text-foreground tabular-nums">{entry.matches}</div>
+        <div className="text-center"><Badge variant={entry.winRate >= 50 ? "success" : "outline"}>{entry.winRate}%</Badge></div>
+        <div className="champion-kda text-right text-sm font-semibold text-foreground tabular-nums">{entry.averageKda}</div>
+        <div className="champion-output text-right text-xs text-muted-foreground tabular-nums">
           <div>{formatK(entry.averageDamage)} dmg</div>
           <div>{formatK(entry.averageGold)} gold</div>
         </div>
-        <div className="flex items-center justify-end gap-2 text-xs text-muted-foreground">
-          <span className="max-sm:hidden">{expanded ? "Selected" : "Open"}</span>
+        <div className="flex items-center justify-end text-muted-foreground">
           <ChevronRight className={cn("size-4 transition-transform", expanded && "rotate-90 text-primary")} />
         </div>
       </button>
@@ -61,12 +88,46 @@ function ChampionInlineRow({
         <div className="overflow-hidden">
           {expanded ? (
             <div id={`champion-inline-${entry.championId ?? name}`} className="border-t border-border/60 bg-card/75 p-3">
-              <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
-                <InlineMetric label="Volume" value={`${entry.matches} games`} />
-                <InlineMetric label="Record" value={`${entry.wins}W - ${entry.losses}L`} />
-                <InlineMetric label="Average KDA" value={String(entry.averageKda)} />
-                <InlineMetric label="Output" value={`${formatK(entry.averageDamage)} / ${formatK(entry.averageGold)}`} />
-              </div>
+              {matchesLoading ? (
+                <div className="rounded-md border border-dashed border-border/70 px-3 py-8 text-center text-sm text-muted-foreground">Loading champion matches...</div>
+              ) : matchesError ? (
+                <div className="rounded-md border border-error/35 bg-error/10 px-3 py-3 text-sm text-error">{matchesError}</div>
+              ) : championMatches.length ? (
+                <div className="divide-y divide-border/55 rounded-md border border-border/60 bg-[color-mix(in_oklch,var(--background)_54%,var(--card))]">
+                  <div className="grid grid-cols-[5.2rem_minmax(0,1fr)_5.2rem_5.8rem_5.4rem_7rem] items-center gap-3 px-3 py-2 text-[0.68rem] font-semibold uppercase text-muted-foreground max-lg:grid-cols-[5.2rem_minmax(0,1fr)_5.2rem_5.4rem] max-lg:[&_.champion-match-wide]:hidden max-sm:grid-cols-[4.8rem_minmax(0,1fr)_5.2rem] max-sm:[&_.champion-match-mid]:hidden">
+                    <span>Result</span>
+                    <span>Match</span>
+                    <span className="text-right">KDA</span>
+                    <span className="champion-match-mid text-right">Damage</span>
+                    <span className="champion-match-wide text-right">Gold</span>
+                    <span className="champion-match-wide text-right">Date</span>
+                  </div>
+                  {championMatches.map(({ match, participant }) => {
+                    const won = participant.win === true;
+                    return (
+                      <div key={match.matchId} className="grid grid-cols-[5.2rem_minmax(0,1fr)_5.2rem_5.8rem_5.4rem_7rem] items-center gap-3 px-3 py-2.5 max-lg:grid-cols-[5.2rem_minmax(0,1fr)_5.2rem_5.4rem] max-lg:[&_.champion-match-wide]:hidden max-sm:grid-cols-[4.8rem_minmax(0,1fr)_5.2rem] max-sm:[&_.champion-match-mid]:hidden">
+                        <div className={won ? "text-xs font-semibold text-success" : "text-xs font-semibold text-error"}>
+                          {won ? "Victory" : "Defeat"}
+                          <div className="mt-0.5 font-normal text-muted-foreground">{formatDuration(match.gameDuration)}</div>
+                        </div>
+                        <div className="min-w-0">
+                          <div className="truncate text-sm font-semibold text-foreground">{match.gameMode ?? "League"}</div>
+                          <div className="mt-0.5 truncate text-xs text-muted-foreground">{match.summary}</div>
+                        </div>
+                        <div className="text-right tabular-nums">
+                          <div className="text-sm font-semibold text-foreground">{participant.kills ?? 0}/{participant.deaths ?? 0}/{participant.assists ?? 0}</div>
+                          <div className="text-xs text-muted-foreground">{formatKdaRatio(participant.kills, participant.deaths, participant.assists).toFixed(2)}</div>
+                        </div>
+                        <div className="champion-match-mid text-right text-sm text-foreground tabular-nums">{formatCompactStat(participant.totalDamageDealt)}</div>
+                        <div className="champion-match-wide text-right text-sm text-muted-foreground tabular-nums">{formatCompactStat(participant.goldEarned)}</div>
+                        <div className="champion-match-wide text-right text-xs text-muted-foreground">{formatDate(match.gameCreation ?? match.retrievedAt)}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="rounded-md border border-dashed border-border/70 px-3 py-8 text-center text-sm text-muted-foreground">No stored matches found for this champion.</div>
+              )}
             </div>
           ) : null}
         </div>
@@ -75,28 +136,49 @@ function ChampionInlineRow({
   );
 }
 
-function InlineMetric({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-md border border-border/60 bg-[color-mix(in_oklch,var(--background)_62%,var(--card))] px-3 py-2">
-      <div className="text-[0.68rem] font-semibold uppercase text-muted-foreground">{label}</div>
-      <div className="mt-1 text-sm font-semibold text-foreground">{value}</div>
-    </div>
-  );
+function getTrackedParticipant(match: MatchListItem, trackedPuuid?: string) {
+  return trackedPuuid
+    ? match.participants.find((participant) => participant.puuid === trackedPuuid) ?? match.participants[0]
+    : match.participants[0];
+}
+
+async function loadAllStoredMatches() {
+  const pageSize = 100;
+  const firstPage = await api.getMatches(1, pageSize);
+  const totalPages = Math.max(Math.ceil(firstPage.total / pageSize), 1);
+  const rest = [];
+
+  for (let page = 2; page <= totalPages; page += 1) {
+    rest.push(api.getMatches(page, pageSize));
+  }
+
+  const pages = await Promise.all(rest);
+  return [firstPage, ...pages].flatMap((page) => page.items);
 }
 
 export function ChampionsPage() {
-  const { championStats, loadChampionStats } = useAnalytics();
+  const { championStats, dashboard, loadChampionStats, loadDashboard } = useAnalytics();
+  const { champions, loadStaticLists } = useStaticData();
   const [search, setSearch] = useState("");
   const deferredSearch = useDeferredValue(search);
   const [sortKey, setSortKey] = useState<ChampionSortKey>("matches");
   const [descending, setDescending] = useState(true);
   const [expandedChampion, setExpandedChampion] = useState<string | null>(null);
+  const [storedMatches, setStoredMatches] = useState<MatchListItem[]>([]);
+  const [matchesLoading, setMatchesLoading] = useState(false);
+  const [matchesError, setMatchesError] = useState<string | undefined>();
 
   useEffect(() => {
     if (!championStats.data && !championStats.loading) {
       void loadChampionStats();
     }
-  }, [championStats.data, championStats.loading, loadChampionStats]);
+    if (!dashboard.data && !dashboard.loading) {
+      void loadDashboard();
+    }
+    if (!champions.length) {
+      void loadStaticLists();
+    }
+  }, [championStats.data, championStats.loading, champions.length, dashboard.data, dashboard.loading, loadChampionStats, loadDashboard, loadStaticLists]);
 
   const filtered = useMemo(() => {
     const query = deferredSearch.trim().toLowerCase();
@@ -124,6 +206,23 @@ export function ChampionsPage() {
     }
     setSortKey(nextKey);
     setDescending(nextKey !== "championName");
+  }
+
+  async function toggleChampion(id: string) {
+    setExpandedChampion((current) => current === id ? null : id);
+    if (expandedChampion === id || storedMatches.length || matchesLoading) {
+      return;
+    }
+
+    setMatchesLoading(true);
+    setMatchesError(undefined);
+    try {
+      setStoredMatches(await loadAllStoredMatches());
+    } catch (error) {
+      setMatchesError(error instanceof Error ? error.message : "Unable to load champion matches.");
+    } finally {
+      setMatchesLoading(false);
+    }
   }
 
   return (
@@ -169,24 +268,28 @@ export function ChampionsPage() {
           <StatusBadge tone="info">{descending ? "Descending" : "Ascending"}</StatusBadge>
         </div>
 
-        <div className="grid grid-cols-[minmax(9rem,1fr)_4.8rem_4.6rem_4.8rem_5.6rem_auto] gap-3 border-b border-border/60 px-3 py-2 text-[0.68rem] font-semibold uppercase text-muted-foreground max-lg:grid-cols-[minmax(0,1fr)_4.5rem_4.5rem_auto] max-lg:[&_.champion-output]:hidden max-sm:grid-cols-[minmax(0,1fr)_4.4rem_auto] max-sm:[&_.champion-kda]:hidden">
-          <span>Champion</span>
-          <span>Games</span>
-          <span>WR</span>
-          <span className="champion-kda">KDA</span>
-          <span className="champion-output">Output</span>
-          <span />
-        </div>
-
         <div className="app-scrollbar max-h-[calc(100vh-18.5rem)] overflow-y-auto max-xl:max-h-none">
+          <div className="sticky top-0 z-10 grid grid-cols-[minmax(13rem,1fr)_4.8rem_4.8rem_4.8rem_7rem_1.5rem] gap-3 border-b border-border/60 bg-card/95 px-3 py-2 text-[0.68rem] font-semibold uppercase text-muted-foreground backdrop-blur max-lg:grid-cols-[minmax(0,1fr)_4.8rem_4.8rem_1.5rem] max-lg:[&_.champion-output]:hidden max-sm:grid-cols-[minmax(0,1fr)_4.8rem_1.5rem] max-sm:[&_.champion-kda]:hidden">
+            <span>Champion</span>
+            <span className="text-right">Games</span>
+            <span className="text-center">WR</span>
+            <span className="champion-kda text-right">KDA</span>
+            <span className="champion-output text-right">Output</span>
+            <span />
+          </div>
           {filtered.length ? filtered.map((entry) => {
             const id = String(entry.championId ?? entry.championName);
             return (
               <ChampionInlineRow
                 key={id}
                 entry={entry}
+                champions={champions}
+                matches={storedMatches}
+                trackedPuuid={dashboard.data?.overview.trackedPlayerPuuid}
+                matchesLoading={matchesLoading}
+                matchesError={matchesError}
                 expanded={expandedChampion === id}
-                onToggle={() => setExpandedChampion((current) => current === id ? null : id)}
+                onToggle={() => void toggleChampion(id)}
               />
             );
           }) : (
