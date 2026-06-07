@@ -1,416 +1,283 @@
-import {
-  AlertCircle,
-  CheckCircle2,
-  Database,
-  RefreshCcw,
-  Server,
-  ShieldCheck,
-  Swords,
-  TerminalSquare,
-} from "lucide-react";
-import { AugmentIcon } from "@/components/features/augment-icon";
-import { DashboardCard } from "@/components/features/dashboard-card";
-import { ItemIcon } from "@/components/features/item-icon";
+import { AlertCircle, CheckCircle2, ChevronRight, Database, RefreshCcw, Server, ShieldCheck, Swords, TerminalSquare, Trash2 } from "lucide-react";
+import type { ReactNode } from "react";
+import { useState } from "react";
+import { EmptyState } from "@/components/features/empty-state";
+import { PageIntro } from "@/components/features/page-intro";
+import { StatusBadge } from "@/components/features/status-badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Surface } from "@/components/ui/surface";
-import { Separator } from "@/components/ui/separator";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { formatDate, formatDuration, getChampionVisual } from "@/lib/tracker-utils";
+import { formatDate, formatDuration } from "@/lib/tracker-utils";
+import { cn } from "@/lib/utils";
 import { useDiagnostics, useMatches, useStaticData } from "@/state/tracker-data";
 
+type DebugRowId = "backend" | "auth" | "summoner" | "powershell" | "static" | "matches" | "payload";
+
+function statusVariant(ok?: boolean, error?: string) {
+  if (error) return "error" as const;
+  if (ok) return "success" as const;
+  return "outline" as const;
+}
+
 export function DebugPage() {
-  const {
-    status,
-    auth,
-    summoner,
-    powerShell,
-    testStatus,
-    loadLeagueAuth,
-    loadCurrentSummoner,
-    runPowerShellTest,
-  } = useDiagnostics();
+  const { status, auth, summoner, powerShell, testStatus, loadLeagueAuth, loadCurrentSummoner, runPowerShellTest } = useDiagnostics();
   const { staticSync, champions, items, augments, loadStaticLists, syncStaticData } = useStaticData();
   const { matches, matchDetail, selectedMatchId, loadMatches, loadMatchDetail, syncMatches, clearMatches } = useMatches();
+  const [openRow, setOpenRow] = useState<DebugRowId>("backend");
+
+  function toggleRow(row: DebugRowId) {
+    setOpenRow((current) => current === row ? "backend" : row);
+  }
 
   return (
-    <div className="space-y-6">
-      <div className="grid gap-5 xl:grid-cols-[1.2fr_0.8fr]">
-        <div className="grid gap-5 md:grid-cols-2">
-          <DashboardCard
-            title="Backend Status"
-            description="Checks that the local Express backend responds through the Vite proxy."
-            badge="GET /api/status"
-            loading={status.loading}
-          >
-            <Button onClick={() => void testStatus()}>Test backend</Button>
-            {status.data ? (
-              <Alert>
-                <CheckCircle2 className="result-win mb-2 h-4 w-4" />
-                <AlertTitle>Backend OK</AlertTitle>
-                <AlertDescription>{status.data.message}</AlertDescription>
-              </Alert>
-            ) : null}
-            {status.error ? (
-              <Alert variant="destructive">
-                <AlertCircle className="mb-2 h-4 w-4" />
-                <AlertTitle>Backend error</AlertTitle>
-                <AlertDescription>{status.error}</AlertDescription>
-              </Alert>
-            ) : null}
-          </DashboardCard>
+    <div className="flex min-h-[calc(100vh-5.25rem)] flex-col gap-4">
+      <PageIntro
+        eyebrow="Internal tools"
+        title="Debug"
+        description="Local backend, League client, static data, and SQLite diagnostics."
+        actions={(
+          <>
+            <StatusBadge>{matches.data?.total ?? 0} matches</StatusBadge>
+            <StatusBadge tone="info">{champions.length + items.length + augments.length} static assets</StatusBadge>
+          </>
+        )}
+      />
 
-          <DashboardCard
-            title="League Auth"
-            description="Tests `authenticate()` on the Node side to fetch the required LCU credentials."
-            badge="GET /api/league/auth"
-            loading={auth.loading}
-          >
-            <Button variant="secondary" onClick={() => void loadLeagueAuth()}>
-              Fetch League auth
-            </Button>
-            {auth.data?.credentials ? (
-              <div className="space-y-2 rounded-2xl border bg-card/70 p-4 text-sm">
-                <p><strong>Adresse:</strong> {auth.data.credentials.address}</p>
-                <p><strong>Port:</strong> {auth.data.credentials.port}</p>
-                <p><strong>Auth:</strong> {auth.data.credentials.authorizationHeader}</p>
-              </div>
-            ) : null}
-            {auth.error ? (
-              <Alert variant="destructive">
-                <AlertTitle>League client unavailable</AlertTitle>
-                <AlertDescription>{auth.error}</AlertDescription>
-              </Alert>
-            ) : null}
-          </DashboardCard>
-
-          <DashboardCard
-            title="Current Summoner"
-            description="Reads the current summoner from the local League client API."
-            badge="GET /api/league/summoner"
-            loading={summoner.loading}
-          >
-            <Button variant="secondary" onClick={() => void loadCurrentSummoner()}>
-              Load summoner
-            </Button>
-            {summoner.data?.summoner ? (
-              <div className="rounded-2xl border bg-card/70 p-4 text-sm">
-                <p className="text-base font-semibold">{summoner.data.summoner.displayName}</p>
-                <p className="text-muted-foreground">
-                  {summoner.data.summoner.gameName ?? "-"}
-                  {summoner.data.summoner.tagLine ? ` #${summoner.data.summoner.tagLine}` : ""}
-                </p>
-                <p className="mt-2">Level: {summoner.data.summoner.summonerLevel ?? "-"}</p>
-                <p>PUUID: {summoner.data.summoner.puuid ?? "-"}</p>
-              </div>
-            ) : null}
-            {summoner.error ? (
-              <Alert variant="destructive">
-                <AlertTitle>Unable to read the summoner</AlertTitle>
-                <AlertDescription>{summoner.error}</AlertDescription>
-              </Alert>
-            ) : null}
-          </DashboardCard>
-
-          <DashboardCard
-            title="PowerShell Test"
-            description="Runs a local PowerShell command to verify the LeagueClientUx process."
-            badge="GET /api/system/powershell-test"
-            loading={powerShell.loading}
-          >
-            <Button variant="secondary" onClick={() => void runPowerShellTest()}>
-              Run PowerShell test
-            </Button>
-            {powerShell.data ? (
-              <div className="grid gap-3">
-                <div className="flex items-center gap-2">
-                  <Badge variant={powerShell.data.ok ? "success" : "error"}>{powerShell.data.ok ? "Success" : "Error"}</Badge>
-                  <span className="text-sm text-muted-foreground">Exit code: {String(powerShell.data.exitCode)}</span>
-                </div>
-                <pre className="code-surface overflow-x-auto rounded-2xl p-4 text-xs">{powerShell.data.stdout || "(no stdout)"}</pre>
-                <pre className="code-surface-error overflow-x-auto rounded-2xl p-4 text-xs">{powerShell.data.stderr || "(no stderr)"}</pre>
-              </div>
-            ) : null}
-          </DashboardCard>
+      <section className="rounded-md border border-border/70 bg-card/72" data-testid="debug-console">
+        <div className="grid grid-cols-[minmax(10rem,1fr)_7rem_auto] gap-3 border-b border-border/60 px-3 py-2 text-[0.68rem] font-semibold uppercase text-muted-foreground max-sm:grid-cols-[minmax(0,1fr)_auto] max-sm:[&_.debug-status]:hidden">
+          <span>Check</span>
+          <span className="debug-status">Status</span>
+          <span />
         </div>
 
-        <DashboardCard
-          title="Static Data"
-          description="Syncs champions, items, and augments from Data Dragon and CommunityDragon, then reloads the local cache."
-          badge="POST /api/static-data/sync"
-          loading={staticSync.loading}
+        <DebugActionRow
+          id="backend"
+          open={openRow === "backend"}
+          icon={<Server className="size-4 text-primary" />}
+          title="Backend"
+          subtitle="GET /api/status"
+          status={<Badge variant={statusVariant(Boolean(status.data), status.error)}>{status.error ? "Error" : status.data ? "OK" : "Idle"}</Badge>}
+          action={<Button variant="outline" size="sm" disabled={status.loading} onClick={() => { setOpenRow("backend"); void testStatus(); }}>{status.loading ? "Running..." : "Run"}</Button>}
+          onToggle={() => toggleRow("backend")}
         >
-          <div className="flex flex-wrap gap-3">
-            <Button onClick={() => void syncStaticData()}>
-              <Database className="h-4 w-4" />
-              Sync static data
-            </Button>
-            <Button variant="outline" onClick={() => void loadStaticLists()}>
-              <RefreshCcw className="h-4 w-4" />
-              Reload UI cache
-            </Button>
-          </div>
-          <div className="grid gap-3 md:grid-cols-3">
-            <Card className="bg-card/70">
-              <CardHeader className="pb-3">
-                <CardDescription>Champions</CardDescription>
-                <CardTitle>{champions.length}</CardTitle>
-              </CardHeader>
-            </Card>
-            <Card className="bg-card/70">
-              <CardHeader className="pb-3">
-                <CardDescription>Items</CardDescription>
-                <CardTitle>{items.length}</CardTitle>
-              </CardHeader>
-            </Card>
-            <Card className="bg-card/70">
-              <CardHeader className="pb-3">
-                <CardDescription>Augments</CardDescription>
-                <CardTitle>{augments.length}</CardTitle>
-              </CardHeader>
-            </Card>
-          </div>
-          {staticSync.data ? (
-            <Alert>
-              <AlertTitle>Sync complete</AlertTitle>
-              <AlertDescription>
-                Version {staticSync.data.result.version} · {staticSync.data.result.champions} champions · {staticSync.data.result.items} items · {staticSync.data.result.augments} augments · {staticSync.data.result.reused ? "cache reused" : "full refresh"}
-              </AlertDescription>
-            </Alert>
-          ) : null}
-        </DashboardCard>
-      </div>
+          {status.data ? <InlineAlert ok title="Backend OK" description={status.data.message} /> : null}
+          {status.error ? <InlineAlert title="Backend error" description={status.error} /> : null}
+          {!status.data && !status.error ? <InlineHint text="Run this check to verify the local API server." /> : null}
+        </DebugActionRow>
 
-      <Separator className="my-6" />
-
-      <div className="grid gap-5 xl:grid-cols-[0.95fr_1.05fr]">
-        <DashboardCard
-          title="Match Sync"
-          description="Fetches match history from the local League client, enriches the data, and persists it to SQLite."
-          badge="POST /api/matches/sync-current"
-          className="xl:col-span-2"
+        <DebugActionRow
+          id="auth"
+          open={openRow === "auth"}
+          icon={<ShieldCheck className="size-4 text-primary" />}
+          title="League auth"
+          subtitle="GET /api/league/auth"
+          status={<Badge variant={statusVariant(Boolean(auth.data?.credentials), auth.error)}>{auth.error ? "Error" : auth.data?.credentials ? "OK" : "Idle"}</Badge>}
+          action={<Button variant="outline" size="sm" disabled={auth.loading} onClick={() => { setOpenRow("auth"); void loadLeagueAuth(); }}>{auth.loading ? "Running..." : "Run"}</Button>}
+          onToggle={() => toggleRow("auth")}
         >
-          <div className="flex flex-wrap gap-3">
-            <Button onClick={() => void syncMatches()}>
-              <Swords className="h-4 w-4" />
-              Sync matches
-            </Button>
-            <Button variant="outline" onClick={() => void loadMatches()}>
-              <RefreshCcw className="h-4 w-4" />
-              Reload list
-            </Button>
-            <Button variant="ghost" onClick={() => void clearMatches()}>
-              Clear local storage
-            </Button>
-          </div>
-        </DashboardCard>
+          {auth.data?.credentials ? <InlineAlert ok title="League auth loaded" description={`${auth.data.credentials.address} - port ${auth.data.credentials.port}`} /> : null}
+          {auth.error ? <InlineAlert title="League client unavailable" description={auth.error} /> : null}
+          {!auth.data && !auth.error ? <InlineHint text="Run this check while the League client is open." /> : null}
+        </DebugActionRow>
 
-        <DashboardCard
-          title="Match List"
-          description="Local paginated list sorted from newest to oldest."
-          badge="GET /api/matches"
-          loading={matches.loading}
+        <DebugActionRow
+          id="summoner"
+          open={openRow === "summoner"}
+          icon={<ShieldCheck className="size-4 text-primary" />}
+          title="Current summoner"
+          subtitle="GET /api/league/summoner"
+          status={<Badge variant={statusVariant(Boolean(summoner.data?.summoner), summoner.error)}>{summoner.error ? "Error" : summoner.data?.summoner ? "OK" : "Idle"}</Badge>}
+          action={<Button variant="outline" size="sm" disabled={summoner.loading} onClick={() => { setOpenRow("summoner"); void loadCurrentSummoner(); }}>{summoner.loading ? "Running..." : "Run"}</Button>}
+          onToggle={() => toggleRow("summoner")}
         >
-          <div className="flex items-center justify-between text-sm text-muted-foreground">
-            <span>Total local: {matches.data?.total ?? 0}</span>
-            <span>Storage: SQLite persistant</span>
-          </div>
-          <ScrollArea className="h-[440px] rounded-2xl border bg-card/70 p-2">
-            <div className="space-y-2">
-              {matches.data?.items.length ? (
-                matches.data.items.map((match) => (
-                  <Surface
-                    key={match.matchId}
-                    asChild
-                    variant={selectedMatchId === match.matchId ? undefined : "subtle"}
-                    className={`w-full rounded-2xl px-4 py-3 text-left transition ${selectedMatchId === match.matchId ? "border border-primary bg-primary/8" : "hover:bg-accent/30"}`}
-                  >
-                    <button
-                      type="button"
-                      className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                      onClick={() => void loadMatchDetail(match.matchId)}
-                    >
-                      <div className="flex items-center justify-between gap-3">
-                        <div>
-                          <div className="font-medium">{match.summary}</div>
-                          <div className="text-xs text-muted-foreground">{formatDate(match.gameCreation ?? match.retrievedAt)} · {formatDuration(match.gameDuration)}{match.gameModeMutators.length ? ` · ${match.gameModeMutators.join(", ")}` : ""}</div>
-                        </div>
-                        <Badge variant="outline">{match.gameMode ?? "League"}</Badge>
-                      </div>
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        {match.participants.slice(0, 5).map((participant, index) => {
-                          const visual = getChampionVisual(participant, champions);
-                          return (
-                            <div key={`${match.matchId}-${participant.puuid ?? index}`} className="flex items-center gap-2 rounded-full bg-secondary/70 px-2 py-1 text-xs">
-                              {visual.icon ? <img src={visual.icon} alt={visual.name} className="h-6 w-6 rounded-full object-cover" /> : null}
-                              <span>{visual.name}</span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </button>
-                  </Surface>
-                ))
-              ) : (
-                <div className="rounded-2xl border border-dashed p-6 text-center text-sm text-muted-foreground">
-                  No matches stored locally.
-                </div>
-              )}
-            </div>
-          </ScrollArea>
-        </DashboardCard>
+          {summoner.data?.summoner ? <InlineAlert ok title={summoner.data.summoner.displayName} description={`Level ${summoner.data.summoner.summonerLevel ?? "-"} - PUUID ${summoner.data.summoner.puuid ?? "-"}`} /> : null}
+          {summoner.error ? <InlineAlert title="Summoner error" description={summoner.error} /> : null}
+          {!summoner.data && !summoner.error ? <InlineHint text="Run this check after League auth succeeds." /> : null}
+        </DebugActionRow>
 
-        <DashboardCard
-          title="Match Detail"
-          description="Participants, items, augments, and raw payload for debugging."
-          badge="GET /api/matches/:matchId"
-          loading={matchDetail.loading}
+        <DebugActionRow
+          id="powershell"
+          open={openRow === "powershell"}
+          icon={<TerminalSquare className="size-4 text-primary" />}
+          title="PowerShell"
+          subtitle="GET /api/system/powershell-test"
+          status={<Badge variant={statusVariant(powerShell.data?.ok, powerShell.data && !powerShell.data.ok ? powerShell.data.stderr : powerShell.error)}>{powerShell.data?.ok ? "OK" : powerShell.data || powerShell.error ? "Error" : "Idle"}</Badge>}
+          action={<Button variant="outline" size="sm" disabled={powerShell.loading} onClick={() => { setOpenRow("powershell"); void runPowerShellTest(); }}>{powerShell.loading ? "Running..." : "Run"}</Button>}
+          onToggle={() => toggleRow("powershell")}
         >
-          {matchDetail.data ? (
-            <Tabs defaultValue="overview">
-              <TabsList>
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="teams">Teams</TabsTrigger>
-                <TabsTrigger value="debug">Debug JSON</TabsTrigger>
-              </TabsList>
-              <TabsContent value="overview">
-                <div className="space-y-4">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Badge variant="default">{matchDetail.data.gameMode ?? "League"}</Badge>
-                    <Badge variant="outline">Queue {matchDetail.data.queueId ?? "-"}</Badge>
-                    <Badge variant="outline">Map {matchDetail.data.mapId ?? "-"}</Badge>
-                    <Badge variant="outline">Version {matchDetail.data.gameVersion ?? "-"}</Badge>
-                    <Badge variant="outline">{formatDate(matchDetail.data.gameCreation)}</Badge>
-                    {matchDetail.data.gameModeMutators.map((mutator) => <Badge key={mutator} variant="secondary">{mutator}</Badge>)}
-                  </div>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Champion</TableHead>
-                        <TableHead>Player</TableHead>
-                        <TableHead>KDA</TableHead>
-                        <TableHead>Stats</TableHead>
-                        <TableHead>Items</TableHead>
-                        <TableHead>Augments</TableHead>
-                        <TableHead>Result</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {matchDetail.data.participants.map((participant, index) => {
-                        const visual = getChampionVisual(participant, champions);
-                        return (
-                          <TableRow key={`${participant.puuid ?? index}-${participant.championId ?? index}`}>
-                            <TableCell>
-                              <div className="flex items-center gap-3">
-                                {visual.icon ? <img src={visual.icon} alt={visual.name} className="h-10 w-10 rounded-xl object-cover" /> : null}
-                                <div>
-                                  <div className="font-medium">{visual.name}</div>
-                                  <div className="text-xs text-muted-foreground">#{participant.championId ?? "-"}</div>
-                                </div>
-                              </div>
-                            </TableCell>
-                            <TableCell>{participant.summonerName ?? participant.puuid ?? "Unknown"}</TableCell>
-                            <TableCell>{participant.kills ?? 0}/{participant.deaths ?? 0}/{participant.assists ?? 0}</TableCell>
-                            <TableCell>
-                              <div className="space-y-1 text-xs text-muted-foreground">
-                                <div>DMG {participant.totalDamageDealt ?? 0}</div>
-                                <div>Taken {participant.totalDamageTaken ?? 0}</div>
-                                <div>Gold {participant.goldEarned ?? 0} · CS {participant.totalCs ?? 0} · Lv {participant.championLevel ?? "-"}</div>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex flex-wrap gap-1.5">
-                                {participant.items.length ? participant.items.map((itemId) => <ItemIcon key={itemId} itemId={itemId} items={items} size={22} />) : "-"}
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex flex-wrap gap-1.5">
-                                {participant.augments.length ? participant.augments.map((augmentId) => <AugmentIcon key={augmentId} augmentId={augmentId} augments={augments} size={22} />) : "-"}
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant={participant.win ? "success" : "error"}>{participant.win ? "Win" : "Loss"}</Badge>
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
-                </div>
-              </TabsContent>
-              <TabsContent value="teams">
-                <div className="grid gap-3 md:grid-cols-2">
-                  {matchDetail.data.teams.map((team) => (
-                    <Card key={team.teamId} className="bg-card/70">
-                      <CardHeader>
-                        <CardTitle>Team {team.teamId}</CardTitle>
-                        <CardDescription>{team.win ? "Victory" : "Defeat or unknown"}</CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-3 text-sm">
-                        <pre className="overflow-x-auto rounded-2xl bg-[#211d17] p-4 text-xs text-amber-50">{JSON.stringify(team.objectives, null, 2)}</pre>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </TabsContent>
-              <TabsContent value="debug">
-                <pre className="max-h-[420px] overflow-auto rounded-2xl bg-[#1f1d25] p-4 text-xs text-slate-100">{JSON.stringify(matchDetail.data.rawPayload, null, 2)}</pre>
-              </TabsContent>
-            </Tabs>
-          ) : (
-            <div className="rounded-2xl border border-dashed p-8 text-center text-sm text-muted-foreground">
-              Select a match to display its details.
+          {powerShell.data ? <InlineAlert ok={powerShell.data.ok} title={`PowerShell ${powerShell.data.ok ? "OK" : "error"}`} description={`Exit code: ${String(powerShell.data.exitCode)}${powerShell.data.stderr ? ` - ${powerShell.data.stderr}` : ""}`} /> : null}
+          {powerShell.error ? <InlineAlert title="PowerShell error" description={powerShell.error} /> : null}
+          {!powerShell.data && !powerShell.error ? <InlineHint text="Run this check to verify shell access from the local backend." /> : null}
+        </DebugActionRow>
+
+        <DebugActionRow
+          id="static"
+          open={openRow === "static"}
+          icon={<Database className="size-4 text-primary" />}
+          title="Static data"
+          subtitle="Champions, items, and augments cache"
+          status={<Badge variant="outline">{champions.length + items.length + augments.length} assets</Badge>}
+          action={(
+            <div className="flex flex-wrap justify-end gap-2">
+              <Button size="sm" onClick={() => { setOpenRow("static"); void syncStaticData(); }}><Database className="size-4" />Sync</Button>
+              <Button size="sm" variant="outline" onClick={() => { setOpenRow("static"); void loadStaticLists(); }}><RefreshCcw className="size-4" />Reload</Button>
             </div>
           )}
-        </DashboardCard>
+          onToggle={() => toggleRow("static")}
+        >
+          <div className="grid gap-2 sm:grid-cols-3">
+            <InlineMetric label="Champions" value={`${champions.length}`} />
+            <InlineMetric label="Items" value={`${items.length}`} />
+            <InlineMetric label="Augments" value={`${augments.length}`} />
+          </div>
+          {staticSync.data ? <InlineAlert ok title="Sync complete" description={`Version ${staticSync.data.result.version} - ${staticSync.data.result.reused ? "cache reused" : "full refresh"}`} /> : null}
+        </DebugActionRow>
+
+        <DebugActionRow
+          id="matches"
+          open={openRow === "matches"}
+          icon={<Swords className="size-4 text-primary" />}
+          title="Match storage"
+          subtitle="Sync, reload, inspect, or clear SQLite matches"
+          status={<Badge variant="outline">{matches.data?.total ?? 0} stored</Badge>}
+          action={(
+            <div className="flex flex-wrap justify-end gap-2">
+              <Button size="sm" onClick={() => { setOpenRow("matches"); void syncMatches(); }}><Swords className="size-4" />Sync</Button>
+              <Button size="sm" variant="outline" onClick={() => { setOpenRow("matches"); void loadMatches(); }}><RefreshCcw className="size-4" />Reload</Button>
+              <Button size="sm" variant="ghost" onClick={() => { setOpenRow("matches"); void clearMatches(); }}><Trash2 className="size-4" />Clear</Button>
+            </div>
+          )}
+          onToggle={() => toggleRow("matches")}
+        >
+          {matches.data?.items.length ? (
+            <div className="divide-y divide-border/55 rounded-md border border-border/60 bg-[color-mix(in_oklch,var(--background)_54%,var(--card))]">
+              {matches.data.items.slice(0, 8).map((match) => (
+                <div key={match.matchId} className="grid grid-cols-[minmax(0,1fr)_5.6rem_5.2rem_auto] items-center gap-3 px-3 py-2.5 max-sm:grid-cols-[minmax(0,1fr)_auto] max-sm:[&_.match-debug-meta]:hidden">
+                  <div className="min-w-0">
+                    <div className="truncate text-sm font-semibold text-foreground">{match.summary}</div>
+                    <div className="mt-0.5 text-xs text-muted-foreground">{formatDate(match.gameCreation ?? match.retrievedAt)}</div>
+                  </div>
+                  <div className="match-debug-meta text-sm text-muted-foreground">{match.gameMode ?? "League"}</div>
+                  <div className="match-debug-meta text-sm text-muted-foreground">{formatDuration(match.gameDuration)}</div>
+                  <Button variant={selectedMatchId === match.matchId ? "default" : "outline"} size="sm" onClick={() => { setOpenRow("payload"); void loadMatchDetail(match.matchId); }}>Inspect</Button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <EmptyState title="No matches stored locally" description="Run match sync to populate SQLite." className="min-h-44 border-0" />
+          )}
+        </DebugActionRow>
+
+        <DebugActionRow
+          id="payload"
+          open={openRow === "payload"}
+          icon={<AlertCircle className="size-4 text-primary" />}
+          title="Selected match payload"
+          subtitle="Raw payload for the inspected match"
+          status={<Badge variant={matchDetail.data ? "success" : "outline"}>{matchDetail.data ? "Loaded" : "Idle"}</Badge>}
+          action={null}
+          onToggle={() => toggleRow("payload")}
+        >
+          {matchDetail.data ? (
+            <div className="grid gap-3">
+              <div className="flex flex-wrap gap-2">
+                <Badge>{matchDetail.data.gameMode ?? "League"}</Badge>
+                <Badge variant="outline">Queue {matchDetail.data.queueId ?? "-"}</Badge>
+                <Badge variant="outline">Version {matchDetail.data.gameVersion ?? "-"}</Badge>
+                <Badge variant="outline">{matchDetail.data.participants.length} players</Badge>
+              </div>
+              <ScrollArea className="h-[340px] rounded-md border border-border/70 bg-[color-mix(in_oklch,var(--background)_62%,var(--card))] p-4">
+                <pre className="text-xs text-foreground">{JSON.stringify(matchDetail.data.rawPayload, null, 2)}</pre>
+              </ScrollArea>
+            </div>
+          ) : (
+            <EmptyState title="No match selected" description="Inspect a match from storage to view payload metadata." className="min-h-44 border-0" />
+          )}
+        </DebugActionRow>
+      </section>
+    </div>
+  );
+}
+
+function DebugActionRow({
+  id,
+  icon,
+  title,
+  subtitle,
+  status,
+  action,
+  open,
+  onToggle,
+  children,
+}: {
+  id: string;
+  icon: ReactNode;
+  title: string;
+  subtitle: string;
+  status: ReactNode;
+  action: ReactNode;
+  open: boolean;
+  onToggle: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <div className="border-b border-border/55 last:border-b-0">
+      <div
+        className={cn(
+          "grid grid-cols-[minmax(10rem,1fr)_7rem_auto] items-center gap-3 px-3 py-2.5 transition-colors max-sm:grid-cols-[minmax(0,1fr)_auto] max-sm:[&_.debug-status]:hidden",
+          open && "bg-[color-mix(in_oklch,var(--primary)_10%,var(--card))] shadow-[inset_3px_0_0_var(--primary)]",
+        )}
+      >
+        <button
+          type="button"
+          aria-expanded={open}
+          aria-controls={`debug-inline-${id}`}
+          className="flex min-w-0 items-center gap-2.5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          onClick={onToggle}
+        >
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-md border border-border/70 bg-[color-mix(in_oklch,var(--background)_68%,var(--card))]">{icon}</span>
+          <span className="min-w-0">
+            <span className="block truncate text-sm font-semibold text-foreground">{title}</span>
+            <span className="mt-0.5 block truncate text-xs text-muted-foreground">{subtitle}</span>
+          </span>
+        </button>
+        <div className="debug-status">{status}</div>
+        <div className="flex items-center justify-end gap-2">
+          {action}
+          <button type="button" className="rounded-md p-1 text-muted-foreground hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" onClick={onToggle} aria-label={`Toggle ${title}`}>
+            <ChevronRight className={cn("size-4 transition-transform", open && "rotate-90 text-primary")} />
+          </button>
+        </div>
       </div>
-
-      <Separator className="my-6" />
-
-      <div className="grid gap-5 lg:grid-cols-[0.8fr_1.2fr]">
-        <Card>
-          <CardHeader>
-            <CardTitle>Backend Contract</CardTitle>
-            <CardDescription>Summary of local endpoints exposed by the Node backend.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3 text-sm">
-            <div className="flex items-center gap-2"><Server className="h-4 w-4" /> GET /api/status</div>
-            <div className="flex items-center gap-2"><ShieldCheck className="h-4 w-4" /> GET /api/league/auth</div>
-            <div className="flex items-center gap-2"><ShieldCheck className="h-4 w-4" /> GET /api/league/summoner</div>
-            <div className="flex items-center gap-2"><TerminalSquare className="h-4 w-4" /> GET /api/system/powershell-test</div>
-            <div className="flex items-center gap-2"><Database className="h-4 w-4" /> POST /api/static-data/sync</div>
-            <div className="flex items-center gap-2"><Swords className="h-4 w-4" /> POST /api/matches/sync-current</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Debug Panels</CardTitle>
-            <CardDescription>Quick payload exposure for iterating on local integrations.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="outline">Open debug JSON</Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Debug Snapshot</DialogTitle>
-                  <DialogDescription>Current local state of backend responses displayed in the UI.</DialogDescription>
-                </DialogHeader>
-                <ScrollArea className="h-[420px] rounded-2xl border p-4">
-                  <pre className="text-xs text-foreground">{JSON.stringify({ status, auth, summoner, powerShell, staticSync, matches, matchDetail }, null, 2)}</pre>
-                </ScrollArea>
-              </DialogContent>
-            </Dialog>
-          </CardContent>
-        </Card>
+      <div className={`grid transition-[grid-template-rows] duration-200 ${open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}>
+        <div className="overflow-hidden">
+          {open ? <div id={`debug-inline-${id}`} className="grid gap-3 border-t border-border/60 bg-card/75 p-3">{children}</div> : null}
+        </div>
       </div>
     </div>
   );
+}
+
+function InlineMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-md border border-border/60 bg-[color-mix(in_oklch,var(--background)_62%,var(--card))] px-3 py-2">
+      <div className="text-[0.68rem] font-semibold uppercase text-muted-foreground">{label}</div>
+      <div className="mt-1 text-sm font-semibold text-foreground">{value}</div>
+    </div>
+  );
+}
+
+function InlineAlert({ ok = false, title, description }: { ok?: boolean; title: string; description: string }) {
+  return (
+    <Alert variant={ok ? "default" : "destructive"}>
+      {ok ? <CheckCircle2 className="size-4" /> : <AlertCircle className="size-4" />}
+      <AlertTitle>{title}</AlertTitle>
+      <AlertDescription>{description}</AlertDescription>
+    </Alert>
+  );
+}
+
+function InlineHint({ text }: { text: string }) {
+  return <p className="rounded-md border border-border/60 bg-[color-mix(in_oklch,var(--background)_62%,var(--card))] px-3 py-2 text-sm text-muted-foreground">{text}</p>;
 }

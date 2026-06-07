@@ -1,10 +1,55 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { MatchHistoryPage } from "@/pages/MatchHistory";
+import type { MatchListItem } from "@/lib/types";
 
 const loadMatchDetail = vi.fn().mockResolvedValue(undefined);
+const setMatchPage = vi.fn().mockResolvedValue(undefined);
+const baseMatch: MatchListItem = {
+  matchId: "match-1",
+  queueId: 450,
+  gameMode: "ARAM",
+  gameVersion: "15.1",
+  gameModeMutators: [],
+  gameCreation: 1_700_000_000_000,
+  gameDuration: 900,
+  retrievedAt: 1_700_000_000_000,
+  summary: "Aatrox carry",
+  participants: [
+    {
+      puuid: "tracked-puuid",
+      summonerName: "Player",
+      teamId: 100,
+      championId: 266,
+      championName: "Aatrox",
+      kills: 10,
+      deaths: 4,
+      assists: 8,
+      win: true,
+      items: [],
+      augments: [],
+    },
+    {
+      puuid: "ally-puuid",
+      summonerName: "Ally",
+      teamId: 200,
+      championId: 103,
+      championName: "Ahri",
+      kills: 4,
+      deaths: 8,
+      assists: 7,
+      win: false,
+      items: [],
+      augments: [],
+    },
+  ],
+};
+let matchItems: MatchListItem[] = [baseMatch];
+let matchTotal = 1;
+let matchPage = 1;
+let selectedMatchId: string | null = "match-1";
 
 vi.mock("@/state/tracker-data", () => ({
   useStaticData: () => ({
@@ -18,7 +63,7 @@ vi.mock("@/state/tracker-data", () => ({
       stickyToolbars: "true",
       dataDensity: "dense",
       density: "comfortable",
-      defaultHistoryView: "split",
+      defaultHistoryView: "inline",
     },
   }),
   useAnalytics: () => ({
@@ -43,56 +88,16 @@ vi.mock("@/state/tracker-data", () => ({
     matches: {
       loading: false,
       data: {
-        items: [
-          {
-            matchId: "match-1",
-            queueId: 450,
-            gameMode: "ARAM",
-            gameVersion: "15.1",
-            gameModeMutators: [],
-            gameCreation: 1_700_000_000_000,
-            gameDuration: 900,
-            retrievedAt: 1_700_000_000_000,
-            summary: "Aatrox carry",
-            participants: [
-              {
-                puuid: "tracked-puuid",
-                summonerName: "Player",
-                teamId: 100,
-                championId: 266,
-                championName: "Aatrox",
-                kills: 10,
-                deaths: 4,
-                assists: 8,
-                win: true,
-                items: [],
-                augments: [],
-              },
-              {
-                puuid: "ally-puuid",
-                summonerName: "Ally",
-                teamId: 200,
-                championId: 103,
-                championName: "Ahri",
-                kills: 4,
-                deaths: 8,
-                assists: 7,
-                win: false,
-                items: [],
-                augments: [],
-              },
-            ],
-          },
-        ],
-        total: 1,
-        page: 1,
+        items: matchItems,
+        total: matchTotal,
+        page: matchPage,
         pageSize: 12,
       },
     },
-    matchPage: 1,
+    matchPage,
     matchPageSize: 12,
-    setMatchPage: vi.fn().mockResolvedValue(undefined),
-    selectedMatchId: "match-1",
+    setMatchPage,
+    selectedMatchId,
     matchDetail: {
       loading: false,
       data: {
@@ -156,7 +161,16 @@ vi.mock("@/state/tracker-data", () => ({
 }));
 
 describe("MatchHistoryPage", () => {
-  it("opens a stored match inside the split review panel", async () => {
+  beforeEach(() => {
+    loadMatchDetail.mockClear();
+    setMatchPage.mockClear();
+    matchItems = [baseMatch];
+    matchTotal = 1;
+    matchPage = 1;
+    selectedMatchId = "match-1";
+  });
+
+  it("opens a stored match inline in the archive", async () => {
     const user = userEvent.setup();
 
     render(
@@ -166,14 +180,30 @@ describe("MatchHistoryPage", () => {
     );
 
     expect(screen.getByText(/stored matches/i)).toBeInTheDocument();
-    expect(screen.getByText(/match list/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/search champion/i)).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: /aatrox/i }));
 
-    const detailPanel = screen.getByTestId("match-history-detail-panel");
+    const detailPanel = screen.getByTestId("match-history-inline-match-1");
 
     expect(detailPanel).toBeInTheDocument();
     expect(within(detailPanel).getByText(/team scoreboard/i)).toBeInTheDocument();
     expect(within(detailPanel).getByRole("link", { name: /full analysis/i })).toHaveAttribute("href", "/history/match-1");
+  });
+
+  it("renders an empty archive state and disables pagination", () => {
+    matchItems = [];
+    matchTotal = 0;
+    selectedMatchId = null;
+
+    render(
+      <MemoryRouter>
+        <MatchHistoryPage />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole("heading", { name: /no local matches/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /previous/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /next/i })).toBeDisabled();
   });
 });

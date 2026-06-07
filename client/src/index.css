@@ -1,50 +1,50 @@
 @import "tailwindcss";
 
 :root {
-  --background: oklch(0.13 0 0);
-  --foreground: oklch(0.94 0.004 260);
-  --card: oklch(0.17 0.004 260);
-  --card-foreground: oklch(0.94 0.004 260);
-  --popover: oklch(0.17 0.004 260);
-  --popover-foreground: oklch(0.94 0.004 260);
-  --primary: oklch(0.68 0.19 255);
-  --primary-foreground: oklch(0.96 0.002 260);
-  --secondary: oklch(0.23 0.006 260);
-  --secondary-foreground: oklch(0.9 0.003 260);
-  --muted: oklch(0.2 0.004 260);
-  --muted-foreground: oklch(0.72 0.004 260);
-  --accent: oklch(0.24 0.014 255);
-  --accent-foreground: oklch(0.94 0.004 260);
-  --destructive: oklch(0.66 0.2 25);
+  --background: oklch(0.165 0.006 245);
+  --foreground: oklch(0.925 0.008 245);
+  --card: oklch(0.205 0.008 245);
+  --card-foreground: oklch(0.925 0.008 245);
+  --popover: oklch(0.205 0.008 245);
+  --popover-foreground: oklch(0.925 0.008 245);
+  --primary: oklch(0.69 0.14 230);
+  --primary-foreground: oklch(0.12 0.012 245);
+  --secondary: oklch(0.255 0.01 245);
+  --secondary-foreground: oklch(0.875 0.01 245);
+  --muted: oklch(0.24 0.008 245);
+  --muted-foreground: oklch(0.68 0.012 245);
+  --accent: oklch(0.33 0.04 220);
+  --accent-foreground: oklch(0.93 0.008 245);
+  --destructive: oklch(0.64 0.16 24);
   --destructive-foreground: oklch(0.1 0 0);
-  --success: oklch(0.74 0.125 160);
+  --success: oklch(0.72 0.11 158);
   --success-foreground: oklch(0.1 0 0);
-  --error: oklch(0.66 0.2 25);
+  --error: oklch(0.64 0.16 24);
   --error-foreground: oklch(0.1 0 0);
-  --border: oklch(0.3 0.006 260);
-  --input: oklch(0.3 0.006 260);
+  --border: oklch(0.34 0.012 245);
+  --input: oklch(0.34 0.012 245);
   --ring: var(--primary);
-  --radius: 0;
-  --surface-1: oklch(0.15 0.004 260);
-  --surface-2: oklch(0.18 0.005 260);
-  --surface-3: oklch(0.22 0.006 260);
-  --surface-card: oklch(0.175 0.004 260);
+  --radius: 0.5rem;
+  --surface-1: oklch(0.19 0.008 245);
+  --surface-2: oklch(0.225 0.01 245);
+  --surface-3: oklch(0.275 0.012 245);
+  --surface-card: oklch(0.215 0.009 245);
   --border-ui: color-mix(in oklch, var(--border) 80%, transparent);
   --selected-bg: color-mix(in oklch, var(--primary) 12%, var(--card));
   --selected-border: color-mix(in oklch, var(--primary) 52%, var(--border));
-  --hover-overlay: color-mix(in oklch, var(--primary) 10%, var(--card));
-  --sidebar: oklch(0.145 0.004 260);
-  --topbar: oklch(0.16 0.004 260);
-  --page-start: oklch(0.13 0 0);
-  --page-end: oklch(0.13 0 0);
-  --heatmap-cell-0: oklch(0.2 0.004 260);
-  --heatmap-cell-1: oklch(0.3 0.006 255);
-  --heatmap-cell-2: oklch(0.38 0.03 252);
-  --heatmap-cell-3: oklch(0.46 0.06 250);
-  --heatmap-cell-4: oklch(0.54 0.09 250);
-  --heatmap-cell-5: oklch(0.6 0.12 252);
-  --heatmap-cell-6: oklch(0.64 0.15 254);
-  --heatmap-cell-7: oklch(0.68 0.19 255);
+  --hover-overlay: color-mix(in oklch, var(--primary) 9%, var(--card));
+  --sidebar: oklch(0.18 0.008 245);
+  --topbar: oklch(0.195 0.008 245);
+  --page-start: oklch(0.165 0.006 245);
+  --page-end: oklch(0.145 0.006 245);
+  --heatmap-cell-0: oklch(0.235 0.008 245);
+  --heatmap-cell-1: oklch(0.3 0.018 225);
+  --heatmap-cell-2: oklch(0.37 0.036 224);
+  --heatmap-cell-3: oklch(0.46 0.056 224);
+  --heatmap-cell-4: oklch(0.54 0.076 224);
+  --heatmap-cell-5: oklch(0.6 0.095 224);
+  --heatmap-cell-6: oklch(0.65 0.115 224);
+  --heatmap-cell-7: oklch(0.69 0.14 230);
   --heatmap-cell-border: color-mix(in oklch, var(--border) 82%, transparent);
   --heatmap-cell-hover-border: color-mix(in oklch, var(--primary) 68%, var(--border));
 }
@@ -93,7 +93,8 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
-  background: var(--background);
+  background:
+    linear-gradient(180deg, var(--page-start), var(--page-end));
   color: var(--foreground);
   font-family: "Aptos", "Segoe UI Variable", "IBM Plex Sans", sans-serif;
   text-rendering: optimizeLegibility;
@@ -127,15 +128,15 @@ body,
 }
 
 .glass-panel {
-  background: color-mix(in oklch, var(--card) 94%, var(--background));
+  background: color-mix(in oklch, var(--card) 92%, var(--background));
 }
 
 
 .table-shell {
   border: 1px solid var(--border-ui);
-  border-radius: 0;
+  border-radius: var(--radius);
   background: var(--surface-card);
-  box-shadow: none;
+  box-shadow: 0 14px 36px -32px color-mix(in oklch, black 60%, transparent);
 }
 
 .table-head-row {
@@ -160,18 +161,18 @@ body,
 }
 
 html[data-accent-mode="electricBlue"] {
-  --primary: oklch(0.68 0.19 255);
-  --accent: oklch(0.24 0.014 255);
+  --primary: oklch(0.69 0.14 230);
+  --accent: oklch(0.33 0.04 220);
 }
 
 html[data-accent-mode="coldViolet"] {
-  --primary: oklch(0.7 0.17 295);
-  --accent: oklch(0.24 0.018 295);
+  --primary: oklch(0.68 0.12 285);
+  --accent: oklch(0.32 0.035 282);
 }
 
 html[data-accent-mode="icyCyan"] {
-  --primary: oklch(0.74 0.14 205);
-  --accent: oklch(0.24 0.016 205);
+  --primary: oklch(0.74 0.11 198);
+  --accent: oklch(0.34 0.036 198);
 }
 
 html[data-density="compact"] {
@@ -182,8 +183,8 @@ html[data-density="compact"] {
   position: relative;
   background: color-mix(in oklch, var(--surface-1) 96%, var(--card));
   border: 1px solid var(--border-ui);
-  border-radius: 0;
-  box-shadow: 0 2px 10px -8px color-mix(in oklch, var(--foreground) 30%, transparent);
+  border-radius: var(--radius);
+  box-shadow: 0 14px 36px -32px color-mix(in oklch, black 70%, transparent);
   overflow: hidden;
 }
 
@@ -219,7 +220,7 @@ html[data-data-density="dense"] .table-shell table {
 }
 
 html[data-data-density="dense"] .table-shell {
-  border-radius: 0;
+  border-radius: var(--radius);
 }
 
 html[data-data-density="dense"] .table-shell th {
@@ -234,7 +235,7 @@ html[data-data-density="dense"] .table-shell td {
 }
 
 html[data-data-density="dense"] .card-shell {
-  border-radius: 0;
+  border-radius: var(--radius);
 }
 
 html[data-data-density="dense"] .history-row {
@@ -242,6 +243,7 @@ html[data-data-density="dense"] .history-row {
   padding-bottom: 0.7rem;
 }
 
-[class*="rounded"] {
-  border-radius: 0 !important;
+.app-scrollbar {
+  scrollbar-color: color-mix(in oklch, var(--muted-foreground) 28%, transparent) transparent;
+  scrollbar-width: thin;
 }

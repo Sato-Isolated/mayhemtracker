@@ -12,7 +12,7 @@ const settingMap = {
   compactSidebar: "false",
   showPageDescriptions: "true",
   stickyToolbars: "true",
-  defaultHistoryView: "split",
+  defaultHistoryView: "inline",
   nativeNotifications: "false",
   autoSyncEnabled: "true",
   autoSyncIntervalSeconds: "10",
@@ -52,7 +52,7 @@ describe("SettingsPage", () => {
     expect(updateSetting).toHaveBeenCalledWith("compactSidebar", "false");
     expect(updateSetting).toHaveBeenCalledWith("showPageDescriptions", "true");
     expect(updateSetting).toHaveBeenCalledWith("stickyToolbars", "true");
-    expect(updateSetting).toHaveBeenCalledWith("defaultHistoryView", "split");
+    expect(updateSetting).toHaveBeenCalledWith("defaultHistoryView", "inline");
     expect(updateSetting).toHaveBeenCalledWith("autoSyncEnabled", "true");
     expect(updateSetting).toHaveBeenCalledWith("autoSyncIntervalSeconds", "10");
   });
@@ -72,14 +72,16 @@ describe("SettingsPage", () => {
     expect(updateSetting).toHaveBeenCalledWith("autoSyncEnabled", "false");
   });
 
-  it("renders the heatmap diagnostics strip in the preview board", () => {
+  it("updates notification preferences from the focused notifications card", async () => {
+    const user = userEvent.setup();
+
     render(<SettingsPage />);
 
-    const strip = screen.getByTestId("heatmap-diagnostics-strip");
-    expect(strip).toBeInTheDocument();
+    const notificationsCard = screen.getByRole("heading", { name: /notifications/i }).closest(".card-shell");
+    expect(notificationsCard).not.toBeNull();
 
-    for (const level of ["0", "1", "2", "3", "4", "5", "6", "7"]) {
-      expect(within(strip).getByTestId(`heatmap-diagnostics-cell-${level}`)).toBeInTheDocument();
-    }
+    await user.click(within(notificationsCard as HTMLElement).getByRole("button", { name: /enable notifications/i }));
+
+    expect(updateSetting).toHaveBeenCalledWith("nativeNotifications", "true");
   });
 });

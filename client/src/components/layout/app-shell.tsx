@@ -1,9 +1,9 @@
-import { BarChart3, Bug, Cog, Home, LayoutGrid, Sparkles, Swords, Users } from "lucide-react";
+import { BarChart3, Bug, Cog, Database, Home, LayoutGrid, RefreshCcw, Sparkles, Swords, Users } from "lucide-react";
 import { useMemo, type ReactNode } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Surface } from "@/components/ui/surface";
+import { StatusBadge } from "@/components/features/status-badge";
 import { cn } from "@/lib/utils";
 import { useLeagueConnection, useMatches, useShellSettings, useStaticData } from "@/state/tracker-data";
 
@@ -18,28 +18,13 @@ const navigation = [
   { to: "/debug", label: "Debug", description: "Internal tools", icon: Bug },
 ];
 
-const routeCopy: Record<string, { title: string; description: string }> = {
-  "/": { title: "Dashboard", description: "Performance, sync health, and session signals at a glance." },
-  "/profile": { title: "Profile", description: "Tracked account snapshot, records, and recent trends." },
-  "/history": { title: "History", description: "Dense queue for reviewing stored matches." },
-  "/champions": { title: "Champions", description: "Quick read on champion performance and pool form." },
-  "/augments": { title: "Augments", description: "Compact meta board for value and rarity." },
-  "/friends": { title: "Friends", description: "Frequent teammates with local notes and ratings." },
-  "/settings": { title: "Settings", description: "Desktop-first preferences for the local shell." },
-  "/debug": { title: "Debug", description: "Verification tools and backend controls." },
-};
-
 export function AppShell({ children }: { children: ReactNode }) {
-  const location = useLocation();
   const { settingMap } = useShellSettings();
   const { leagueConnected } = useLeagueConnection();
   const { champions, items, augments, syncStaticData } = useStaticData();
   const { matches, syncMatches } = useMatches();
 
-  const routeKey = location.pathname.startsWith("/history/") ? "/history" : location.pathname;
-  const currentRoute = routeCopy[routeKey] ?? routeCopy["/"];
   const showPageDescriptions = settingMap.showPageDescriptions !== "false";
-  const compactSidebar = settingMap.compactSidebar === "true";
   const dataDensity = settingMap.dataDensity ?? settingMap.density ?? "comfortable";
   const dense = dataDensity === "dense";
 
@@ -52,20 +37,23 @@ export function AppShell({ children }: { children: ReactNode }) {
   );
 
   return (
-    <div className="mx-auto grid min-h-screen w-full max-w-[1660px] grid-cols-[250px_minmax(0,1fr)] gap-5 px-5 py-4 max-[1300px]:grid-cols-[234px_minmax(0,1fr)] max-[1100px]:grid-cols-1 max-sm:px-3 max-sm:py-3">
+    <div className="mx-auto grid min-h-screen w-full max-w-[1680px] grid-cols-[176px_minmax(0,1fr)] gap-2.5 bg-[radial-gradient(circle_at_15%_0%,color-mix(in_oklch,var(--primary)_8%,transparent),transparent_30%)] px-0 py-0 max-[980px]:grid-cols-1">
       <aside
         className={cn(
-          "relative sticky top-4 flex max-h-[calc(100vh-2rem)] flex-col justify-between gap-4 overflow-y-auto border border-[var(--border-ui)]",
-          "bg-[var(--sidebar)] p-4 shadow-[0_2px_14px_-10px_color-mix(in_oklch,var(--foreground)_30%,transparent)] transition-[background,border-color,color,box-shadow,background-color] duration-220 motion-reduce:transition-none",
-          "max-[1100px]:static max-[1100px]:min-h-auto",
+          "app-scrollbar sticky top-0 flex h-screen flex-col justify-between gap-4 overflow-y-auto border-r border-[var(--border-ui)]",
+          "bg-[color-mix(in_oklch,var(--sidebar)_94%,black)] p-3 transition-[background,border-color,color,box-shadow,background-color] duration-220 motion-reduce:transition-none",
+          "max-[980px]:static max-[980px]:h-auto max-[980px]:gap-2 max-[980px]:border-b max-[980px]:border-r-0 max-sm:p-2",
         )}
       >
-        <div className="relative space-y-3">
-          <div className="border-b border-border/70 px-1 pb-3">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">Mayhem Tracker</div>
+        <div className="relative flex flex-col gap-3">
+          <div className="flex items-center gap-2 border-b border-border/70 px-1 pb-3">
+            <span className="inline-flex size-7 items-center justify-center rounded-md bg-primary text-sm font-black text-primary-foreground">M</span>
+            <div>
+              <div className="text-sm font-semibold text-foreground">Mayhem Tracker</div>
+            </div>
           </div>
 
-          <nav className="space-y-2 max-[1100px]:grid max-[1100px]:grid-cols-2 max-[1100px]:gap-[0.65rem] max-sm:grid-cols-1" aria-label="Primary navigation">
+          <nav className="flex flex-col gap-1 max-[980px]:grid max-[980px]:grid-cols-4 max-sm:grid-cols-4" aria-label="Primary navigation">
             {navigation.map((item) => {
               const Icon = item.icon;
               return (
@@ -74,10 +62,10 @@ export function AppShell({ children }: { children: ReactNode }) {
                   to={item.to}
                   className={({ isActive }) =>
                     cn(
-                      "group relative flex items-center gap-3 overflow-hidden border border-transparent text-foreground no-underline",
+                      "group relative flex items-center gap-3 overflow-hidden rounded-md border border-transparent text-foreground no-underline",
                       "transition-[background-color,border-color] duration-140 motion-reduce:transition-none",
                       "hover:border-[color-mix(in_oklch,var(--border)_80%,var(--primary))] hover:bg-[var(--hover-overlay)]",
-                      dense ? "px-3 py-[0.55rem]" : "px-3 py-2.5 max-sm:px-[0.85rem] max-sm:py-[0.8rem]",
+                      dense ? "px-2.5 py-2" : "px-2.5 py-2.5 max-sm:flex-col max-sm:gap-1 max-sm:px-1.5 max-sm:py-2 max-sm:text-center",
                       isActive &&
                         "border-[color-mix(in_oklch,var(--primary)_42%,var(--border))] bg-[color-mix(in_oklch,var(--primary)_12%,var(--card))]",
                     )
@@ -85,10 +73,12 @@ export function AppShell({ children }: { children: ReactNode }) {
                 >
                   {({ isActive }) => (
                     <>
-                      <Icon className="relative h-4 w-4 shrink-0" />
-                      <div className="relative min-w-0 flex-1">
-                        <div className="truncate text-sm font-medium">{item.label}</div>
+                      <Icon className="relative size-4 shrink-0" />
+                      <div className="relative min-w-0 flex-1 max-sm:w-full">
+                        <div className="truncate text-sm font-medium max-sm:text-[0.7rem]">{item.label}</div>
+                        {!dense && showPageDescriptions ? <div className="truncate text-[0.66rem] text-muted-foreground max-sm:hidden">{item.description}</div> : null}
                       </div>
+                      {isActive ? <span className="size-1.5 rounded-full bg-primary" /> : null}
                     </>
                   )}
                 </NavLink>
@@ -97,7 +87,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </nav>
         </div>
 
-        <Surface className="relative px-3 py-3">
+        <div className="relative rounded-lg border border-border/75 bg-[color-mix(in_oklch,var(--card)_78%,var(--surface-2))] px-3 py-2.5 max-sm:hidden">
           <div className="flex items-center gap-2.5">
             <span
               className={cn(
@@ -112,32 +102,25 @@ export function AppShell({ children }: { children: ReactNode }) {
               <div className="text-xs text-muted-foreground">{leagueConnected ? "Online - auto sync ready" : "Offline - waiting for client"}</div>
             </div>
           </div>
-        </Surface>
+        </div>
       </aside>
 
-      <div className="min-w-0 flex flex-col gap-3.5 pb-2">
+      <div className="min-w-0 flex flex-col gap-3 px-3 py-3">
         <header
           className={cn(
-            "z-10 flex flex-wrap items-center justify-between gap-3 border border-[var(--border-ui)]",
-            "bg-[color-mix(in_oklch,var(--topbar)_95%,var(--card))] px-4 shadow-[0_2px_14px_-10px_color-mix(in_oklch,var(--foreground)_30%,transparent)] backdrop-blur-[6px]",
-            "transition-[background,border-color,color,box-shadow,background-color] duration-220 motion-reduce:transition-none max-[1100px]:static",
-            dense ? "py-[0.65rem]" : "py-2.5",
+            "z-10 flex flex-wrap items-center justify-end gap-2 rounded-lg border border-[var(--border-ui)]",
+            "bg-[color-mix(in_oklch,var(--topbar)_92%,transparent)] px-3 shadow-[0_18px_44px_-42px_color-mix(in_oklch,black_80%,transparent)] backdrop-blur-[8px]",
+            "transition-[background,border-color,color,box-shadow,background-color] duration-220 motion-reduce:transition-none max-[980px]:static",
+            dense ? "py-2" : "py-2",
           )}
         >
-          <div className="min-w-0">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">Current workspace</div>
-            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
-              <h2 className="text-lg font-semibold tracking-tight text-foreground">{currentRoute.title}</h2>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center justify-end gap-1.5 max-[1100px]:w-full max-[1100px]:justify-start">
-            <Badge variant={leagueConnected ? "success" : "outline"}>{leagueConnected ? "League online" : "League offline"}</Badge>
+          <div className="flex flex-wrap items-center justify-end gap-1.5 max-[980px]:w-full max-[980px]:justify-start max-sm:grid max-sm:grid-cols-2">
+            <StatusBadge tone={leagueConnected ? "success" : "neutral"}>{leagueConnected ? "League online" : "League offline"}</StatusBadge>
             {shellBadges.map((entry) => (
               <Badge key={entry.label} variant={entry.variant}>{entry.label}</Badge>
             ))}
-            <Button size="sm" variant="outline" onClick={() => void syncMatches()}>Sync matches</Button>
-            <Button size="sm" variant="outline" onClick={() => void syncStaticData()}>Sync static data</Button>
+            <Button size="sm" variant="outline" className="max-sm:w-full" onClick={() => void syncMatches()}><RefreshCcw className="size-4" />Sync matches</Button>
+            <Button size="sm" variant="outline" className="max-sm:w-full" onClick={() => void syncStaticData()}><Database className="size-4" />Sync static data</Button>
           </div>
         </header>
 

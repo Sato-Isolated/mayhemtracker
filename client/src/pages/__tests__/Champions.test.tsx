@@ -45,7 +45,7 @@ vi.mock("@/state/tracker-data", () => ({
 }));
 
 describe("ChampionsPage", () => {
-  it("filters champions and opens details from a focusable button", async () => {
+  it("filters champions and opens inline details from a focusable row", async () => {
     const user = userEvent.setup();
 
     render(<ChampionsPage />);
@@ -54,13 +54,13 @@ describe("ChampionsPage", () => {
 
     await user.type(screen.getByLabelText(/search champion/i), "lux");
 
-    expect(screen.getByRole("button", { name: "Lux" })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Garen" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Lux/i })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Garen/i })).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Lux" }));
+    await user.click(screen.getByRole("button", { name: /Lux/i }));
 
-    expect(await screen.findByRole("dialog")).toBeInTheDocument();
-    expect(screen.getByText(/compact signal read/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Average KDA/i)).toBeInTheDocument();
+    expect(screen.getByText(/8 games/i)).toBeInTheDocument();
     expect(screen.getAllByText("Lux").length).toBeGreaterThan(0);
   });
 });

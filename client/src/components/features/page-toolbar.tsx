@@ -1,7 +1,5 @@
 import type { ReactNode } from "react";
-import { Surface } from "@/components/ui/surface";
-import { cn } from "@/lib/utils";
-import { useShellSettings } from "@/state/tracker-data";
+import { CommandBar } from "@/components/features/command-bar";
 
 interface PageToolbarProps {
   meta?: ReactNode;
@@ -13,30 +11,5 @@ interface PageToolbarProps {
 }
 
 export function PageToolbar({ meta, search, filters, actions, className, testId }: PageToolbarProps) {
-  const { settingMap } = useShellSettings();
-  const dataDensity = settingMap.dataDensity ?? settingMap.density ?? "comfortable";
-
-  return (
-    <Surface
-      variant="subtle"
-      data-testid={testId}
-      data-density={dataDensity}
-      className={cn(
-        "page-toolbar rounded-[1.05rem] border-[color-mix(in_oklch,var(--border)_86%,var(--primary))] px-4 py-3",
-        dataDensity === "dense" && "px-3 py-2.5",
-        className,
-      )}
-    >
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 pb-2.5">
-        {meta ? <div className="min-w-0 flex flex-1 flex-wrap items-center gap-2">{meta}</div> : <div />}
-        {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
-      </div>
-      {search || filters ? (
-        <div className="mt-2.5 flex flex-wrap items-center gap-3">
-          {search ? <div className="min-w-[16rem] flex-1">{search}</div> : null}
-          {filters ? <div className="flex flex-wrap items-center gap-2">{filters}</div> : null}
-        </div>
-      ) : null}
-    </Surface>
-  );
+  return <CommandBar meta={meta} search={search} filters={filters} actions={actions} className={className} testId={testId} />;
 }

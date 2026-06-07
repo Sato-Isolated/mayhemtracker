@@ -6,11 +6,11 @@ import { cn } from "@/lib/utils";
 const surfaceVariants = cva("", {
   variants: {
     variant: {
-      soft: "border border-[var(--border-ui)] bg-[var(--surface-card)]",
+      soft: "rounded-lg border border-[var(--border-ui)] bg-[var(--surface-card)] shadow-[0_14px_36px_-34px_color-mix(in_oklch,black_70%,transparent)]",
       subtle:
-        "border border-[var(--border-ui)] bg-[color-mix(in_oklch,var(--card)_66%,var(--surface-2))]",
+        "rounded-lg border border-[var(--border-ui)] bg-[color-mix(in_oklch,var(--card)_76%,var(--surface-2))]",
       elevated:
-        "border border-[var(--border-ui)] bg-[color-mix(in_oklch,var(--card)_84%,var(--surface-1))] shadow-[0_1px_10px_-8px_color-mix(in_oklch,var(--foreground)_35%,transparent)]",
+        "rounded-lg border border-[var(--border-ui)] bg-[color-mix(in_oklch,var(--card)_88%,var(--surface-1))] shadow-[0_20px_48px_-38px_color-mix(in_oklch,black_80%,transparent)]",
     },
   },
   defaultVariants: {

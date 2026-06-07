@@ -1,10 +1,12 @@
 import { useEffect } from "react";
 import { ActivityHeatmap } from "@/components/features/activity-heatmap";
+import { DataPanel } from "@/components/features/data-panel";
+import { LoadingState } from "@/components/features/loading-state";
 import { PageIntro } from "@/components/features/page-intro";
 import { PageToolbar } from "@/components/features/page-toolbar";
 import { RecentMatchFeed } from "@/components/features/recent-match-feed";
 import { StatsOverview } from "@/components/features/stats-overview";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/features/status-badge";
 import { Button } from "@/components/ui/button";
 import { useAnalytics, useMatches, useStaticData } from "@/state/tracker-data";
 
@@ -21,30 +23,27 @@ export function DashboardPage() {
 
   if (!dashboard.data) {
     return (
-      <div className="flex flex-col items-center justify-center gap-4 py-20 text-center">
-        <p className="text-sm text-muted-foreground">Loading dashboard data...</p>
-        <Button onClick={() => void loadDashboard()}>Reload</Button>
-      </div>
+      <LoadingState label="Loading dashboard data..." />
     );
   }
 
   const { overview, recentSession, streak, activity, recentMatches } = dashboard.data;
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-4">
       <PageIntro
         eyebrow="Operational dashboard"
-        title={overview.trackedPlayerName}
-        description={`${overview.totalMatches} matches tracked locally with a desktop-first reading flow.`}
+        title="Dashboard"
+        description={`Tracked player: ${overview.trackedPlayerName} - ${overview.totalMatches} matches tracked locally.`}
       />
 
       <PageToolbar
         testId="dashboard-toolbar"
         meta={(
           <>
-            <Badge variant="outline">{overview.totalMatches} tracked</Badge>
-            <Badge variant="secondary">{recentSession.matches} this session</Badge>
-            <Badge variant="outline">{recentMatches.length} recent rows</Badge>
+            <StatusBadge>{overview.totalMatches} tracked</StatusBadge>
+            <StatusBadge tone="info">{recentSession.matches} this session</StatusBadge>
+            <StatusBadge>{recentMatches.length} recent rows</StatusBadge>
           </>
         )}
         actions={<Button size="sm" onClick={() => void syncMatches()}>Sync now</Button>}
@@ -52,7 +51,13 @@ export function DashboardPage() {
 
       <StatsOverview overview={overview} session={recentSession} streak={streak} />
 
-      <ActivityHeatmap items={activity} variant="embedded" showStats={false} />
+      <DataPanel
+        title="Activity pace"
+        description="A compact yearly rhythm view for local match volume."
+        contentClassName="p-0"
+      >
+        <ActivityHeatmap items={activity} variant="embedded" showStats={false} />
+      </DataPanel>
 
       <RecentMatchFeed
         matches={recentMatches}

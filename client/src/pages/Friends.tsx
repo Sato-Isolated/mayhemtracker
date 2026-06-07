@@ -1,10 +1,8 @@
 import { ArrowDownUp, RotateCcw, Search } from "lucide-react";
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { FriendsList } from "@/components/features/friends/friends-list";
-import { FriendsSummary } from "@/components/features/friends/friends-summary";
 import { PageIntro } from "@/components/features/page-intro";
-import { PageSection } from "@/components/features/page-section";
-import { PageToolbar } from "@/components/features/page-toolbar";
+import { StatusBadge } from "@/components/features/status-badge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { TeammateStats } from "@/lib/types";
@@ -62,12 +60,8 @@ export function FriendsPage() {
   const ratedCount = filtered.filter((entry) => typeof entry.rating === "number").length;
   const topAlly = filtered[0];
   useEffect(() => {
-    if (!filtered.length) {
+    if (!filtered.length || (selectedPuuid && !filtered.some((entry) => entry.puuid === selectedPuuid))) {
       setSelectedPuuid(null);
-      return;
-    }
-    if (!selectedPuuid || !filtered.some((entry) => entry.puuid === selectedPuuid)) {
-      setSelectedPuuid(filtered[0].puuid);
     }
   }, [filtered, selectedPuuid]);
 
@@ -99,31 +93,22 @@ export function FriendsPage() {
   }
 
   return (
-    <div className="space-y-5">
+    <div className="flex min-h-[calc(100vh-5.25rem)] flex-col gap-4">
       <PageIntro
         eyebrow="Teammates"
-        title="Friends board"
-        description="Local board of frequent teammates for rating synergy and keeping actionable notes."
+        title="Friends"
+        description="Frequent teammates, local ratings, and short notes."
         actions={(
           <>
-            <Badge variant="outline">{filtered.length} teammates</Badge>
-            <Badge variant="secondary">{ratedCount} notes</Badge>
+            <StatusBadge>{filtered.length} teammates</StatusBadge>
+            <StatusBadge tone="info">{ratedCount} rated</StatusBadge>
           </>
         )}
       />
 
-      <PageToolbar
-        testId="friends-toolbar"
-        meta={(
-          <>
-            <Badge variant="outline">Tracked: {filtered.length}</Badge>
-            <Badge variant="outline">Rated: {ratedCount}</Badge>
-            <Badge variant="secondary">Top ally: {topAlly?.summonerName ?? "-"}</Badge>
-            <Badge variant="outline">{descending ? "Descending" : "Ascending"}</Badge>
-          </>
-        )}
-        search={(
-          <div className="relative">
+      <section className="rounded-md border border-border/70 bg-card/72" data-testid="friends-card">
+        <div className="grid gap-2 border-b border-border/60 p-2 min-[980px]:grid-cols-[minmax(15rem,1fr)_auto]">
+          <div className="relative min-w-0">
             <label htmlFor="friends-search" className="sr-only">Search teammate</label>
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
@@ -131,16 +116,14 @@ export function FriendsPage() {
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search teammate"
-              className="dense-input w-full rounded-xl border border-border bg-[color-mix(in_oklch,var(--card)_78%,var(--surface-2))] py-2.5 pl-10 pr-4 text-sm text-foreground outline-none ring-offset-2 placeholder:text-muted-foreground focus:border-primary focus-visible:ring-2 focus-visible:ring-ring"
+              className="h-9 w-full rounded-md border border-border/70 bg-[color-mix(in_oklch,var(--background)_78%,var(--card))] pl-9 pr-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-primary"
             />
           </div>
-        )}
-        filters={(
-          <>
+          <div className="flex flex-wrap items-center gap-2">
             <select
               value={minimumMatches}
               onChange={(event) => setMinimumMatches(Number(event.target.value))}
-              className="h-9 rounded-lg border border-border bg-[color-mix(in_oklch,var(--card)_78%,var(--surface-2))] px-3 text-sm text-foreground outline-none"
+              className="h-9 rounded-md border border-border/70 bg-[color-mix(in_oklch,var(--background)_78%,var(--card))] px-3 text-sm text-foreground outline-none"
             >
               <option value={1}>1+ games</option>
               <option value={3}>3+ games</option>
@@ -150,7 +133,7 @@ export function FriendsPage() {
             <select
               value={ratingFilter}
               onChange={(event) => setRatingFilter(event.target.value as "all" | "rated" | "unrated")}
-              className="h-9 rounded-lg border border-border bg-[color-mix(in_oklch,var(--card)_78%,var(--surface-2))] px-3 text-sm text-foreground outline-none"
+              className="h-9 rounded-md border border-border/70 bg-[color-mix(in_oklch,var(--background)_78%,var(--card))] px-3 text-sm text-foreground outline-none"
             >
               <option value="all">All ratings</option>
               <option value="rated">Rated only</option>
@@ -174,29 +157,28 @@ export function FriendsPage() {
               <RotateCcw className="h-4 w-4" />
               Reset
             </Button>
-          </>
-        )}
-      />
+          </div>
+        </div>
 
-      <PageSection
-        title="Overview"
-        description="Compact view of the main signals before a detailed review."
-        className="space-y-4"
-      >
-        <FriendsSummary teammates={filtered} />
-      </PageSection>
+        <div className="flex flex-wrap items-center gap-2 border-b border-border/60 px-3 py-2">
+          <Badge variant="outline">Tracked: {filtered.length}</Badge>
+          <Badge variant="outline">Rated: {ratedCount}</Badge>
+          <Badge variant="secondary">Top ally: {topAlly?.summonerName ?? "-"}</Badge>
+          <Badge variant="outline">{descending ? "Descending" : "Ascending"}</Badge>
+        </div>
 
-      <FriendsList
-        teammates={filtered}
-        selectedPuuid={selectedPuuid}
-        notes={notes}
-        savingPuuid={savingPuuid}
-        onSelect={setSelectedPuuid}
-        onNoteChange={(puuid, value) => setNotes((current) => ({ ...current, [puuid]: value }))}
-        onSave={(entry) => void handleSaveNote(entry)}
-        onRevert={(entry) => setNotes((current) => ({ ...current, [entry.puuid]: entry.note ?? "" }))}
-        onRate={(entry, value) => void handleRate(entry, value)}
-      />
+        <FriendsList
+          teammates={filtered}
+          selectedPuuid={selectedPuuid}
+          notes={notes}
+          savingPuuid={savingPuuid}
+          onSelect={setSelectedPuuid}
+          onNoteChange={(puuid, value) => setNotes((current) => ({ ...current, [puuid]: value }))}
+          onSave={(entry) => void handleSaveNote(entry)}
+          onRevert={(entry) => setNotes((current) => ({ ...current, [entry.puuid]: entry.note ?? "" }))}
+          onRate={(entry, value) => void handleRate(entry, value)}
+        />
+      </section>
     </div>
   );
 }

@@ -152,9 +152,10 @@ export function ActivityHeatmap({ items, variant = "card", showStats = true }: A
         variant === "embedded" ? "grid-cols-1" : "[grid-template-columns:minmax(208px,0.82fr)_minmax(0,1.48fr)]",
       )}
     >
+      {variant === "embedded" && !showStats && !debugMode ? null : (
       <div
         className={cn(
-          "min-w-0 rounded-[1rem]",
+          "min-w-0 rounded-lg",
           variant === "embedded"
             ? "flex flex-wrap items-end justify-between gap-5"
             : "grid content-start gap-3 border border-[color-mix(in_oklch,var(--border)_58%,transparent)] bg-[color-mix(in_oklch,var(--card)_92%,var(--surface-2))] p-[0.85rem]",
@@ -197,6 +198,7 @@ export function ActivityHeatmap({ items, variant = "card", showStats = true }: A
           </div>
         ) : null}
       </div>
+      )}
 
       <div className="min-w-0 rounded-[1rem] border border-[color-mix(in_oklch,var(--border)_42%,transparent)] bg-[color-mix(in_oklch,var(--card)_78%,transparent)] px-[0.8rem] py-[0.72rem] max-sm:px-[0.8rem] max-sm:py-[0.8rem]">
         <div className="w-full min-w-0 max-w-full overflow-x-auto overflow-y-hidden pb-[0.35rem] [container-type:inline-size] [scrollbar-width:thin]" data-testid="activity-calendar-shell">
@@ -288,10 +290,10 @@ export function ActivityHeatmap({ items, variant = "card", showStats = true }: A
   if (variant === "embedded") {
     return (
       <div
-        className="rounded-[1.25rem] border border-[var(--border-ui)] bg-[radial-gradient(circle_at_top_left,color-mix(in_oklch,var(--accent)_14%,transparent),transparent_42%),color-mix(in_oklch,var(--card)_84%,var(--surface-2))] shadow-[inset_0_1px_0_color-mix(in_oklch,white_38%,transparent)]"
+        className="bg-[color-mix(in_oklch,var(--card)_84%,var(--surface-2))]"
         data-testid="activity-heatmap-card"
       >
-        <div className="grid gap-4 p-4">{content}</div>
+        <div className="grid gap-4 p-3">{content}</div>
       </div>
     );
   }
