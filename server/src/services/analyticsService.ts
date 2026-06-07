@@ -7,6 +7,7 @@ import type {
   DashboardOverviewDto,
   MatchSpotlightDto,
   ProfileAnalyticsDto,
+  RecordChampionDto,
   SessionSnapshotDto,
   StreakSnapshotDto,
   TeammateStatsDto,
@@ -23,6 +24,13 @@ type TrackedMatch = {
   match: MatchListItemDto;
   participant: MatchListItemDto["participants"][number];
   playedAt: number;
+};
+
+type ProfileRecords = ProfileAnalyticsDto["records"];
+
+type ProfileRecordsAccumulator = ProfileRecords & {
+  bestPentakillsInMatch: number;
+  champions: ProfileRecords["champions"];
 };
 
 function round(value: number, precision = 1) {
@@ -416,22 +424,50 @@ function buildRecentMatches(trackedMatches: TrackedMatch[], limit: number) {
 }
 
 function buildRecords(trackedMatches: TrackedMatch[]) {
-  return trackedMatches.reduce(
-    (records, entry) => ({
-      highestKills: Math.max(records.highestKills, entry.participant.kills ?? 0),
-      highestAssists: Math.max(records.highestAssists, entry.participant.assists ?? 0),
-      highestDamage: Math.max(records.highestDamage, entry.participant.totalDamageDealt ?? 0),
-      highestGold: Math.max(records.highestGold, entry.participant.goldEarned ?? 0),
-      pentakills: records.pentakills + (entry.participant.pentaKills ?? 0),
-    }),
-    {
-      highestKills: 0,
-      highestAssists: 0,
-      highestDamage: 0,
-      highestGold: 0,
-      pentakills: 0,
+  const championFor = (entry: TrackedMatch): RecordChampionDto => ({
+    championId: entry.participant.championId,
+    championName: entry.participant.championName,
+  });
+
+  const initialRecords: ProfileRecordsAccumulator = {
+    highestKills: 0,
+    highestAssists: 0,
+    highestDamage: 0,
+    highestGold: 0,
+    pentakills: 0,
+    champions: {},
+    bestPentakillsInMatch: 0,
+  };
+
+  const records = trackedMatches.reduce<ProfileRecordsAccumulator>(
+    (records, entry) => {
+      const kills = entry.participant.kills ?? 0;
+      const assists = entry.participant.assists ?? 0;
+      const damage = entry.participant.totalDamageDealt ?? 0;
+      const gold = entry.participant.goldEarned ?? 0;
+      const pentakills = entry.participant.pentaKills ?? 0;
+
+      return {
+        highestKills: Math.max(records.highestKills, kills),
+        highestAssists: Math.max(records.highestAssists, assists),
+        highestDamage: Math.max(records.highestDamage, damage),
+        highestGold: Math.max(records.highestGold, gold),
+        pentakills: records.pentakills + pentakills,
+        champions: {
+          highestKills: kills > records.highestKills ? championFor(entry) : records.champions.highestKills,
+          highestAssists: assists > records.highestAssists ? championFor(entry) : records.champions.highestAssists,
+          highestDamage: damage > records.highestDamage ? championFor(entry) : records.champions.highestDamage,
+          highestGold: gold > records.highestGold ? championFor(entry) : records.champions.highestGold,
+          pentakills: pentakills > records.bestPentakillsInMatch ? championFor(entry) : records.champions.pentakills,
+        },
+        bestPentakillsInMatch: Math.max(records.bestPentakillsInMatch, pentakills),
+      };
     },
+    initialRecords,
   );
+
+  const { bestPentakillsInMatch, ...profileRecords } = records;
+  return profileRecords;
 }
 
 export class AnalyticsService {
@@ -482,6 +518,7 @@ export class AnalyticsService {
           highestDamage: 0,
           highestGold: 0,
           pentakills: 0,
+          champions: {},
         },
       };
     }

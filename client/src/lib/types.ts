@@ -250,6 +250,28 @@ export interface ProfileAnalytics {
     highestDamage: number;
     highestGold: number;
     pentakills: number;
+    champions: {
+      highestKills?: {
+        championId?: number;
+        championName?: string;
+      };
+      highestAssists?: {
+        championId?: number;
+        championName?: string;
+      };
+      highestDamage?: {
+        championId?: number;
+        championName?: string;
+      };
+      highestGold?: {
+        championId?: number;
+        championName?: string;
+      };
+      pentakills?: {
+        championId?: number;
+        championName?: string;
+      };
+    };
   };
 }
 

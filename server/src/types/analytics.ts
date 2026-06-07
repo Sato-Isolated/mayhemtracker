@@ -68,6 +68,11 @@ export interface MatchSpotlightDto {
   participant: MatchListItemDto["participants"][number];
 }
 
+export interface RecordChampionDto {
+  championId?: number;
+  championName?: string;
+}
+
 export interface DashboardAnalyticsDto {
   overview: DashboardOverviewDto;
   recentSession: SessionSnapshotDto;
@@ -90,6 +95,13 @@ export interface ProfileAnalyticsDto {
     highestDamage: number;
     highestGold: number;
     pentakills: number;
+    champions: {
+      highestKills?: RecordChampionDto;
+      highestAssists?: RecordChampionDto;
+      highestDamage?: RecordChampionDto;
+      highestGold?: RecordChampionDto;
+      pentakills?: RecordChampionDto;
+    };
   };
 }
 
